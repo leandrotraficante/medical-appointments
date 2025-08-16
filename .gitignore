@@ -1,0 +1,27 @@
+# dependencias y artefactos
+node_modules/
+dist/
+build/
+coverage/
+.nyc_output/
+
+tmp/
+
+# logs y caches
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# entornos
+.env
+.env.*.local
+
+# editores/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
