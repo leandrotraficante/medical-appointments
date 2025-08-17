@@ -3,6 +3,17 @@ import mongoose from 'mongoose';
 const doctorsCollection = 'doctors';
 
 const doctorsSchema = new mongoose.Schema({
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
     personalId: {
         type: String,
         required: true,
@@ -23,6 +34,10 @@ const doctorsSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: true
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true

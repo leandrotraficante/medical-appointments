@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
-const patientsCollection = 'patients';
+const adminCollection = 'admins';
 
-const patientsSchema = new mongoose.Schema({
+const adminSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
@@ -14,21 +14,12 @@ const patientsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    personalId: {
-        type: String,
-        required: true,
-        unique: true
-    },
     name: {
         type: String,
         required: true
     },
     lastname: {
         type: String,
-        required: true
-    },
-    dateOfBirth: {
-        type: Date,
         required: true
     },
     phone: {
@@ -38,11 +29,18 @@ const patientsSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    permissions: {
+        manageDoctors: { type: Boolean, default: true },
+        managePatients: { type: Boolean, default: true },
+        manageAppointments: { type: Boolean, default: true },
+        viewReports: { type: Boolean, default: true },
+        systemAdmin: { type: Boolean, default: false }
     }
 }, {
     timestamps: true
 });
 
-const patientsModel = mongoose.model(patientsCollection, patientsSchema);
+const adminModel = mongoose.model(adminCollection, adminSchema);
 
-export default patientsModel;
+export default adminModel;
