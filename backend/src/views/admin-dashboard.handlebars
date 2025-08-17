@@ -1,0 +1,174 @@
+<div class="row">
+    <!-- Stats Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Doctors</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{totalDoctors}}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-md fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total Patients</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{totalPatients}}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Today's Appointments</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{todayAppointments}}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Pending Appointments</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{pendingAppointments}}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addDoctorModal">
+                            <i class="fas fa-plus me-2"></i>Add Doctor
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+                            <i class="fas fa-user-plus me-2"></i>Add Patient
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
+                            <i class="fas fa-calendar-plus me-2"></i>Schedule Appointment
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-warning w-100" onclick="generateReport()">
+                            <i class="fas fa-chart-bar me-2"></i>Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Doctors</h6>
+            </div>
+            <div class="card-body">
+                {{#if doctors}}
+                    {{#each doctors}}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-md fa-2x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">{{name}}</h6>
+                            <small class="text-muted">{{specialties}}</small>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span class="badge bg-{{#if isActive}}success{{else}}danger{{/if}}">
+                                {{#if isActive}}Active{{else}}Inactive{{/if}}
+                            </span>
+                        </div>
+                    </div>
+                    {{/each}}
+                {{else}}
+                    <p class="text-muted">No doctors found</p>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Appointments</h6>
+            </div>
+            <div class="card-body">
+                {{#if appointments}}
+                    {{#each appointments}}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-calendar-check fa-2x text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0">{{patient.name}} {{patient.lastname}}</h6>
+                            <small class="text-muted">{{date}} - {{status}}</small>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span class="badge bg-{{#if (eq status 'pending')}}warning{{else if (eq status 'confirmed')}}success{{else if (eq status 'cancelled')}}danger{{else}}secondary{{/if}}">
+                                {{status}}
+                            </span>
+                        </div>
+                    </div>
+                    {{/each}}
+                {{else}}
+                    <p class="text-muted">No appointments found</p>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function generateReport() {
+    alert('Report generation feature coming soon!');
+}
+</script>

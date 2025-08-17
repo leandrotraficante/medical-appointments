@@ -1,0 +1,213 @@
+<div class="row">
+    <!-- Patient Info Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-user fa-4x text-success mb-3"></i>
+                <h5 class="card-title">{{patient.name}} {{patient.lastname}}</h5>
+                <p class="card-text text-muted">ID: {{patient.personalId}}</p>
+                <p class="card-text"><small class="text-muted">{{patient.email}}</small></p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="editProfile()">
+                        <i class="fas fa-edit me-1"></i>Edit Profile
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="bookAppointment()">
+                        <i class="fas fa-plus me-1"></i>Book Appointment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Appointment -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Next Appointment</h5>
+            </div>
+            <div class="card-body">
+                {{#if nextAppointment}}
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="mb-1">Dr. {{nextAppointment.doctor.name}}</h6>
+                            <p class="mb-1 text-muted">{{nextAppointment.doctor.specialties}}</p>
+                            <p class="mb-0">
+                                <i class="fas fa-calendar me-1"></i>{{formatDate nextAppointment.date}}<br>
+                                <i class="fas fa-clock me-1"></i>{{formatTime nextAppointment.date}}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-{{#if (eq nextAppointment.status 'pending')}}warning{{else if (eq nextAppointment.status 'confirmed')}}success{{else}}secondary{{/if}} mb-2">
+                                {{nextAppointment.status}}
+                            </span>
+                            <div class="d-grid gap-2">
+                                {{#if (eq nextAppointment.status 'pending')}}
+                                    <button class="btn btn-success btn-sm" onclick="confirmAppointment('{{nextAppointment._id}}')">
+                                        <i class="fas fa-check me-1"></i>Confirm
+                                    </button>
+                                {{/if}}
+                                <button class="btn btn-danger btn-sm" onclick="cancelAppointment('{{nextAppointment._id}}')">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {{else}}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No upcoming appointments</h6>
+                        <p class="text-muted">Book your next appointment now!</p>
+                        <button class="btn btn-primary" onclick="bookAppointment()">
+                            <i class="fas fa-plus me-1"></i>Book Appointment
+                        </button>
+                    </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Appointments -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Appointments</h5>
+            </div>
+            <div class="card-body">
+                {{#if recentAppointments}}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Doctor</th>
+                                    <th>Specialty</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each recentAppointments}}
+                                <tr>
+                                    <td>
+                                        <strong>{{formatDate date}}</strong><br>
+                                        <small class="text-muted">{{formatTime date}}</small>
+                                    </td>
+                                    <td>
+                                        <strong>Dr. {{doctor.name}}</strong><br>
+                                        <small class="text-muted">{{doctor.license}}</small>
+                                    </td>
+                                    <td>{{doctor.specialties}}</td>
+                                    <td>
+                                        <span class="badge bg-{{#if (eq status 'pending')}}warning{{else if (eq status 'confirmed')}}success{{else if (eq status 'cancelled')}}danger{{else}}secondary{{/if}}">
+                                            {{status}}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-info btn-sm" onclick="viewDetails('{{_id}}')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {{#if (eq status 'pending')}}
+                                                <button class="btn btn-success btn-sm" onclick="confirmAppointment('{{_id}}')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm" onclick="cancelAppointment('{{_id}}')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            {{/if}}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                {{else}}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No appointment history</h6>
+                        <p class="text-muted">Your appointment history will appear here</p>
+                    </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-primary w-100" onclick="bookAppointment()">
+                            <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-info w-100" onclick="viewMedicalHistory()">
+                            <i class="fas fa-file-medical me-2"></i>Medical History
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-success w-100" onclick="contactDoctor()">
+                            <i class="fas fa-comments me-2"></i>Contact Doctor
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-warning w-100" onclick="updatePreferences()">
+                            <i class="fas fa-cog me-2"></i>Preferences
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function editProfile() {
+    alert('Edit profile feature coming soon!');
+}
+
+function bookAppointment() {
+    alert('Book appointment feature coming soon!');
+}
+
+function confirmAppointment(appointmentId) {
+    if (confirm('Confirm this appointment?')) {
+        // API call to confirm appointment
+        console.log('Confirming appointment:', appointmentId);
+    }
+}
+
+function cancelAppointment(appointmentId) {
+    if (confirm('Cancel this appointment?')) {
+        // API call to cancel appointment
+        console.log('Cancelling appointment:', appointmentId);
+    }
+}
+
+function viewDetails(appointmentId) {
+    // Show appointment details modal
+    console.log('Viewing details for appointment:', appointmentId);
+}
+
+function viewMedicalHistory() {
+    alert('Medical history feature coming soon!');
+}
+
+function contactDoctor() {
+    alert('Contact doctor feature coming soon!');
+}
+
+function updatePreferences() {
+    alert('Update preferences feature coming soon!');
+}
+</script>

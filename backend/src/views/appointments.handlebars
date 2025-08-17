@@ -1,0 +1,267 @@
+<div class="row mb-4">
+    <!-- Filters -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filters</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label">Date Range</label>
+                        <select class="form-select" id="dateFilter">
+                            <option value="">All Dates</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label">Doctor</label>
+                        <select class="form-select" id="doctorFilter">
+                            <option value="">All Doctors</option>
+                            {{#each doctors}}
+                            <option value="{{_id}}">{{name}} - {{specialties}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label">Patient</label>
+                        <input type="text" class="form-control" id="patientFilter" placeholder="Search patient...">
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <button class="btn btn-primary me-2" onclick="applyFilters()">
+                            <i class="fas fa-search me-1"></i>Apply Filters
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                            <i class="fas fa-times me-1"></i>Clear Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointments Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Appointments</h5>
+                <button class="btn btn-success" onclick="addAppointment()">
+                    <i class="fas fa-plus me-1"></i>New Appointment
+                </button>
+            </div>
+            <div class="card-body">
+                {{#if appointments}}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Specialty</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each appointments}}
+                                <tr>
+                                    <td>
+                                        <strong>{{formatDate date}}</strong><br>
+                                        <small class="text-muted">{{formatTime date}}</small>
+                                    </td>
+                                    <td>
+                                        <strong>{{patient.name}} {{patient.lastname}}</strong><br>
+                                        <small class="text-muted">{{patient.personalId}}</small>
+                                    </td>
+                                    <td>
+                                        <strong>Dr. {{doctor.name}}</strong><br>
+                                        <small class="text-muted">{{doctor.license}}</small>
+                                    </td>
+                                    <td>{{doctor.specialties}}</td>
+                                    <td>
+                                        <span class="badge bg-{{#if (eq status 'pending')}}warning{{else if (eq status 'confirmed')}}success{{else if (eq status 'cancelled')}}danger{{else}}secondary{{/if}}">
+                                            {{status}}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-info btn-sm" onclick="viewDetails('{{_id}}')" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {{#if (eq status 'pending')}}
+                                                <button class="btn btn-success btn-sm" onclick="confirmAppointment('{{_id}}')" title="Confirm">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm" onclick="cancelAppointment('{{_id}}')" title="Cancel">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            {{/if}}
+                                            {{#if (eq status 'confirmed')}}
+                                                <button class="btn btn-primary btn-sm" onclick="startAppointment('{{_id}}')" title="Start">
+                                                    <i class="fas fa-play"></i>
+                                                </button>
+                                            {{/if}}
+                                            <button class="btn btn-warning btn-sm" onclick="editAppointment('{{_id}}')" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {{#if pagination}}
+                    <nav aria-label="Appointments pagination">
+                        <ul class="pagination justify-content-center">
+                            {{#if pagination.hasPrevPage}}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{pagination.prevPage}}">Previous</a>
+                            </li>
+                            {{/if}}
+                            
+                            {{#each pagination.pages}}
+                            <li class="page-item {{#if (eq this ../pagination.currentPage)}}active{{/if}}">
+                                <a class="page-link" href="?page={{this}}">{{this}}</a>
+                            </li>
+                            {{/each}}
+                            
+                            {{#if pagination.hasNextPage}}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{pagination.nextPage}}">Next</a>
+                            </li>
+                            {{/if}}
+                        </ul>
+                    </nav>
+                    {{/if}}
+                {{else}}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">No appointments found</h5>
+                        <p class="text-muted">Try adjusting your filters or create a new appointment</p>
+                        <button class="btn btn-primary" onclick="addAppointment()">
+                            <i class="fas fa-plus me-1"></i>Create First Appointment
+                        </button>
+                    </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row mt-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">{{stats.pending}}</h5>
+                <p class="card-text text-muted">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <h5 class="card-title">{{stats.confirmed}}</h5>
+                <p class="card-text text-muted">Confirmed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                <h5 class="card-title">{{stats.cancelled}}</h5>
+                <p class="card-text text-muted">Cancelled</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-check-double fa-2x text-info mb-2"></i>
+                <h5 class="card-title">{{stats.completed}}</h5>
+                <p class="card-text text-muted">Completed</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function applyFilters() {
+    const status = document.getElementById('statusFilter').value;
+    const date = document.getElementById('dateFilter').value;
+    const doctor = document.getElementById('doctorFilter').value;
+    const patient = document.getElementById('patientFilter').value;
+    
+    // Build query string
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (date) params.append('date', date);
+    if (doctor) params.append('doctor', doctor);
+    if (patient) params.append('patient', patient);
+    
+    // Redirect with filters
+    window.location.href = `/appointments?${params.toString()}`;
+}
+
+function clearFilters() {
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('dateFilter').value = '';
+    document.getElementById('doctorFilter').value = '';
+    document.getElementById('patientFilter').value = '';
+    window.location.href = '/appointments';
+}
+
+function addAppointment() {
+    alert('Add appointment feature coming soon!');
+}
+
+function viewDetails(appointmentId) {
+    alert('View details feature coming soon!');
+}
+
+function confirmAppointment(appointmentId) {
+    if (confirm('Confirm this appointment?')) {
+        // API call to confirm appointment
+        console.log('Confirming appointment:', appointmentId);
+    }
+}
+
+function cancelAppointment(appointmentId) {
+    if (confirm('Cancel this appointment?')) {
+        // API call to cancel appointment
+        console.log('Cancelling appointment:', appointmentId);
+    }
+}
+
+function startAppointment(appointmentId) {
+    // API call to start appointment
+    console.log('Starting appointment:', appointmentId);
+}
+
+function editAppointment(appointmentId) {
+    alert('Edit appointment feature coming soon!');
+}
+</script>

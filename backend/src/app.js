@@ -21,6 +21,12 @@ app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
 app.set('views', './src/views');
 
+// Importar rutas de vistas
+import viewsRoutes from './routes/views.route.js';
+
+// Usar rutas de vistas (sin prefijo)
+app.use('/', viewsRoutes);
+
 app.get('/', (req, res) => {
     res.send('Medical Appointments Running');
 });
