@@ -35,13 +35,25 @@ const patientsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    role: {
+        type: String,
+        default: 'patient',
+        required: true
+    },
     isActive: {
         type: Boolean,
         default: true
+    },
+    last_connection: {
+        type: Date,
+        default: Date.now
     }
 }, {
     timestamps: true
 });
+
+// Compound unique index for email + role
+patientsSchema.index({ email: 1, role: 1 }, { unique: true });
 
 const patientsModel = mongoose.model(patientsCollection, patientsSchema);
 

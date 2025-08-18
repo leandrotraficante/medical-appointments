@@ -22,8 +22,18 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    personalId: {
+        type: String,
+        required: true,
+        unique: true
+    },
     phone: {
         type: String,
+        required: true
+    },
+    role: {
+        type: String,
+        default: 'admin',
         required: true
     },
     isActive: {
@@ -36,10 +46,17 @@ const adminSchema = new mongoose.Schema({
         manageAppointments: { type: Boolean, default: true },
         viewReports: { type: Boolean, default: true },
         systemAdmin: { type: Boolean, default: false }
+    },
+    last_connection: {
+        type: Date,
+        default: Date.now
     }
 }, {
     timestamps: true
 });
+
+// Compound unique index for email + role
+adminSchema.index({ email: 1, role: 1 }, { unique: true });
 
 const adminModel = mongoose.model(adminCollection, adminSchema);
 
