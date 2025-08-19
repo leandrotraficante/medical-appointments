@@ -1,7 +1,8 @@
 import AuthRepository from '../repositories/auth.repository.js';
 import { UserAlreadyExists, InvalidCredentials } from '../utils/custom.exceptions.js';
-import { createHash, generateToken, isValidPassword } from '../utils/utils.js';
-import { ROLE_CONFIG } from '../config/configs.js';
+import { createHash, isValidPassword } from '../utils/utils.js';
+import configs, { ROLE_CONFIG } from '../config/configs.js';
+import jwt from 'jsonwebtoken';
 
 const authRepository = new AuthRepository();
 
@@ -56,8 +57,26 @@ const login = async (email, password) => {
     return {
         status: 'success',
         message: 'Login successful',
-        access_token: token
+        access_token: token,
+        user: user
     }
+}
+
+// Generate JWT token for user
+const generateToken = (user) => {
+    const token = jwt.sign(
+        { 
+            userId: user._id, 
+            email: user.email, 
+            role: user.role,
+            name: user.name,
+            lastname: user.lastname,
+            personalId: user.personalId
+        },
+        configs.privateKeyJwt, 
+        { expiresIn: configs.jwtExpiresIn }
+    );
+    return token;
 }
 
 // Logout (invalidate token)
@@ -104,9 +123,10 @@ const verifyToken = async (token) => {
     }
 };
 
-export {
+export default {
     register,
     login,
     logout,
-    verifyToken
+    verifyToken,
+    generateToken
 };

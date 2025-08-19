@@ -1,7 +1,7 @@
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import path from "path";
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import configs from '../config/configs.js';
 

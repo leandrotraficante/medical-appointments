@@ -24,16 +24,13 @@ const patientsSchema = new mongoose.Schema({
         required: true
     },
     lastname: {
-        type: String,
-        required: true
+        type: String
     },
     dateOfBirth: {
-        type: Date,
-        required: true
+        type: Date
     },
     phone: {
-        type: String,
-        required: true
+        type: String
     },
     role: {
         type: String,
@@ -52,7 +49,6 @@ const patientsSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Compound unique index for email + role
 patientsSchema.index({ email: 1, role: 1 }, { unique: true });
 
 const patientsModel = mongoose.model(patientsCollection, patientsSchema);
