@@ -2,7 +2,7 @@ import authService from '../services/auth.service.js';
 
 const register = async (req, res) => {
     try {
-        const { name, lastname, email, personalId, dateOfBirth, phone, password, role } = req.body;
+        const { name, lastname, email, personalId, dateOfBirth, phone, password, role, license, specialties } = req.body;
 
         if (!name || !email || !personalId || !password || !role) {
             return res.status(400).send({ error: 'Name, email, personal ID, password and role are required' });
@@ -26,7 +26,9 @@ const register = async (req, res) => {
             password,
             ...(lastname && { lastname }),
             ...(dateOfBirth && { dateOfBirth }),
-            ...(phone && { phone })
+            ...(phone && { phone }),
+            ...(role === 'doctor' && license && { license }),
+            ...(role === 'doctor' && specialties && { specialties: Array.isArray(specialties) ? specialties : [specialties] })
         };
         
         const user = await authService.register(userData, role);
