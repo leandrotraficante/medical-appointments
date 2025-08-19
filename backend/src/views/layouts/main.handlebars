@@ -33,41 +33,62 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
+            {{#if user}}
             <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                 <div class="position-sticky pt-3">
                     <div class="text-center mb-4">
                         <i class="fas fa-hospital fa-3x text-white mb-2"></i>
                         <h5 class="text-white">Medical App</h5>
+                        <small class="text-white-50">{{user.name}} ({{user.role}})</small>
                     </div>
                     
                     <ul class="nav flex-column">
+                        {{#if (eq user.role 'admin')}}
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/admin">
                                 <i class="fas fa-user-shield me-2"></i>
                                 Admin Dashboard
                             </a>
                         </li>
+                        {{/if}}
+                        
+                        {{#if (eq user.role 'doctor')}}
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/doctor">
                                 <i class="fas fa-user-md me-2"></i>
                                 Doctor Panel
                             </a>
                         </li>
+                        {{/if}}
+                        
+                        {{#if (eq user.role 'patient')}}
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/patient">
                                 <i class="fas fa-user me-2"></i>
                                 Patient Portal
                             </a>
                         </li>
+                        {{/if}}
+                        
+                        {{#if (or (eq user.role 'admin') (eq user.role 'doctor'))}}
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/appointments">
                                 <i class="fas fa-calendar-alt me-2"></i>
                                 Appointments
                             </a>
                         </li>
+                        {{/if}}
+                        
+                        <li class="nav-item mt-3">
+                            <a class="nav-link text-white" href="/api/auth/logout">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Logout
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
+            {{/if}}
 
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">

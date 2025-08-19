@@ -26,7 +26,7 @@ const appointmentsSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Validación de solapamiento antes de guardar
+// Overlap validation before saving
 appointmentsSchema.pre('save', async function(next) {
     if (this.isNew || this.isModified('date') || this.isModified('doctor')) {
         const existingAppointment = await this.constructor.findOne({
@@ -37,7 +37,7 @@ appointmentsSchema.pre('save', async function(next) {
         });
         
         if (existingAppointment) {
-            return next(new Error('El médico ya tiene un turno en esta fecha y hora'));
+            return next(new Error('The doctor already has an appointment at this date and time'));
         }
     }
     next();

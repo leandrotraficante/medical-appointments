@@ -1,0 +1,88 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card p-4">
+                <h2 class="mb-4 text-center">Patient Registration</h2>
+                <form id="registerForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="lastname" class="form-label">Last Name (optional)</label>
+                            <input type="text" class="form-control" id="lastname" name="lastname">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="personalId" class="form-label">Personal ID</label>
+                            <input type="text" class="form-control" id="personalId" name="personalId" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="dateOfBirth" class="form-label">Date of Birth (optional)</label>
+                            <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone (optional)</label>
+                            <input type="tel" class="form-control" id="phone" name="phone">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <input type="hidden" name="role" value="patient">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">Register</button>
+                </form>
+
+                <script>
+                    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(this);
+                        const userData = Object.fromEntries(formData.entries());
+                        
+                        try {
+                            const response = await fetch('/api/auth/register', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(userData)
+                            });
+                            
+                            const result = await response.json();
+                            
+                            if (response.ok) {
+                                // Always redirect to patient dashboard
+                                window.location.href = '/patient';
+                            } else {
+                                console.error('Registration failed:', result.error);
+                            }
+                        } catch (error) {
+                            console.error('Registration failed:', error.message);
+                        }
+                    });
+                </script>
+                
+                <div class="alert alert-info mt-3">
+                    <small>
+                        <strong>Required fields:</strong> Name, Email, Personal ID, Password<br>
+                        <strong>Optional fields:</strong> Last Name, Date of Birth, Phone
+                    </small>
+                </div>
+                <div class="text-center">
+                    <p class="mb-0">Already have an account?</p>
+                    <a href="/login" class="btn btn-outline-secondary">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
