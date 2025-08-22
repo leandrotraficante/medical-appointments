@@ -38,6 +38,11 @@ const login = async (email, password) => {
         throw new InvalidCredentials('Invalid credentials');
     }
 
+    // Verificar que el usuario esté activo antes de generar el token
+    if (!user.isActive) {
+        throw new InvalidCredentials('User account is deactivated');
+    }
+
     const comparePassword = isValidPassword(password, user.password);
     if (!comparePassword) {
         throw new InvalidCredentials('Invalid credentials');

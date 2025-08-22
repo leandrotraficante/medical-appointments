@@ -94,52 +94,5 @@ export default class UserRepository {
         });
     }
 
-    // UPDATE
-    activateAdmin = async (adminId) => {
-        return await adminModel.findByIdAndUpdate(
-            adminId,
-            { isActive: true },
-            { new: true }
-        );
-    }
 
-    activateDoctor = async (doctorId) => {
-        return await doctorsModel.findByIdAndUpdate(
-            doctorId,
-            { isActive: true },
-            { new: true }
-        );
-    }
-
-    activatePatient = async (patientId) => {
-        return await patientsModel.findByIdAndUpdate(
-            patientId,
-            { isActive: true },
-            { new: true }
-        );
-    }
-
-    deactivateAdmin = async (adminId) => {
-        return await adminModel.findByIdAndUpdate(
-            adminId,
-            { isActive: false },
-            { new: true }
-        );
-    }
-
-    deactivateDoctor = async (doctorId) => {
-        return await doctorsModel.findByIdAndUpdate(
-            doctorId,
-            { isActive: false },
-            { new: true }
-        );
-    }
-
-    deactivatePatient = async (patientId) => {
-        return await patientsModel.findByIdAndUpdate(
-            patientId,
-            { isActive: false },
-            { new: true }
-        );
-    }
 }

@@ -14,7 +14,17 @@ const createAppointment = async (req, res) => {
         const newAppointment = await appointmentsService.createAppointmentService(appointmentData);
         res.status(201).json({ success: true, data: newAppointment });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (error?.message === 'Patient not found') {
+            res.status(404).json({ error: error.message });
+        } else if (error?.message === 'Doctor not found') {
+            res.status(404).json({ error: error.message });
+        } else if (error?.message === 'Appointment date must be in the future') {
+            res.status(400).json({ error: error.message });
+        } else if (error?.message === 'The doctor already has an appointment at this date and time') {
+            res.status(400).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Internal server error while creating appointment' });
+        }
     }
 };
 
@@ -24,7 +34,11 @@ const getAllAppointments = async (req, res) => {
         const appointments = await appointmentsService.findAllAppointments(filters)
         res.status(200).json({ success: true, data: appointments });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (error?.message === 'Invalid filter format') {
+            res.status(400).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Internal server error while fetching appointments' });
+        }
     }
 };
 
@@ -56,7 +70,13 @@ const getAppointmentByDoctor = async (req, res) => {
         const appointmentByDoctor = await appointmentsService.findAppointmentsByDoctor(doctorId, filters);
         res.status(200).json({ success: true, data: appointmentByDoctor });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (error?.message === 'Invalid doctor ID format') {
+            res.status(400).json({ error: error.message });
+        } else if (error?.message === 'Doctor not found') {
+            res.status(404).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Internal server error while fetching doctor appointments' });
+        }
     }
 };
 
@@ -72,7 +92,13 @@ const getAppointmentByPatient = async (req, res) => {
         const appointmentByPatient = await appointmentsService.findAppointmentsByPatient(patientId, filters);
         res.status(200).json({ success: true, data: appointmentByPatient });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (error?.message === 'Invalid patient ID format') {
+            res.status(400).json({ error: error.message });
+        } else if (error?.message === 'Patient not found') {
+            res.status(404).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Internal server error while fetching patient appointments' });
+        }
     }
 };
 
@@ -92,7 +118,11 @@ const findAppointmentsByDateRange = async (req, res) => {
         const appointments = await appointmentsService.findAppointmentsByDateRange(startDate, endDate, filters);
         res.status(200).json({ success: true, data: appointments });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (error?.message === 'Invalid date range') {
+            res.status(400).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Internal server error while searching appointments by date range' });
+        }
     }
 };
 
@@ -108,7 +138,11 @@ const findAppointmentsByStatus = async (req, res) => {
         const appointments = await appointmentsService.findAppointmentsByStatus(status, filters);
         res.status(200).json({ success: true, data: appointments });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (error?.message === 'Invalid status format') {
+            res.status(400).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Internal server error while searching appointments by status' });
+        }
     }
 };
 
@@ -132,7 +166,13 @@ const getAvailableSlots = async (req, res) => {
         const availableSlots = await appointmentsService.findAvailableSlots(doctorId, date);
         res.status(200).json({ success: true, data: availableSlots });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        if (error?.message === 'Invalid doctor ID format') {
+            res.status(400).json({ error: error.message });
+        } else if (error?.message === 'Doctor not found') {
+            res.status(404).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Internal server error while fetching available slots' });
+        }
     }
 };
 

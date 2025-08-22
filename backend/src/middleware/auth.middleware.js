@@ -1,4 +1,7 @@
 import authService from '../services/auth.service.js';
+import UserRepository from '../repositories/user.repository.js';
+
+const userRepository = new UserRepository();
 
 // Middleware to authenticate JWT token
 export const authenticateToken = async (req, res, next) => {
@@ -10,6 +13,13 @@ export const authenticateToken = async (req, res, next) => {
         }
 
         const decoded = await authService.verifyToken(token);
+        
+        // Verificar que el usuario siga activo
+        const user = await userRepository.findUserByIdAndType(decoded.userId, decoded.role);
+        if (!user || !user.isActive) {
+            return res.status(401).json({ error: 'User account is deactivated or not found' });
+        }
+        
         req.user = decoded;
         next();
     } catch (error) {
