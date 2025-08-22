@@ -8,29 +8,22 @@ const authRepository = new AuthRepository();
 
 // User registration
 const register = async (user, role) => {
-    // Basic validations
     if (!user || !role) {
         throw new Error('User and role are required');
     }
 
     if (!ROLE_CONFIG.validRoles.includes(role)) {
-        throw new Error(`Invalid role: ${role}. Valid roles: ${ROLE_CONFIG.validRoles.join(', ')}`);
+        throw new Error(`Invalid role: ${role}`);
     }
 
     const existingUser = await authRepository.checkEmailExists(user.email);
-
     if (existingUser) {
         throw new UserAlreadyExists('User already exists.');
     }
 
     const hashedPassword = createHash(user.password);
+    const newUser = { ...user, password: hashedPassword };
 
-    const newUser = {
-        ...user,
-        password: hashedPassword,
-    };
-
-    // Direct call to repository method
     return await authRepository[ROLE_CONFIG.handlers[role]](newUser);
 };
 
@@ -41,13 +34,11 @@ const login = async (email, password) => {
     }
 
     const user = await authRepository.checkEmailExists(email);
-
     if (!user) {
         throw new InvalidCredentials('Invalid credentials');
     }
 
     const comparePassword = isValidPassword(password, user.password);
-
     if (!comparePassword) {
         throw new InvalidCredentials('Invalid credentials');
     }
@@ -55,53 +46,24 @@ const login = async (email, password) => {
     const token = generateToken(user);
 
     return {
-        status: 'success',
-        message: 'Login successful',
         access_token: token,
         user: user
     }
 }
 
-// Generate JWT token for user
+// Generate JWT token
 const generateToken = (user) => {
-    const token = jwt.sign(
-        { 
-            userId: user._id, 
-            email: user.email, 
+    return jwt.sign(
+        {
+            userId: user._id,
+            email: user.email,
             role: user.role,
-            name: user.name,
-            lastname: user.lastname,
-            personalId: user.personalId
+            name: user.name
         },
-        configs.privateKeyJwt, 
+        configs.privateKeyJwt,
         { expiresIn: configs.jwtExpiresIn }
     );
-    return token;
 }
-
-// Logout (invalidate token)
-const logout = async (token) => {
-    if (!token) {
-        throw new Error('Token is required');
-    }
-
-    // Verify token is valid before logout
-    try {
-        const decoded = await verifyToken(token);
-
-        return {
-            status: 'success',
-            message: 'Logout successful',
-            user: {
-                userId: decoded.userId,
-                email: decoded.email,
-                role: decoded.role
-            }
-        };
-    } catch (error) {
-        throw new Error(`Logout failed: ${error.message}`);
-    }
-};
 
 // Verify JWT token
 const verifyToken = async (token) => {
@@ -110,15 +72,12 @@ const verifyToken = async (token) => {
     }
 
     try {
-        const decoded = jwt.verify(token, configs.privateKeyJwt);
-        return decoded;
+        return jwt.verify(token, configs.privateKeyJwt);
     } catch (error) {
         if (error.name === 'TokenExpiredError') {
             throw new Error('Token has expired');
-        } else if (error.name === 'JsonWebTokenError') {
-            throw new Error('Invalid token');
         } else {
-            throw new Error('Token verification failed');
+            throw new Error('Invalid token');
         }
     }
 };
@@ -126,7 +85,6 @@ const verifyToken = async (token) => {
 export default {
     register,
     login,
-    logout,
-    verifyToken,
-    generateToken
+    generateToken,
+    verifyToken
 };

@@ -3,82 +3,44 @@ import doctorsModel from "../models/doctor.model.js";
 import patientsModel from "../models/patient.model.js";
 
 export default class UserRepository {
-    // Methods to activate/deactivate users
-    async deactivateAdmin(adminId) {
-        return await adminModel.findByIdAndUpdate(
-            adminId,
-            { isActive: false },
-            { new: true }
-        );
+    // READ (GET) - De más general a más específico
+    getAllDoctors = async () => {
+        return await doctorsModel.find();
     }
 
-    async activateAdmin(adminId) {
-        return await adminModel.findByIdAndUpdate(
-            adminId,
-            { isActive: true },
-            { new: true }
-        );
+    getAllPatients = async () => {
+        return await patientsModel.find();
     }
 
-    async deactivateDoctor(doctorId) {
-        return await doctorsModel.findByIdAndUpdate(
-            doctorId,
-            { isActive: false },
-            { new: true }
-        );
+    getAllAdmins = async () => {
+        return await adminModel.find();
     }
 
-    async activateDoctor(doctorId) {
-        return await doctorsModel.findByIdAndUpdate(
-            doctorId,
-            { isActive: true },
-            { new: true }
-        );
-    }
-
-    async deactivatePatient(patientId) {
-        return await patientsModel.findByIdAndUpdate(
-            patientId,
-            { isActive: false },
-            { new: true }
-        );
-    }
-
-    async activatePatient(patientId) {
-        return await patientsModel.findByIdAndUpdate(
-            patientId,
-            { isActive: true },
-            { new: true }
-        );
-    }
-
-    // Methods to find active/inactive users
-    async findActiveAdmins() {
+    findActiveAdmins = async () => {
         return await adminModel.find({ isActive: true });
     }
 
-    async findInactiveAdmins() {
-        return await adminModel.find({ isActive: false });
-    }
-
-    async findActiveDoctors() {
+    findActiveDoctors = async () => {
         return await doctorsModel.find({ isActive: true });
     }
 
-    async findInactiveDoctors() {
-        return await doctorsModel.find({ isActive: false });
-    }
-
-    async findActivePatients() {
+    findActivePatients = async () => {
         return await patientsModel.find({ isActive: true });
     }
 
-    async findInactivePatients() {
+    findInactiveAdmins = async () => {
+        return await adminModel.find({ isActive: false });
+    }
+
+    findInactiveDoctors = async () => {
+        return await doctorsModel.find({ isActive: false });
+    }
+
+    findInactivePatients = async () => {
         return await patientsModel.find({ isActive: false });
     }
 
-    // Method to find user by ID and type
-    async findUserByIdAndType(userId, userType) {
+    findUserByIdAndType = async (userId, userType) => {
         switch (userType) {
             case 'admin':
                 return await adminModel.findById(userId);
@@ -90,4 +52,94 @@ export default class UserRepository {
                 throw new Error('Invalid user type');
         }
     }
-};
+
+    // Search methods for doctors
+    findDoctorByLicense = async (license) => {
+        return await doctorsModel.findOne({ license });
+    }
+
+    findDoctorByPersonalId = async (personalId) => {
+        return await doctorsModel.findOne({ personalId });
+    }
+
+    findDoctorByEmail = async (email) => {
+        return await doctorsModel.findOne({ email });
+    }
+
+    // Search methods for patients
+    findPatientByPersonalId = async (personalId) => {
+        return await patientsModel.findOne({ personalId });
+    }
+
+    findPatientByEmail = async (email) => {
+        return await patientsModel.findOne({ email });
+    }
+
+    // Generic search methods
+    searchDoctorsByName = async (searchTerm) => {
+        return await doctorsModel.find({
+            $or: [
+                { name: { $regex: searchTerm, $options: 'i' } },
+                { lastname: { $regex: searchTerm, $options: 'i' } }
+            ]
+        });
+    }
+
+    searchPatientsByName = async (searchTerm) => {
+        return await patientsModel.find({
+            $or: [
+                { name: { $regex: searchTerm, $options: 'i' } },
+                { lastname: { $regex: searchTerm, $options: 'i' } }
+            ]
+        });
+    }
+
+    // UPDATE
+    activateAdmin = async (adminId) => {
+        return await adminModel.findByIdAndUpdate(
+            adminId,
+            { isActive: true },
+            { new: true }
+        );
+    }
+
+    activateDoctor = async (doctorId) => {
+        return await doctorsModel.findByIdAndUpdate(
+            doctorId,
+            { isActive: true },
+            { new: true }
+        );
+    }
+
+    activatePatient = async (patientId) => {
+        return await patientsModel.findByIdAndUpdate(
+            patientId,
+            { isActive: true },
+            { new: true }
+        );
+    }
+
+    deactivateAdmin = async (adminId) => {
+        return await adminModel.findByIdAndUpdate(
+            adminId,
+            { isActive: false },
+            { new: true }
+        );
+    }
+
+    deactivateDoctor = async (doctorId) => {
+        return await doctorsModel.findByIdAndUpdate(
+            doctorId,
+            { isActive: false },
+            { new: true }
+        );
+    }
+
+    deactivatePatient = async (patientId) => {
+        return await patientsModel.findByIdAndUpdate(
+            patientId,
+            { isActive: false },
+            { new: true }
+        );
+    }
+}

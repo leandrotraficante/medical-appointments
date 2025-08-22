@@ -1,0 +1,200 @@
+MedicalAppointments - Análisis de código (archivo por archivo)
+
+1) backend/package.json
+- ¿Qué es?: Manifest del proyecto Node.js del backend.
+- Scripts:
+  - start: ejecuta `node src/app.js`.
+  - dev: ejecuta `nodemon src/app.js` para recarga en desarrollo.
+  - test: placeholder sin tests configurados.
+- type: "module" habilita módulos ES (import/export) en todo el backend.
+- Dependencias y por qué:
+  - express: framework HTTP minimalista para armar el servidor y rutas.
+  - mongoose: ODM para modelar datos MongoDB con esquemas, validaciones e índices.
+  - dotenv: carga variables de entorno desde .env para no hardcodear secretos.
+  - express-handlebars: motor de vistas para renderizar páginas HTML con plantillas.
+  - cookie-parser: para leer cookies (ej. JWT) en requests del navegador.
+  - jsonwebtoken: para firmar y verificar JWTs de autenticación.
+  - bcryptjs: para hashear y validar contraseñas de forma segura.
+  - nodemon: utilidad de desarrollo para reinicio automático.
+
+2) backend/src/app.js
+- Responsabilidad: Punto de entrada del servidor Express. Configura middlewares, motor de vistas, rutas y conexión a MongoDB.
+- dotenv.config(): carga variables de entorno.
+- validateEnv(): verificación fail-fast de vars críticas (PRIVATE_KEY_JWT, JWT_EXPIRES_IN, MONGO_URI/MONGO_URL). Si faltan, sale con código 1.
+- Creación de app Express y configuración de puerto y URI de Mongo.
+- Middlewares:
+  - express.json(), express.urlencoded(): parseo de JSON/form para recibir body.
+  - cookieParser(): lectura de cookies (para JWT persistido en navegador).
+- Motor de vistas Handlebars:
+  - helpers registrados:
+    - eq(a, b): igualdad estricta.
+    - or(...args): OR lógico.
+    - formatDate(date): fecha legible en "en-GB", con guardas ante valores inválidos.
+    - formatTime(date): hora legible HH:MM en "en-GB".
+- app.set('view engine','handlebars') y app.set('views','./src/views').
+- Importación de modelos (admin, patient, doctor, appointment) para registrar esquemas y colecciones.
+- Rutas montadas:
+  - '/': `viewsRoutes` para páginas HTML.
+  - '/api/auth': `authRoutes` para endpoints de autenticación.
+- Conexión a MongoDB con mongoose.connect y arranque del servidor al conectar.
+- Logs de conexión/errores.
+- Decisiones:
+  - Separación de rutas de vistas y API.
+  - Helpers de vistas centralizados para formato de fechas/horas.
+  - Validación temprana de entorno para evitar estados inconsistentes.
+
+3) backend/src/config/configs.js
+- Responsabilidad: Centralizar configuración proveniente de variables de entorno.
+- Exporta `configs` con: port, mongoUrl, privateKeyJwt, jwtExpiresIn.
+- Constante `ROLE_CONFIG`:
+  - validRoles: ['admin','doctor','patient'].
+  - handlers: mapeo rol → método del repositorio para crear cada tipo de usuario (createAdmin, createDoctor, createPatient).
+- Decisiones: separar la config de roles de la lógica de servicio para mantener un único lugar de verdad.
+
+4) backend/src/controllers/auth.controller.js
+- Responsabilidad: Controladores HTTP (capa Express) para autenticación.
+- Funciones:
+  - register(req, res):
+    - Valida campos requeridos (name, email, personalId, password, role) y formato de `dateOfBirth` si viene.
+    - Normaliza email a minúsculas y arma `userData` con campos opcionales y, si role = 'doctor', incluye `license` y `specialties` (forzado a array).
+    - Llama a `authService.register(userData, role)`.
+    - Genera token con `authService.generateToken(user)` y lo coloca en cookie httpOnly por 24h.
+    - Si Accept incluye text/html (form browser), redirige a '/patient'. Si es API, responde 201 con JSON {user, token, redirectUrl, message}.
+  - login(req, res):
+    - Valida credenciales. Llama `authService.login(email, password)`.
+    - Si éxito: setea cookie httpOnly con el token.
+    - Si request HTML: redirige por role ('/admin' | '/doctor' | '/patient'). Si API: responde 200 con token, message y user básico.
+  - logout(req, res):
+    - Borra cookie `token`. Si HTML, redirige a '/login'; si API, responde 200.
+  - validateToken(req, res):
+    - Verifica presencia de token en body, usa `authService.verifyToken`, y responde 200 con user decodificado o 401 si inválido.
+- Decisiones: dualidad HTML/api via header Accept para reusar controladores en SSR y fetch; persistencia del JWT en cookie httpOnly para sesiones web.
+
+5) backend/src/middleware/auth.middleware.js
+- Responsabilidad: Middlewares de autenticación/autorización para rutas de vistas.
+- Funciones:
+  - authenticateToken(req, res, next):
+    - Obtiene token de Authorization: Bearer, cookie `token` o body.
+    - Si no hay token: si Accept=application/json devuelve 401 JSON; caso contrario redirige a '/login'.
+    - Verifica con `authService.verifyToken` y setea `req.user`.
+  - requireRole(allowedRoles):
+    - Devuelve un middleware que chequea `req.user` y que el rol esté permitido.
+    - Si no autorizado: 403 JSON si API, o renderiza vista 'error' con mensaje.
+  - redirectIfAuthenticated(req, res, next):
+    - Si hay token válido, redirige según rol a '/admin' | '/doctor' | '/patient' (desde login/register).
+- Decisiones: manejo diferenciado HTML/API por Accept; soporte de tokens en cookie para SSR.
+
+6) backend/src/models/*.model.js (Mongoose)
+- admin.model.js (colección 'admins'):
+  - Campos: email (único, requerido, lowercased), password, name, lastname, personalId (único), phone, role='admin', isActive=true, permissions (varios flags), last_connection, timestamps.
+  - Índices: compuesto unique {email, role} para evitar colisiones por rol.
+  - Motivo: separar admins con permisos avanzados y trazabilidad básica.
+- patient.model.js (colección 'patients'):
+  - Campos: email (único), password, personalId (único), name, lastname?, dateOfBirth?, phone?, role='patient', isActive, last_connection, timestamps.
+  - Índice compuesto {email, role}.
+  - Motivo: datos básicos del paciente para autenticación y vistas.
+- doctor.model.js (colección 'doctors'):
+  - Campos: email (único), password, personalId (único), name, lastname, specialties:[String], license (único), phone, role='doctor', isActive, last_connection, timestamps.
+  - Índice compuesto {email, role}.
+  - Motivo: atributos específicos del médico (matrícula, especialidades) para panel y turnos.
+- appointment.model.js (colección 'appointments'):
+  - Campos: patient (ref 'patients'), doctor (ref 'doctors'), date (Date), status enum ['pending','confirmed','cancelled','completed'], timestamps.
+  - Hook pre('save'): valida que no exista solapamiento para el mismo doctor, fecha y estado no cancelado; previene dobles reservas.
+  - Motivo: representar y asegurar consistencia de turnos.
+
+7) backend/src/repositories/
+- auth.repository.js:
+  - findAdminByEmail(email), findDoctorByEmail(email), findPatientByEmail(email): helpers específicos por rol (no usados en login actual, pero útiles si se separaran credenciales por rol).
+  - checkEmailExists(email): busca en las tres colecciones; devuelve el primer usuario encontrado.
+  - createAdmin, createDoctor, createPatient: encapsulan la creación por tipo.
+  - Motivo: capa de acceso a datos desacoplada del servicio para facilitar cambios y testing.
+- user.repository.js:
+  - activate*/deactivate* para admin/doctor/patient: togglean isActive por id y devuelven el documento actualizado.
+  - findActive*/findInactive* para cada tipo.
+  - findUserByIdAndType(userId, userType): obtiene por id según tipo.
+  - Motivo: operaciones de administración y consultas por estado en un único lugar.
+
+8) backend/src/services/auth.service.js
+- Responsabilidad: Reglas de negocio de autenticación.
+- register(user, role):
+  - Valida presencia de user y role y que el role sea válido según ROLE_CONFIG.
+  - Verifica email existente con `authRepository.checkEmailExists`.
+  - Hashea contraseña con `createHash` (bcryptjs) y crea el usuario llamando al método mapeado por rol.
+- login(email, password):
+  - Valida presencia; busca usuario por email en cualquier colección.
+  - Compara password con `isValidPassword`.
+  - Si ok, genera JWT con `generateToken(user)` y retorna {status, message, access_token, user}.
+- generateToken(user):
+  - Firma JWT con claims: userId, email, role, name, lastname, personalId usando `configs.privateKeyJwt` y `configs.jwtExpiresIn`.
+- logout(token):
+  - Verifica token y retorna metadata de logout exitosa (nota: JWT es stateless, el logout real es borrar cookie en cliente).
+- verifyToken(token):
+  - Verifica firma/expiración; mapea errores a mensajes claros (expired/invalid).
+- Decisiones: excepciones personalizadas para estados de error; incluir datos útiles en el payload del JWT para SSR.
+
+9) backend/src/utils/
+- custom.exceptions.js:
+  - UserAlreadyExists e InvalidCredentials: clases Error específicas para semántica clara en servicios/controladores.
+- utils.js:
+  - generateToken(user): firma JWT simple (userId, email, role). Nota: funcionalidad duplicada respecto a `auth.service.js/generateToken` (la del servicio es la utilizada por controladores y agrega más claims). Podría consolidarse para evitar duplicación.
+  - authorization(role): middleware simple (no usado) para chequear rol exacto; la app usa `requireRole` en su lugar.
+  - createHash(password) e isValidPassword(plain, hashed): wrappers bcryptjs para hashear/validar contraseñas.
+
+10) backend/src/routes/
+- auth.route.js:
+  - POST /register → register
+  - POST /login → login
+  - POST y GET /logout → logout (ambos para conveniencia desde vistas o API)
+  - POST /validateToken → validateToken
+- views.route.js (rutas de server-side rendering):
+  - GET /login y /register: renderizan vistas; usan `redirectIfAuthenticated` para evitar que usuarios logueados vuelvan a estas páginas.
+  - GET /admin: protegido con `authenticateToken` y `requireRole(['admin'])`. Carga métricas concurrentemente (Promise.all): cantidad doctores/pacientes, turnos de hoy, pendientes, y últimos 5 turnos con `populate` de relaciones.
+  - GET /doctor: protegido para 'doctor'. Busca el doctor por id de JWT y carga turnos de hoy y próximos con `populate('patient')`.
+  - GET /patient: protegido para 'patient'. Renderiza datos básicos desde el JWT; deja lugar para cargar más vía AJAX.
+  - GET /appointments: protegido para 'admin' y 'doctor'. Render base con filtros y estadísticas.
+  - GET / → redirige a /login.
+- Decisiones: SSR con Handlebars y control de acceso por rol a nivel ruta.
+
+11) backend/src/views/ (Handlebars)
+- layouts/main.handlebars: layout base con Bootstrap/FontAwesome, sidebar condicional según `user.role`, y {{{body}}} para contenido. Incluye pequeña lógica para marcar activo el link actual.
+- login.handlebars: formulario simple de sign in (POST a /api/auth/login). Muestra errores si se renderiza con `error`.
+- register.handlebars: formulario de registro de paciente; envío via fetch JSON a /api/auth/register; si ok redirige a /patient. Muestra campos obligatorios/opcionales.
+- admin-dashboard.handlebars: tarjetas de métricas, acciones rápidas (modales futuros), listados recientes de doctores y turnos. Usa helpers `eq` y badges por estado.
+- doctor-panel.handlebars: info del médico, agenda de hoy con acciones (confirm/cancel/start) y próximos turnos. Muchas acciones aún como placeholders (console.log/confirm()).
+- patient-portal.handlebars: tarjeta con info del paciente, próximo turno (si existiera), historial de turnos y acciones rápidas (placeholders).
+- appointments.handlebars: filtros de turnos, tabla con acciones y estadísticas. Lógica de filtros via query string; acciones como placeholders.
+- error.handlebars: tarjeta de error genérica con CTA a login.
+- Decisiones: usar helpers eq/or/formatDate/formatTime para presentar datos y estilos con Bootstrap; placeholders permiten iterar luego hacia endpoints reales.
+
+12) Notas y oportunidades de mejora
+- Seguridad:
+  - Considerar CSRF si mantenés cookies como portadoras del JWT; o cambiar a Authorization Bearer en SPA.
+  - Sanitizar más inputs (ej. normalizar phone/personalId) y validar formatos con bibliotecas (celebrate/joi/zod) en capa Express.
+  - Mover logs de errores sensibles detrás de niveles de logging.
+- Duplicación:
+  - Unificar `generateToken` de `utils.js` y el de `auth.service.js` para una única fuente.
+- UX de vistas:
+  - Varias acciones usan `confirm()`/console.log como placeholders. Reemplazar por modales Bootstrap y toasts.
+- Datos:
+  - `checkEmailExists` busca en 3 colecciones; si el modelo creciera, podría centralizarse con una colección única de credenciales y referencias por rol.
+- Tests:
+  - No hay tests configurados. Agregar tests unitarios para servicio y repos, e2e para rutas.
+
+13) Flujo de Autenticación (breve)
+- Registro: controller valida → service hashea y crea usuario según rol → genera JWT → cookie httpOnly → redirección.
+- Login: controller valida → service valida credenciales → genera JWT → cookie httpOnly → redirección por rol o JSON.
+- Protección de vistas: middlewares verifican token (cookie o header) y rol; si no, redirigen o responden 401/403.
+
+14) Por qué cada dependencia encaja en este diseño
+- express: simplicidad y ecosistema maduro para middlewares y routing.
+- mongoose: modelado fuerte y validaciones/índices en MongoDB, más hooks como el de solapamiento de turnos.
+- dotenv: portabilidad entre entornos sin exponer secretos.
+- express-handlebars: SSR rápida para dashboards/páginas con estado.
+- cookie-parser: necesaria para leer JWT persistido en cookie en SSR.
+- jsonwebtoken: estándar para sesiones stateless y control de acceso por rol.
+- bcryptjs: hashing seguro de contraseñas.
+- nodemon: DX en desarrollo.
+
+Fin del análisis.
+
+

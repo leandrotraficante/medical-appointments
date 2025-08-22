@@ -9,4 +9,6 @@ authRoutes.post('/logout', logout);
 authRoutes.get('/logout', logout);
 authRoutes.post('/validateToken', validateToken);
 
+
+
 export default authRoutes;

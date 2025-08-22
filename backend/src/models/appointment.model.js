@@ -26,8 +26,14 @@ const appointmentsSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Overlap validation before saving
+// Validation: Date must be in the future
 appointmentsSchema.pre('save', async function(next) {
+    // Check if date is in the future
+    if (this.date <= new Date()) {
+        return next(new Error('Appointment date must be in the future'));
+    }
+    
+    // Overlap validation
     if (this.isNew || this.isModified('date') || this.isModified('doctor')) {
         const existingAppointment = await this.constructor.findOne({
             doctor: this.doctor,
