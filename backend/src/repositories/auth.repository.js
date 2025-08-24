@@ -1,46 +1,33 @@
-import adminModel from "../models/admin.model.js";
-import doctorsModel from "../models/doctor.model.js";
-import patientsModel from "../models/patient.model.js";
+import AdminModel from '../models/admin.model.js';
+import DoctorModel from '../models/doctor.model.js';
+import PatientModel from '../models/patient.model.js';
 
-export default class AuthRepository {
-    // CREATE
-    createAdmin = async (adminData) => {
-        const newAdmin = await adminModel.create(adminData);
-        return newAdmin;
+class AuthRepository {
+    async createAdmin(adminData) {
+        return await AdminModel.create(adminData);
     }
 
-    createDoctor = async (doctorData) => {
-        const newDoctor = await doctorsModel.create(doctorData);
-        return newDoctor;
+    async createDoctor(doctorData) {
+        return await DoctorModel.create(doctorData);
     }
 
-    createPatient = async (patientData) => {
-        const newPatient = await patientsModel.create(patientData);
-        return newPatient;
+    async createPatient(patientData) {
+        return await PatientModel.create(patientData);
     }
 
-    // READ (GET) - De más general a más específico
-    checkEmailExists = async (email) => {
-        const admin = await adminModel.findOne({ email });
-        const doctor = await doctorsModel.findOne({ email });
-        const patient = await patientsModel.findOne({ email });
+    async checkEmailExists(email) {
+        const admin = await AdminModel.findOne({ email });
+        if (admin) return admin;
 
-        return admin || doctor || patient;
-    }
+        const doctor = await DoctorModel.findOne({ email });
+        if (doctor) return doctor;
 
-    findAdminByEmail = async (email) => {
-        const adminLogin = await adminModel.findOne({ email, isActive: true });
-        return adminLogin;
-    }
+        const patient = await PatientModel.findOne({ email });
+        if (patient) return patient;
 
-    findDoctorByEmail = async (email) => {
-        const doctorLogin = await doctorsModel.findOne({ email, isActive: true });
-        return doctorLogin;
-    }
-
-    findPatientByEmail = async (email) => {
-        const patientLogin = await patientsModel.findOne({ email, isActive: true });
-        return patientLogin;
+        return null;
     }
 }
+
+export default AuthRepository;
 

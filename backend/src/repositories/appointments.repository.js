@@ -39,14 +39,26 @@ export default class AppointmentsRepository {
     }
 
     findAppointmentsByDateRange = async (startDate, endDate, filters = {}) => {
+        // Convertir a objetos Date si vienen como strings
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        
+        // Ajustar endDate para incluir todo el día
+        endDateObj.setHours(23, 59, 59, 999);
+        
+        // Limpiar filters - excluir startDate y endDate que no son campos de la BD
+        const { startDate: _, endDate: __, ...cleanFilters } = filters;
+        
         const query = {
-            date: { $gte: startDate, $lte: endDate },
-            ...filters
+            date: { $gte: startDateObj, $lte: endDateObj },
+            ...cleanFilters
         };
+        
         const appointments = await appointmentsModel.find(query)
             .populate('patient', 'name lastname personalId')
             .populate('doctor', 'name lastname license specialties')
             .sort({ date: 1 });
+            
         return appointments;
     }
 
@@ -87,11 +99,18 @@ export default class AppointmentsRepository {
                 // Verificar si el slot está disponible
                 const isOccupied = existingAppointments.some(app => {
                     const appTime = new Date(app.date);
-                    return Math.abs(appTime.getTime() - slotTime.getTime()) < 30 * 60 * 1000; // 30 minutos
+                    const timeDiff = Math.abs(appTime.getTime() - slotTime.getTime());
+                    return timeDiff < 30 * 60 * 1000; // 30 minutos
                 });
 
                 if (!isOccupied) {
-                    availableSlots.push(slotTime);
+                    availableSlots.push({
+                        time: slotTime,
+                        formatted: slotTime.toLocaleTimeString('es-AR', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        })
+                    });
                 }
             }
         }

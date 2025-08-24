@@ -1,11 +1,8 @@
 import AppointmentsRepository from "../repositories/appointments.repository.js";
 import UserRepository from "../repositories/user.repository.js";
-import mongoose from 'mongoose';
 
 const appointmentsRepository = new AppointmentsRepository();
 const userRepository = new UserRepository();
-
-const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 const createAppointmentService = async (appointmentData) => {
     const { patient, doctor, date } = appointmentData;
@@ -14,12 +11,12 @@ const createAppointmentService = async (appointmentData) => {
         throw new Error('Patient, doctor and date are required');
     }
 
-    const doctorExists = await userRepository.findUserByIdAndType(doctor, 'doctor');
+    const doctorExists = await userRepository.findUserByIdAndRole(doctor, 'doctor');
     if (!doctorExists) {
         throw new Error('Doctor not found');
     }
 
-    const patientExists = await userRepository.findUserByIdAndType(patient, 'patient');
+    const patientExists = await userRepository.findUserByIdAndRole(patient, 'patient');
     if (!patientExists) {
         throw new Error('Patient not found');
     }
@@ -34,10 +31,6 @@ const findAllAppointments = async (filters = {}) => {
 };
 
 const findAppointmentById = async (appointmentId) => {
-    if (!isValidObjectId(appointmentId)) {
-        throw new Error('Invalid appointment ID format');
-    }
-
     const appointmentById = await appointmentsRepository.findAppointmentById(appointmentId);
     if (!appointmentById) {
         throw new Error('Appointment not found');
@@ -46,11 +39,7 @@ const findAppointmentById = async (appointmentId) => {
 };
 
 const findAppointmentsByDoctor = async (doctorId, filters = {}) => {
-    if (!isValidObjectId(doctorId)) {
-        throw new Error('Invalid doctor ID format');
-    }
-
-    const doctor = await userRepository.findUserByIdAndType(doctorId, 'doctor');
+    const doctor = await userRepository.findUserByIdAndRole(doctorId, 'doctor');
     if (!doctor) {
         throw new Error('Doctor not found');
     }
@@ -60,11 +49,7 @@ const findAppointmentsByDoctor = async (doctorId, filters = {}) => {
 };
 
 const findAppointmentsByPatient = async (patientId, filters = {}) => {
-    if (!isValidObjectId(patientId)) {
-        throw new Error('Invalid patient ID format');
-    }
-
-    const patient = await userRepository.findUserByIdAndType(patientId, 'patient');
+    const patient = await userRepository.findUserByIdAndRole(patientId, 'patient');
     if (!patient) {
         throw new Error('Patient not found');
     }
@@ -92,15 +77,11 @@ const findAppointmentsByStatus = async (status, filters = {}) => {
 };
 
 const findAvailableSlots = async (doctorId, date) => {
-    if (!isValidObjectId(doctorId)) {
-        throw new Error('Invalid doctor ID format');
-    }
-
     if (!date) {
         throw new Error('Date is required');
     }
 
-    const doctor = await userRepository.findUserByIdAndType(doctorId, 'doctor');
+    const doctor = await userRepository.findUserByIdAndRole(doctorId, 'doctor');
     if (!doctor) {
         throw new Error('Doctor not found');
     }
@@ -110,10 +91,6 @@ const findAvailableSlots = async (doctorId, date) => {
 };
 
 const updateAppointmentStatus = async (appointmentId, newStatus) => {
-    if (!isValidObjectId(appointmentId)) {
-        throw new Error('Invalid appointment ID format');
-    }
-
     if (!newStatus) {
         throw new Error('Status is required');
     }
@@ -143,10 +120,6 @@ const updateAppointmentStatus = async (appointmentId, newStatus) => {
 };
 
 const updateAppointmentDateTime = async (appointmentId, newDateTime) => {
-    if (!isValidObjectId(appointmentId)) {
-        throw new Error('Invalid appointment ID format');
-    }
-
     if (!newDateTime) {
         throw new Error('New date and time is required');
     }
@@ -175,10 +148,6 @@ const updateAppointmentDateTime = async (appointmentId, newDateTime) => {
 };
 
 const deleteAppointment = async (appointmentId) => {
-    if (!isValidObjectId(appointmentId)) {
-        throw new Error('Invalid appointment ID format');
-    }
-
     const deletedAppointment = await appointmentsRepository.deleteAppointment(appointmentId);
     if (!deletedAppointment) {
         throw new Error('Appointment not found');
@@ -188,15 +157,11 @@ const deleteAppointment = async (appointmentId) => {
 };
 
 const cancelAllDoctorAppointmentsInWeek = async (doctorId, startDate, endDate, reason) => {
-    if (!isValidObjectId(doctorId)) {
-        throw new Error('Invalid doctor ID format');
-    }
-
     if (!startDate || !endDate) {
         throw new Error('Start date and end date are required');
     }
 
-    const doctor = await userRepository.findUserByIdAndType(doctorId, 'doctor');
+    const doctor = await userRepository.findUserByIdAndRole(doctorId, 'doctor');
     if (!doctor) {
         throw new Error('Doctor not found');
     }

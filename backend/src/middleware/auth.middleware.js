@@ -1,41 +1,45 @@
 import authService from '../services/auth.service.js';
 import UserRepository from '../repositories/user.repository.js';
+import { verifyToken } from '../utils/utils.js';
 
 const userRepository = new UserRepository();
 
-// Middleware to authenticate JWT token
 export const authenticateToken = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.replace('Bearer ', '');
 
         if (!token) {
-            return res.status(401).json({ error: 'No token provided' });
+            return res.status(401).json({ error: 'Authentication token is required. Please log in to continue' });
         }
 
-        const decoded = await authService.verifyToken(token);
+        const decoded = await verifyToken(token);
         
-        // Verificar que el usuario siga activo
-        const user = await userRepository.findUserByIdAndType(decoded.userId, decoded.role);
+        const user = await userRepository.findUserByIdAndRole(decoded.userId, decoded.role);
         if (!user || !user.isActive) {
-            return res.status(401).json({ error: 'User account is deactivated or not found' });
+            return res.status(401).json({ error: 'Your account has been deactivated or not found. Please contact support' });
         }
         
         req.user = decoded;
         next();
     } catch (error) {
-        return res.status(401).json({ error: 'Invalid token' });
+        if (error.message === 'Token has expired') {
+            return res.status(401).json({ error: 'Your session has expired. Please log in again' });
+        } else if (error.message === 'Invalid token') {
+            return res.status(401).json({ error: 'Invalid or corrupted authentication token' });
+        } else {
+            return res.status(401).json({ error: 'Authentication failed. Please log in again' });
+        }
     }
 };
 
-// Middleware to require specific roles
 export const requireRole = (allowedRoles) => {
     return (req, res, next) => {
         if (!req.user) {
-            return res.status(401).json({ error: 'Authentication required' });
+            return res.status(401).json({ error: 'Authentication required. Please log in to continue' });
         }
         
         if (!allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ error: 'Insufficient permissions' });
+            return res.status(403).json({ error: 'You do not have permission to access this resource' });
         }
         
         next();

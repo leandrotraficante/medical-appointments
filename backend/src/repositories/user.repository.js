@@ -3,21 +3,12 @@ import doctorsModel from "../models/doctor.model.js";
 import patientsModel from "../models/patient.model.js";
 
 export default class UserRepository {
-    // READ (GET) - De más general a más específico
     getAllDoctors = async () => {
         return await doctorsModel.find();
     }
 
     getAllPatients = async () => {
         return await patientsModel.find();
-    }
-
-    getAllAdmins = async () => {
-        return await adminModel.find();
-    }
-
-    findActiveAdmins = async () => {
-        return await adminModel.find({ isActive: true });
     }
 
     findActiveDoctors = async () => {
@@ -28,10 +19,6 @@ export default class UserRepository {
         return await patientsModel.find({ isActive: true });
     }
 
-    findInactiveAdmins = async () => {
-        return await adminModel.find({ isActive: false });
-    }
-
     findInactiveDoctors = async () => {
         return await doctorsModel.find({ isActive: false });
     }
@@ -40,8 +27,8 @@ export default class UserRepository {
         return await patientsModel.find({ isActive: false });
     }
 
-    findUserByIdAndType = async (userId, userType) => {
-        switch (userType) {
+    findUserByIdAndRole = async (userId, role) => {
+        switch (role) {
             case 'admin':
                 return await adminModel.findById(userId);
             case 'doctor':
@@ -49,11 +36,10 @@ export default class UserRepository {
             case 'patient':
                 return await patientsModel.findById(userId);
             default:
-                throw new Error('Invalid user type');
+                throw new Error('Invalid user role');
         }
     }
 
-    // Search methods for doctors
     findDoctorByLicense = async (license) => {
         return await doctorsModel.findOne({ license });
     }
@@ -66,7 +52,6 @@ export default class UserRepository {
         return await doctorsModel.findOne({ email });
     }
 
-    // Search methods for patients
     findPatientByPersonalId = async (personalId) => {
         return await patientsModel.findOne({ personalId });
     }
@@ -75,7 +60,6 @@ export default class UserRepository {
         return await patientsModel.findOne({ email });
     }
 
-    // Generic search methods
     searchDoctorsByName = async (searchTerm) => {
         return await doctorsModel.find({
             $or: [
@@ -93,6 +77,4 @@ export default class UserRepository {
             ]
         });
     }
-
-
 }

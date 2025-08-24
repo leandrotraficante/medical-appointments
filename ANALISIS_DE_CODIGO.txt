@@ -20,7 +20,7 @@ MedicalAppointments - Análisis de código (archivo por archivo)
 2) backend/src/app.js
 - Responsabilidad: Punto de entrada del servidor Express. Configura middlewares, motor de vistas, rutas y conexión a MongoDB.
 - dotenv.config(): carga variables de entorno.
-- validateEnv(): verificación fail-fast de vars críticas (PRIVATE_KEY_JWT, JWT_EXPIRES_IN, MONGO_URI/MONGO_URL). Si faltan, sale con código 1.
+- validateEnv(): verificación fail-fast de vars críticas (PRIVATE_KEY_JWT, JWT_EXPIRES_IN, MONGO_URI/MONGO_URI). Si faltan, sale con código 1.
 - Creación de app Express y configuración de puerto y URI de Mongo.
 - Middlewares:
   - express.json(), express.urlencoded(): parseo de JSON/form para recibir body.
@@ -111,7 +111,7 @@ MedicalAppointments - Análisis de código (archivo por archivo)
 - user.repository.js:
   - activate*/deactivate* para admin/doctor/patient: togglean isActive por id y devuelven el documento actualizado.
   - findActive*/findInactive* para cada tipo.
-  - findUserByIdAndType(userId, userType): obtiene por id según tipo.
+  - findUserByIdAndRole(userId, userType): obtiene por id según tipo.
   - Motivo: operaciones de administración y consultas por estado en un único lugar.
 
 8) backend/src/services/auth.service.js

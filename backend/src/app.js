@@ -4,15 +4,18 @@ import dotenv from 'dotenv';
 
 import authRoutes from './routes/auth.route.js';
 import appointmentsRoutes from './routes/appointments.route.js';
+import usersRoutes from './routes/users.route.js';
+
+
+import configs from './config/configs.js';
 
 dotenv.config();
 
-// Fail-fast on missing environment variables
 const validateEnv = () => {
 	const missingVars = [];
 	if (!process.env.PRIVATE_KEY_JWT) missingVars.push('PRIVATE_KEY_JWT');
 	if (!process.env.JWT_EXPIRES_IN) missingVars.push('JWT_EXPIRES_IN');
-	if (!process.env.MONGO_URI && !process.env.MONGO_URL) missingVars.push('MONGO_URI or MONGO_URL');
+	if (!configs.mongoUrl) missingVars.push('MONGO_URI');
 
 	if (missingVars.length > 0) {
 		console.error('Missing required environment variables:', missingVars.join(', '));
@@ -25,17 +28,15 @@ validateEnv();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGO_URL;
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentsRoutes);
+app.use('/api/users', usersRoutes);
 
-mongoose.connect(MONGO_URI, {})
+mongoose.connect(configs.mongoUrl, {})
     .then(() => {
         console.log('Connected to MongoDB');
         app.listen(PORT, () => {

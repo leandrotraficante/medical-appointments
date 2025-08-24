@@ -1,12 +1,10 @@
 import AuthRepository from '../repositories/auth.repository.js';
 import { UserAlreadyExists, InvalidCredentials } from '../utils/custom.exceptions.js';
-import { createHash, isValidPassword } from '../utils/utils.js';
-import configs, { ROLE_CONFIG } from '../config/configs.js';
-import jwt from 'jsonwebtoken';
+import { createHash, isValidPassword, generateToken } from '../utils/utils.js';
+import { ROLE_CONFIG } from '../config/configs.js';
 
 const authRepository = new AuthRepository();
 
-// User registration
 const register = async (user, role) => {
     if (!user || !role) {
         throw new Error('User and role are required');
@@ -14,6 +12,10 @@ const register = async (user, role) => {
 
     if (!ROLE_CONFIG.validRoles.includes(role)) {
         throw new Error(`Invalid role: ${role}`);
+    }
+
+    if (role === 'doctor' && !user.license) {
+        throw new Error('License is required for doctors');
     }
 
     const existingUser = await authRepository.checkEmailExists(user.email);
@@ -27,7 +29,6 @@ const register = async (user, role) => {
     return await authRepository[ROLE_CONFIG.handlers[role]](newUser);
 };
 
-// User login
 const login = async (email, password) => {
     if (!email || !password) {
         throw new Error('Email and password are required');
@@ -38,7 +39,6 @@ const login = async (email, password) => {
         throw new InvalidCredentials('Invalid credentials');
     }
 
-    // Verificar que el usuario esté activo antes de generar el token
     if (!user.isActive) {
         throw new InvalidCredentials('User account is deactivated');
     }
@@ -56,40 +56,7 @@ const login = async (email, password) => {
     }
 }
 
-// Generate JWT token
-const generateToken = (user) => {
-    return jwt.sign(
-        {
-            userId: user._id,
-            email: user.email,
-            role: user.role,
-            name: user.name
-        },
-        configs.privateKeyJwt,
-        { expiresIn: configs.jwtExpiresIn }
-    );
-}
-
-// Verify JWT token
-const verifyToken = async (token) => {
-    if (!token) {
-        throw new Error('Token is required');
-    }
-
-    try {
-        return jwt.verify(token, configs.privateKeyJwt);
-    } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            throw new Error('Token has expired');
-        } else {
-            throw new Error('Invalid token');
-        }
-    }
-};
-
 export default {
     register,
-    login,
-    generateToken,
-    verifyToken
+    login
 };

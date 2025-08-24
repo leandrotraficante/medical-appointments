@@ -8,33 +8,45 @@ const adminSchema = new mongoose.Schema({
         required: true,
         unique: true,
         lowercase: true,
-        trim: true
+        trim: true,
+        match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email address']
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        minlength: [6, 'Password must be at least 6 characters long']
     },
     name: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        minlength: [2, 'Name must be at least 2 characters long'],
+        maxlength: [50, 'Name cannot exceed 50 characters']
     },
     lastname: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        minlength: [2, 'Lastname must be at least 2 characters long'],
+        maxlength: [50, 'Lastname cannot exceed 50 characters']
     },
     personalId: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true,
+        minlength: [3, 'Personal ID must be at least 3 characters long']
     },
     phone: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        minlength: [8, 'Phone must be at least 8 characters long']
     },
     role: {
         type: String,
         default: 'admin',
-        required: true
+        required: true,
     },
     isActive: {
         type: Boolean,
@@ -55,7 +67,6 @@ const adminSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Compound unique index for email + role
 adminSchema.index({ email: 1, role: 1 }, { unique: true });
 
 const adminModel = mongoose.model(adminCollection, adminSchema);

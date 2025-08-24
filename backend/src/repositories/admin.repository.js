@@ -3,9 +3,7 @@ import doctorsModel from "../models/doctor.model.js";
 import patientsModel from "../models/patient.model.js";
 
 export default class AdminRepository {
-    // UPDATE - Operaciones administrativas de activación/desactivación
     activateAdmin = async (adminId) => {
-        // Verificar que el usuario exista antes de activarlo
         const existingAdmin = await adminModel.findById(adminId);
         if (!existingAdmin) {
             throw new Error('Admin not found');
@@ -19,7 +17,6 @@ export default class AdminRepository {
     }
 
     activateDoctor = async (doctorId) => {
-        // Verificar que el usuario exista antes de activarlo
         const existingDoctor = await doctorsModel.findById(doctorId);
         if (!existingDoctor) {
             throw new Error('Doctor not found');
@@ -33,7 +30,6 @@ export default class AdminRepository {
     }
 
     activatePatient = async (patientId) => {
-        // Verificar que el usuario exista antes de activarlo
         const existingPatient = await patientsModel.findById(patientId);
         if (!existingPatient) {
             throw new Error('Patient not found');
@@ -47,7 +43,6 @@ export default class AdminRepository {
     }
 
     deactivateAdmin = async (adminId) => {
-        // Verificar que el usuario exista antes de desactivarlo
         const existingAdmin = await adminModel.findById(adminId);
         if (!existingAdmin) {
             throw new Error('Admin not found');
@@ -61,7 +56,6 @@ export default class AdminRepository {
     }
 
     deactivateDoctor = async (doctorId) => {
-        // Verificar que el usuario exista antes de desactivarlo
         const existingDoctor = await doctorsModel.findById(doctorId);
         if (!existingDoctor) {
             throw new Error('Doctor not found');
@@ -75,7 +69,6 @@ export default class AdminRepository {
     }
 
     deactivatePatient = async (patientId) => {
-        // Verificar que el usuario exista antes de desactivarlo
         const existingPatient = await patientsModel.findById(patientId);
         if (!existingPatient) {
             throw new Error('Patient not found');
