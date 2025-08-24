@@ -3,14 +3,35 @@ import doctorsModel from "../models/doctor.model.js";
 import patientsModel from "../models/patient.model.js";
 
 export default class UserRepository {
+    /**
+     * Retrieves all doctors from the database
+     * @returns {Promise<Array>} - Array of all doctor documents
+     * @example
+     * const doctors = await userRepository.getAllDoctors();
+     * console.log(`Found ${doctors.length} doctors`);
+     */
     getAllDoctors = async () => {
         return await doctorsModel.find();
     }
 
+    /**
+     * Retrieves all patients from the database
+     * @returns {Promise<Array>} - Array of all patient documents
+     * @example
+     * const patients = await userRepository.getAllPatients();
+     * console.log(`Found ${patients.length} patients`);
+     */
     getAllPatients = async () => {
         return await patientsModel.find();
     }
 
+    /**
+     * Retrieves all active doctors from the database
+     * @returns {Promise<Array>} - Array of active doctor documents
+     * @example
+     * const activeDoctors = await userRepository.findActiveDoctors();
+     * console.log(`Found ${activeDoctors.length} active doctors`);
+     */
     findActiveDoctors = async () => {
         return await doctorsModel.find({ isActive: true });
     }

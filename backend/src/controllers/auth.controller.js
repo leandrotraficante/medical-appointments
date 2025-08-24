@@ -1,6 +1,35 @@
 import authService from '../services/auth.service.js';
 import { generateToken } from '../utils/utils.js';
 
+/**
+ * Registers a new user in the system with the specified role
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing user data
+ * @param {string} req.body.name - User's full name (required)
+ * @param {string} req.body.lastname - User's last name (optional)
+ * @param {string} req.body.email - User's email address (required)
+ * @param {string} req.body.personalId - User's personal ID/DNI (required)
+ * @param {string} req.body.dateOfBirth - User's date of birth (optional)
+ * @param {string} req.body.phone - User's phone number (optional)
+ * @param {string} req.body.password - User's password (required)
+ * @param {string} req.body.role - User role: 'admin', 'doctor', or 'patient' (required)
+ * @param {string} req.body.license - Doctor's license number (required if role is 'doctor')
+ * @param {string|Array} req.body.specialties - Doctor's specialties (required if role is 'doctor')
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with user data and JWT token
+ * @throws {Error} - If validation fails or user creation fails
+ * @example
+ * POST /api/auth/register
+ * Body: {
+ *   "name": "Dr. John Doe",
+ *   "email": "john@example.com",
+ *   "personalId": "12345678",
+ *   "password": "secure123",
+ *   "role": "doctor",
+ *   "license": "MD12345",
+ *   "specialties": ["Cardiology", "Internal Medicine"]
+ * }
+ */
 const register = async (req, res) => {
     try {
         const { name, lastname, email, personalId, dateOfBirth, phone, password, role, license, specialties } = req.body;
@@ -57,6 +86,23 @@ const register = async (req, res) => {
     }
 };
 
+/**
+ * Authenticates a user with email and password
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing credentials
+ * @param {string} req.body.email - User's email address (required)
+ * @param {string} req.body.password - User's password (required)
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with JWT token and user data
+ * @throws {Error} - If credentials are invalid or account is deactivated
+ * @example
+ * POST /api/auth/login
+ * Body: {
+ *   "email": "john@example.com",
+ *   "password": "secure123"
+ * }
+ * // Returns: { token: "jwt_token_here", user: {...}, message: "Login successful" }
+ */
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -87,6 +133,15 @@ const login = async (req, res) => {
     }
 };
 
+/**
+ * Logs out the current user (clears session)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response confirming successful logout
+ * @example
+ * GET /api/auth/logout
+ * // Returns: { message: "Logout successful" }
+ */
 const logout = async (req, res) => {
     try {
         res.status(200).json({ message: 'Logout successful' });

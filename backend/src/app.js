@@ -5,37 +5,41 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route.js';
 import appointmentsRoutes from './routes/appointments.route.js';
 import usersRoutes from './routes/users.route.js';
-
+import { validateEnv } from './utils/validation.js';
 
 import configs from './config/configs.js';
 
 dotenv.config();
 
-const validateEnv = () => {
-	const missingVars = [];
-	if (!process.env.PRIVATE_KEY_JWT) missingVars.push('PRIVATE_KEY_JWT');
-	if (!process.env.JWT_EXPIRES_IN) missingVars.push('JWT_EXPIRES_IN');
-	if (!configs.mongoUrl) missingVars.push('MONGO_URI');
-
-	if (missingVars.length > 0) {
-		console.error('Missing required environment variables:', missingVars.join(', '));
-		console.error('Please set them in your environment or .env file before starting the server.');
-		process.exit(1);
-	}
-};
-
+// Validate environment variables before starting the app
 validateEnv();
 
+/**
+ * Main Express application instance
+ * @type {express.Application}
+ */
 const app = express();
+
+/**
+ * Server port configuration
+ * @type {number}
+ */
 const PORT = process.env.PORT || 3000;
 
+// Middleware configuration
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Route mounting
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentsRoutes);
 app.use('/api/users', usersRoutes);
 
+/**
+ * Connects to MongoDB and starts the Express server
+ * @async
+ * @returns {Promise<void>}
+ */
 mongoose.connect(configs.mongoUrl, {})
     .then(() => {
         console.log('Connected to MongoDB');

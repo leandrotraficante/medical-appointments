@@ -4,6 +4,19 @@ import { verifyToken } from '../utils/utils.js';
 
 const userRepository = new UserRepository();
 
+/**
+ * Middleware to authenticate JWT tokens from request headers
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next function
+ * @returns {void}
+ * @throws {Error} - If authentication fails
+ * @example
+ * app.use('/protected', authenticateToken, (req, res) => {
+ *   // req.user is now available with decoded token data
+ *   res.json({ message: 'Access granted' });
+ * });
+ */
 export const authenticateToken = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.replace('Bearer ', '');
@@ -32,6 +45,17 @@ export const authenticateToken = async (req, res, next) => {
     }
 };
 
+/**
+ * Middleware factory to require specific user roles for access
+ * @param {string[]} allowedRoles - Array of roles that can access the route
+ * @returns {Function} - Express middleware function
+ * @example
+ * // Only admins can access
+ * app.get('/admin', requireRole(['admin']), adminController);
+ * 
+ * // Admins and doctors can access
+ * app.get('/doctors', requireRole(['admin', 'doctor']), doctorController);
+ */
 export const requireRole = (allowedRoles) => {
     return (req, res, next) => {
         if (!req.user) {

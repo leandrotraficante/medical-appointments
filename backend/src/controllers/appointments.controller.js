@@ -1,6 +1,24 @@
 import appointmentsService from "../services/appointments.service.js";
 import { isValidObjectId } from "../utils/validation.js";
 
+/**
+ * Creates a new appointment in the system
+ * @param {Object} req - Express request object
+ * @param {Object} req.body - Request body containing appointment data
+ * @param {string} req.body.patient - Patient's MongoDB ID (required)
+ * @param {string} req.body.doctor - Doctor's MongoDB ID (required)
+ * @param {string} req.body.date - Appointment date and time (required)
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with created appointment data
+ * @throws {Error} - If patient/doctor not found, invalid date, or time slot unavailable
+ * @example
+ * POST /api/appointments
+ * Body: {
+ *   "patient": "507f1f77bcf86cd799439011",
+ *   "doctor": "507f1f77bcf86cd799439012",
+ *   "date": "2024-01-15T10:00:00.000Z"
+ * }
+ */
 const createAppointment = async (req, res) => {
     try {
         const { patient, doctor, date } = req.body;
@@ -30,6 +48,16 @@ const createAppointment = async (req, res) => {
     }
 };
 
+/**
+ * Retrieves all appointments with optional filtering
+ * @param {Object} req - Express request object
+ * @param {Object} req.query - Query parameters for filtering
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with filtered appointments
+ * @example
+ * GET /api/appointments?status=pending&doctor=507f1f77bcf86cd799439012
+ * // Returns: { success: true, data: [appointment1, appointment2, ...] }
+ */
 const getAllAppointments = async (req, res) => {
     try {
         const filters = req.query;
@@ -44,6 +72,17 @@ const getAllAppointments = async (req, res) => {
     }
 };
 
+/**
+ * Retrieves a specific appointment by its ID
+ * @param {Object} req - Express request object
+ * @param {string} req.params.appointmentId - Appointment's MongoDB ID
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with appointment data
+ * @throws {Error} - If appointment ID format is invalid or appointment not found
+ * @example
+ * GET /api/appointments/507f1f77bcf86cd799439011
+ * // Returns: { success: true, data: { appointment details } }
+ */
 const getAppointmentById = async (req, res) => {
     const { appointmentId } = req.params;
     
@@ -63,6 +102,18 @@ const getAppointmentById = async (req, res) => {
     }
 };
 
+/**
+ * Retrieves all appointments for a specific doctor
+ * @param {Object} req - Express request object
+ * @param {string} req.params.doctorId - Doctor's MongoDB ID
+ * @param {Object} req.query - Query parameters for filtering
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with doctor's appointments
+ * @throws {Error} - If doctor ID format is invalid or doctor not found
+ * @example
+ * GET /api/appointments/doctor/507f1f77bcf86cd799439012?status=pending
+ * // Returns: { success: true, data: [appointment1, appointment2, ...] }
+ */
 const getAppointmentByDoctor = async (req, res) => {
     const { doctorId } = req.params;
     const filters = req.query;
@@ -87,6 +138,18 @@ const getAppointmentByDoctor = async (req, res) => {
     }
 };
 
+/**
+ * Retrieves all appointments for a specific patient
+ * @param {Object} req - Express request object
+ * @param {string} req.params.patientId - Patient's MongoDB ID
+ * @param {Object} req.query - Query parameters for filtering
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with patient's appointments
+ * @throws {Error} - If patient ID format is invalid or patient not found
+ * @example
+ * GET /api/appointments/patient/507f1f77bcf86cd799439011?status=confirmed
+ * // Returns: { success: true, data: [appointment1, appointment2, ...] }
+ */
 const getAppointmentByPatient = async (req, res) => {
     const { patientId } = req.params;
     const filters = req.query;
@@ -111,6 +174,19 @@ const getAppointmentByPatient = async (req, res) => {
     }
 };
 
+/**
+ * Searches appointments within a specific date range
+ * @param {Object} req - Express request object
+ * @param {string} req.query.startDate - Start date for search range (required)
+ * @param {string} req.query.endDate - End date for search range (required)
+ * @param {Object} req.query - Additional query parameters for filtering
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with appointments in date range
+ * @throws {Error} - If date range is invalid or dates are malformed
+ * @example
+ * GET /api/appointments/date-range?startDate=2024-01-01&endDate=2024-01-31&status=pending
+ * // Returns: { success: true, data: [appointment1, appointment2, ...] }
+ */
 const findAppointmentsByDateRange = async (req, res) => {
     const { startDate, endDate } = req.query;
     const filters = req.query;
@@ -135,6 +211,18 @@ const findAppointmentsByDateRange = async (req, res) => {
     }
 };
 
+/**
+ * Searches appointments by their current status
+ * @param {Object} req - Express request object
+ * @param {string} req.query.status - Appointment status to search for (required)
+ * @param {Object} req.query - Additional query parameters for filtering
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with appointments matching the status
+ * @throws {Error} - If status parameter is missing or invalid
+ * @example
+ * GET /api/appointments/status?status=pending&doctor=507f1f77bcf86cd799439012
+ * // Returns: { success: true, data: [pending appointment1, pending appointment2, ...] }
+ */
 const findAppointmentsByStatus = async (req, res) => {
     const { status } = req.query;
     const filters = req.query;
@@ -155,6 +243,18 @@ const findAppointmentsByStatus = async (req, res) => {
     }
 };
 
+/**
+ * Gets available time slots for a doctor on a specific date
+ * @param {Object} req - Express request object
+ * @param {string} req.params.doctorId - Doctor's MongoDB ID
+ * @param {string} req.query.date - Date to check for available slots (required)
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with available time slots
+ * @throws {Error} - If doctor ID format is invalid, doctor not found, or date is missing
+ * @example
+ * GET /api/appointments/available-slots/507f1f77bcf86cd799439012?date=2024-01-15
+ * // Returns: { success: true, data: [{ time: "2024-01-15T09:00:00.000Z", formatted: "09:00" }, ...] }
+ */
 const getAvailableSlots = async (req, res) => {
     const { doctorId } = req.params;
     const { date } = req.query;
@@ -187,6 +287,19 @@ const getAvailableSlots = async (req, res) => {
     }
 };
 
+/**
+ * Updates the status of an existing appointment
+ * @param {Object} req - Express request object
+ * @param {string} req.params.appointmentId - Appointment's MongoDB ID
+ * @param {string} req.body.status - New status for the appointment (required)
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with updated appointment data
+ * @throws {Error} - If appointment ID format is invalid, status is invalid, or appointment not found
+ * @example
+ * PUT /api/appointments/507f1f77bcf86cd799439011/status
+ * Body: { "status": "confirmed" }
+ * // Returns: { success: true, data: { updated appointment } }
+ */
 const updateAppointmentStatus = async (req, res) => {
     const { appointmentId } = req.params;
     const newStatus = req.body.status;
@@ -220,6 +333,19 @@ const updateAppointmentStatus = async (req, res) => {
     }
 };
 
+/**
+ * Updates the date and time of an existing appointment
+ * @param {Object} req - Express request object
+ * @param {string} req.params.appointmentId - Appointment's MongoDB ID
+ * @param {string} req.body.date - New date and time for the appointment (required)
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with updated appointment data
+ * @throws {Error} - If appointment ID format is invalid, date is invalid, or time slot unavailable
+ * @example
+ * PUT /api/appointments/507f1f77bcf86cd799439011/date
+ * Body: { "date": "2024-01-16T14:00:00.000Z" }
+ * // Returns: { success: true, data: { updated appointment } }
+ */
 const updateAppointmentDate = async (req, res) => {
     const { appointmentId } = req.params;
     const newDate = req.body.date;
@@ -254,6 +380,17 @@ const updateAppointmentDate = async (req, res) => {
     }
 };
 
+/**
+ * Deletes (cancels) an existing appointment
+ * @param {Object} req - Express request object
+ * @param {string} req.params.appointmentId - Appointment's MongoDB ID
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with deleted appointment data
+ * @throws {Error} - If appointment ID format is invalid or appointment not found
+ * @example
+ * DELETE /api/appointments/507f1f77bcf86cd799439011
+ * // Returns: { success: true, data: { deleted appointment }, message: "Appointment deleted successfully" }
+ */
 const deleteAppointment = async (req, res) => {
     const { appointmentId } = req.params;
     
@@ -273,6 +410,25 @@ const deleteAppointment = async (req, res) => {
     }
 };
 
+/**
+ * Cancels all appointments for a doctor within a specified week
+ * @param {Object} req - Express request object
+ * @param {string} req.params.doctorId - Doctor's MongoDB ID
+ * @param {string} req.body.startDate - Start date of the week (required)
+ * @param {string} req.body.endDate - End date of the week (required)
+ * @param {string} req.body.reason - Reason for cancellation (optional)
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with cancellation results
+ * @throws {Error} - If doctor ID format is invalid, dates are missing, or doctor not found
+ * @example
+ * POST /api/appointments/doctor/507f1f77bcf86cd799439012/cancel-week
+ * Body: {
+ *   "startDate": "2024-01-15",
+ *   "endDate": "2024-01-21",
+ *   "reason": "Doctor on vacation"
+ * }
+ * // Returns: { success: true, data: { modifiedCount: 5 }, message: "Successfully cancelled 5 appointments" }
+ */
 const cancelAllDoctorAppointmentsInWeek = async (req, res) => {
     const { doctorId } = req.params;
     const { startDate, endDate, reason } = req.body;
