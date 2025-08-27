@@ -6,16 +6,28 @@ const userRepository = new UserRepository();
 
 /**
  * Middleware to authenticate JWT tokens from request headers
+ * Verifies token validity, decodes user information, and validates user existence and status
+ * 
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
  * @returns {void}
- * @throws {Error} - If authentication fails
+ * @throws {Error} - If authentication fails, token is invalid, or user is deactivated
+ * 
  * @example
+ * // Basic usage
  * app.use('/protected', authenticateToken, (req, res) => {
  *   // req.user is now available with decoded token data
- *   res.json({ message: 'Access granted' });
+ *   res.json({ message: 'Access granted', userId: req.user.userId });
  * });
+ * 
+ * @example
+ * // With role-based access
+ * app.get('/admin', authenticateToken, requireRole(['admin']), adminController);
+ * 
+ * @example
+ * // Token format in headers
+ * Headers: { "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
  */
 export const authenticateToken = async (req, res, next) => {
     try {
@@ -27,12 +39,34 @@ export const authenticateToken = async (req, res, next) => {
 
         const decoded = await verifyToken(token);
         
-        const user = await userRepository.findUserByIdAndRole(decoded.userId, decoded.role);
+        // Verificar que el usuario existe y está activo según su rol
+        let user;
+        switch (decoded.role) {
+            case 'admin':
+                user = await userRepository.findAdminById(decoded.userId);
+                break;
+            case 'doctor':
+                user = await userRepository.findDoctorById(decoded.userId);
+                break;
+            case 'patient':
+                user = await userRepository.findPatientById(decoded.userId);
+                break;
+            default:
+                return res.status(401).json({ error: 'Invalid user role' });
+        }
+        
         if (!user || !user.isActive) {
             return res.status(401).json({ error: 'Your account has been deactivated or not found. Please contact support' });
         }
         
-        req.user = decoded;
+        // Normalizar el objeto user para consistencia
+        req.user = {
+            id: decoded.userId,
+            userId: decoded.userId,
+            email: decoded.email,
+            role: decoded.role,
+            name: decoded.name
+        };
         next();
     } catch (error) {
         if (error.message === 'Token has expired') {
@@ -47,14 +81,29 @@ export const authenticateToken = async (req, res, next) => {
 
 /**
  * Middleware factory to require specific user roles for access
+ * Creates a middleware function that checks if the authenticated user has the required role
+ * 
  * @param {string[]} allowedRoles - Array of roles that can access the route
- * @returns {Function} - Express middleware function
+ * @returns {Function} - Express middleware function that validates user role
+ * 
  * @example
  * // Only admins can access
  * app.get('/admin', requireRole(['admin']), adminController);
  * 
+ * @example
  * // Admins and doctors can access
  * app.get('/doctors', requireRole(['admin', 'doctor']), doctorController);
+ * 
+ * @example
+ * // Multiple roles with different permissions
+ * app.get('/appointments', requireRole(['admin', 'doctor', 'patient']), appointmentsController);
+ * 
+ * @example
+ * // Usage in route definitions
+ * router.get('/sensitive-data', authenticateToken, requireRole(['admin']), (req, res) => {
+ *   // Only admins can access this route
+ *   res.json({ data: 'Sensitive information' });
+ * });
  */
 export const requireRole = (allowedRoles) => {
     return (req, res, next) => {

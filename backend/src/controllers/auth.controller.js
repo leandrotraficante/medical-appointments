@@ -118,7 +118,7 @@ const login = async (req, res) => {
         }
 
         res.status(200).json({
-            token: result.access_token,
+            token: result.token,
             user: result.user,
             message: 'Login successful'
         });
@@ -144,7 +144,16 @@ const login = async (req, res) => {
  */
 const logout = async (req, res) => {
     try {
-        res.status(200).json({ message: 'Logout successful' });
+        // Get user ID from authenticated request (if using middleware)
+        const userId = req.user?.userId || 'unknown';
+        
+        const result = await authService.logout(userId);
+        
+        // 🍪 BORRAR LA COOKIE JWT PARA CERRAR LA SESIÓN
+        res.clearCookie('jwt'); // Si usas cookie para JWT
+        res.clearCookie('token'); // Si usas cookie llamada 'token'
+        
+        res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ error: 'Unable to log out. Please try again later' });
     }

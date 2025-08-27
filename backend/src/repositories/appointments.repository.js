@@ -253,10 +253,6 @@ export default class AppointmentsRepository {
             status: { $nin: ['cancelled'] },
             _id: { $ne: appointmentId }
         });
-        
-        if (existingAppointment) {
-            throw new Error('The doctor already has an appointment at this date and time');
-        }
 
         const updatedApp = await appointmentsModel.findByIdAndUpdate(
             appointmentId,

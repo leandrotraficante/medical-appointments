@@ -19,7 +19,7 @@ const getAllDoctors = async (req, res) => {
         if (error?.message === 'No doctors found') {
             res.status(404).json({ error: 'No doctors found' });
         } else {
-            res.status(500).json({ error: 'Unable to get doctors. Please try again later' });
+        res.status(500).json({ error: 'Unable to get doctors. Please try again later' });
         }
     }
 }
@@ -41,7 +41,7 @@ const getAllPatients = async (req, res) => {
         if (error?.message === 'No patients found') {
             res.status(404).json({ error: 'No patients found' });
         } else {
-            res.status(500).json({ error: 'Unable to get patients. Please try again later' });
+        res.status(500).json({ error: 'Unable to get patients. Please try again later' });
         }
     }
 }
@@ -135,46 +135,49 @@ const findInactivePatients = async (req, res) => {
 }
 
 /**
- * Finds a user by their ID and specific role
+ * Unified flexible search function that searches across all fields and user types
  * @param {Object} req - Express request object
- * @param {string} req.params.userId - User's MongoDB ID
- * @param {string} req.params.role - User role: 'admin', 'doctor', or 'patient'
+ * @param {string} req.query.q - Search query (searches in all relevant fields)
  * @param {Object} res - Express response object
- * @returns {Object} - JSON response with user data
- * @throws {Error} - If user ID or role is missing, invalid ID format, or invalid role
+ * @returns {Object} - JSON response with matching users and their types
+ * @throws {Error} - If search query is missing or empty
  * @example
- * GET /api/users/users/507f1f77bcf86cd799439011/doctor
- * // Returns: { success: true, data: { user details } }
+ * GET /api/users/search?q=john
+ * // Returns: { success: true, data: [{ user: {...}, type: 'doctor' }, { user: {...}, type: 'patient' }] }
+ * 
+ * GET /api/users/search?q=123
+ * // Returns: users with DNI, license, or name containing "123"
+ * 
+ * GET /api/users/search?q=cardiology
+ * // Returns: doctors with specialty containing "cardiology"
  */
-const findUserByIdAndRole = async (req, res) => {
-    const { userId } = req.params;
-    const { role } = req.params;
-
-    if (!userId) {
-        return res.status(400).json({ error: 'User ID is required' });
+const searchUsers = async (req, res) => {
+    const { q } = req.query;
+    
+    if (!q || q.trim() === '') {
+        return res.status(400).json({ error: 'Search query is required' });
     }
-
-    if (!role) {
-        return res.status(400).json({ error: 'Role is required' });
-    }
-
-    if (!isValidObjectId(userId)) {
-        return res.status(400).json({ error: 'Invalid user ID format' });
-    }
-
-    if (!ROLE_CONFIG.validRoles.includes(role)) {
-        return res.status(400).json({ 
-            error: `Invalid role. Allowed values: ${ROLE_CONFIG.validRoles.join(', ')}` 
-        });
-    }
-
+    
     try {
-        const userByIdAndRole = await userService.findUserByIdAndRole(userId, role);
-        res.status(200).json({ success: true, data: userByIdAndRole });
+        const results = await userService.searchUsers(q);
+        
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'No users found matching your search' });
+        }
+        
+        res.status(200).json({ 
+            success: true, 
+            data: results,
+            message: `Found ${results.length} user(s) matching "${q}"`
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Unable to get user. Please try again later' });
+        if (error?.message === 'Search query is required') {
+            res.status(400).json({ error: 'Search query is required' });
+        } else {
+            res.status(500).json({ error: 'Unable to search users. Please try again later' });
+        }
     }
-}
+};
 
 /**
  * Finds a doctor by their medical license number
@@ -274,7 +277,7 @@ const findDoctorByEmail = async (req, res) => {
  * @returns {Object} - JSON response with patient data
  * @throws {Error} - If personal ID is missing or patient not found
  * @example
- * GET /api/users/patients/personal-id/11223344
+ * GET /api/users/doctors/personal-id/11223344
  * // Returns: { success: true, data: { patient details } }
  */
 const findPatientByPersonalId = async (req, res) => {
@@ -304,7 +307,7 @@ const findPatientByPersonalId = async (req, res) => {
  * @returns {Object} - JSON response with patient data
  * @throws {Error} - If email is missing or patient not found
  * @example
- * GET /api/users/patients/email/jane.smith@email.com
+ * GET /api/users/doctors/email/jane.smith@email.com
  * // Returns: { success: true, data: { patient details } }
  */
 const findPatientByEmail = async (req, res) => {
@@ -364,7 +367,7 @@ const searchDoctorsByName = async (req, res) => {
  * @returns {Object} - JSON response with matching patients
  * @throws {Error} - If search term is missing or no patients found
  * @example
- * GET /api/users/patients-by-name?searchTerm=Jane
+ * GET /api/users/doctors-by-name?searchTerm=Jane
  * // Returns: { success: true, data: [patient1, patient2, ...] }
  */
 const searchPatientsByName = async (req, res) => {
@@ -386,6 +389,64 @@ const searchPatientsByName = async (req, res) => {
     }
 }
 
+/**
+ * Retrieves a specific doctor by ID
+ * @param {Object} req - Express request object
+ * @param {string} req.params.doctorId - Doctor's MongoDB ID
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with doctor data
+ * @throws {Error} - If doctor ID is invalid or doctor not found
+ * @example
+ * GET /api/users/doctors/507f1f77bcf86cd799439011
+ * // Returns: { success: true, data: { doctor details } }
+ */
+const getDoctorById = async (req, res) => {
+    const { doctorId } = req.params;
+    
+    if (!doctorId) {
+        return res.status(400).json({ error: 'Doctor ID is required' });
+    }
+    
+    try {
+        const doctor = await userService.findDoctorById(doctorId);
+        if (!doctor) {
+            return res.status(404).json({ error: 'Doctor not found' });
+        }
+        res.status(200).json({ success: true, data: doctor });
+    } catch (error) {
+        res.status(500).json({ error: 'Unable to get doctor. Please try again later' });
+    }
+}
+
+/**
+ * Retrieves a specific patient by ID
+ * @param {Object} req - Express request object
+ * @param {string} req.params.patientId - Patient's MongoDB ID
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with patient data
+ * @throws {Error} - If patient ID is invalid or patient not found
+ * @example
+ * GET /api/users/patients/507f1f77bcf86cd799439011
+ * // Returns: { success: true, data: { patient details } }
+ */
+const getPatientById = async (req, res) => {
+    const { patientId } = req.params;
+    
+    if (!patientId) {
+        return res.status(400).json({ error: 'Patient ID is required' });
+    }
+    
+    try {
+        const patient = await userService.findPatientById(patientId);
+        if (!patient) {
+            return res.status(404).json({ error: 'Patient not found' });
+        }
+        res.status(200).json({ success: true, data: patient });
+    } catch (error) {
+        res.status(500).json({ error: 'Unable to get patient. Please try again later' });
+    }
+}
+
 export {
     getAllDoctors,
     getAllPatients,
@@ -393,12 +454,14 @@ export {
     findActivePatients,
     findInactiveDoctors,
     findInactivePatients,
-    findUserByIdAndRole,
+    searchUsers,
     findDoctorByLicense,
     findDoctorByPersonalId,
     findDoctorByEmail,
     findPatientByPersonalId,
     findPatientByEmail,
     searchDoctorsByName,
-    searchPatientsByName
+    searchPatientsByName,
+    getDoctorById,
+    getPatientById
 };

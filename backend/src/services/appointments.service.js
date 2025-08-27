@@ -23,16 +23,12 @@ const userRepository = new UserRepository();
 const createAppointmentService = async (appointmentData) => {
     const { patient, doctor, date } = appointmentData;
     
-    if (!patient || !doctor || !date) {
-        throw new Error('Patient, doctor and date are required');
-    }
-
-    const doctorExists = await userRepository.findUserByIdAndRole(doctor, 'doctor');
+    const doctorExists = await userRepository.findDoctorById(doctor);
     if (!doctorExists) {
         throw new Error('Doctor not found');
     }
 
-    const patientExists = await userRepository.findUserByIdAndRole(patient, 'patient');
+    const patientExists = await userRepository.findPatientById(patient);
     if (!patientExists) {
         throw new Error('Patient not found');
     }
@@ -85,7 +81,7 @@ const findAppointmentById = async (appointmentId) => {
  * const pendingDoctorAppointments = await findAppointmentsByDoctor('507f1f77bcf86cd799439012', { status: 'pending' });
  */
 const findAppointmentsByDoctor = async (doctorId, filters = {}) => {
-    const doctor = await userRepository.findUserByIdAndRole(doctorId, 'doctor');
+    const doctor = await userRepository.findDoctorById(doctorId);
     if (!doctor) {
         throw new Error('Doctor not found');
     }
@@ -105,7 +101,7 @@ const findAppointmentsByDoctor = async (doctorId, filters = {}) => {
  * const confirmedPatientAppointments = await findAppointmentsByPatient('507f1f77bcf86cd799439011', { status: 'confirmed' });
  */
 const findAppointmentsByPatient = async (patientId, filters = {}) => {
-    const patient = await userRepository.findUserByIdAndRole(patientId, 'patient');
+    const patient = await userRepository.findPatientById(patientId);
     if (!patient) {
         throw new Error('Patient not found');
     }
@@ -164,11 +160,7 @@ const findAppointmentsByStatus = async (status, filters = {}) => {
  * // Returns: [{ time: "2024-01-15T09:00:00.000Z", formatted: "09:00" }, ...]
  */
 const findAvailableSlots = async (doctorId, date) => {
-    if (!date) {
-        throw new Error('Date is required');
-    }
-
-    const doctor = await userRepository.findUserByIdAndRole(doctorId, 'doctor');
+    const doctor = await userRepository.findDoctorById(doctorId);
     if (!doctor) {
         throw new Error('Doctor not found');
     }
@@ -188,10 +180,6 @@ const findAvailableSlots = async (doctorId, date) => {
  * // Valid statuses: 'pending', 'confirmed', 'cancelled', 'completed'
  */
 const updateAppointmentStatus = async (appointmentId, newStatus) => {
-    if (!newStatus) {
-        throw new Error('Status is required');
-    }
-
     // Validar que el estado sea uno de los permitidos
     const allowedStatuses = ['pending', 'confirmed', 'cancelled', 'completed'];
     if (!allowedStatuses.includes(newStatus)) {
@@ -226,10 +214,6 @@ const updateAppointmentStatus = async (appointmentId, newStatus) => {
  * const updatedAppointment = await updateAppointmentDateTime('507f1f77bcf86cd799439011', '2024-01-16T14:00:00.000Z');
  */
 const updateAppointmentDateTime = async (appointmentId, newDateTime) => {
-    if (!newDateTime) {
-        throw new Error('New date and time is required');
-    }
-
     // Validar que la nueva fecha sea futura
     if (newDateTime <= new Date()) {
         throw new Error('New appointment date must be in the future');
@@ -287,7 +271,7 @@ const cancelAllDoctorAppointmentsInWeek = async (doctorId, startDate, endDate, r
         throw new Error('Start date and end date are required');
     }
 
-    const doctor = await userRepository.findUserByIdAndRole(doctorId, 'doctor');
+    const doctor = await userRepository.findDoctorById(doctorId);
     if (!doctor) {
         throw new Error('Doctor not found');
     }
