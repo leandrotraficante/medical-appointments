@@ -52,6 +52,6 @@ authRoutes.post('/login', login);
  * GET /api/auth/logout
  * Headers: { "Authorization": "Bearer <jwt_token>" }
  */
-authRoutes.get('/logout', logout);
+authRoutes.post('/logout', logout);
 
 export default authRoutes;

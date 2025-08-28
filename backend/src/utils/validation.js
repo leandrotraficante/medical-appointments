@@ -15,11 +15,11 @@ export const isValidObjectId = (id) => {
 
 /**
  * Validates that all required environment variables are present
- * @throws {Error} - Exits process if required variables are missing
+ * @throws {Error} - If required variables are missing
  * @example
  * // This function should be called at app startup
  * validateEnv();
- * // Will exit with code 1 if any required env vars are missing
+ * // Will throw error if any required env vars are missing
  */
 export const validateEnv = () => {
     const missingVars = [];
@@ -29,8 +29,7 @@ export const validateEnv = () => {
     if (!process.env.MONGO_URI) missingVars.push('MONGO_URI');
 
     if (missingVars.length > 0) {
-        console.error('Missing required environment variables:', missingVars.join(', '));
-        console.error('Please set them in your environment or .env file before starting the server.');
-        process.exit(1);
+        const errorMessage = `Missing required environment variables: ${missingVars.join(', ')}. Please set them in your environment or .env file before starting the server.`;
+        throw new Error(errorMessage);
     }
 };

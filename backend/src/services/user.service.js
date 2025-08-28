@@ -2,96 +2,26 @@ import UserRepository from "../repositories/user.repository.js";
 
 const userRepository = new UserRepository();
 
-/**
- * Retrieves all doctors from the database
- * @returns {Promise<Array>} - Array of all doctor documents
- * @example
- * const doctors = await getAllDoctors();
- * console.log(`Found ${doctors.length} doctors`);
- * 
- * // Example response structure:
- * // [
- * //   {
- * //     _id: '507f1f77bcf86cd799439011',
- * //     name: 'Dr. John Smith',
- * //     email: 'john.smith@hospital.com',
- * //     specialties: ['Cardiology'],
- * //     isActive: true
- * //   }
- * // ]
- */
 const getAllDoctors = async () => {
     const doctors = await userRepository.getAllDoctors();
     return doctors;
 };
 
-/**
- * Retrieves all patients from the database
- * @returns {Promise<Array>} - Array of all patient documents
- * @example
- * const patients = await getAllPatients();
- * console.log(`Found ${patients.length} patients`);
- * 
- * // Example response structure:
- * // [
- * //   {
- * //     _id: '507f1f77bcf86cd799439012',
- * //     name: 'Jane Doe',
- * //     email: 'jane.doe@email.com',
- * //     personalId: '11223344',
- * //     isActive: true
- * //   }
- * // ]
- */
 const getAllPatients = async () => {
     const patients = await userRepository.getAllPatients();
     return patients;
 };
 
-/**
- * Retrieves all active doctors from the database
- * @returns {Promise<Array>} - Array of active doctor documents
- * @example
- * const activeDoctors = await findActiveDoctors();
- * console.log(`Found ${activeDoctors.length} active doctors`);
- * 
- * // Filter active doctors for display
- * const availableDoctors = activeDoctors.filter(doctor => 
- *   doctor.specialties.includes('Cardiology')
- * );
- */
 const findActiveDoctors = async () => {
     const activeDoctors = await userRepository.findActiveDoctors();
     return activeDoctors;
 };
 
-/**
- * Retrieves all active patients from the database
- * @returns {Promise<Array>} - Array of active patient documents
- * @example
- * const activePatients = await findActivePatients();
- * console.log(`Found ${activePatients.length} active patients`);
- * 
- * // Get patients with phone numbers for notifications
- * const patientsWithPhone = activePatients.filter(patient => patient.phone);
- */
 const findActivePatients = async () => {
     const activePatients = await userRepository.findActivePatients();
     return activePatients;
 };
 
-/**
- * Retrieves all inactive doctors from the database
- * @returns {Promise<Array>} - Array of inactive doctor documents
- * @example
- * const inactiveDoctors = await findInactiveDoctors();
- * console.log(`Found ${inactiveDoctors.length} inactive doctors`);
- * 
- * // Send reactivation emails to inactive doctors
- * inactiveDoctors.forEach(doctor => {
- *   sendReactivationEmail(doctor.email, doctor.name);
- * });
- */
 const findInactiveDoctors = async () => {
     const inactiveDoctors = await userRepository.findInactiveDoctors();
     return inactiveDoctors;

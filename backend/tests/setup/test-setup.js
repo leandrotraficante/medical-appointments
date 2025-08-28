@@ -49,3 +49,20 @@ beforeEach(() => {
 afterEach(() => {
   // Limpiar después de cada test individual
 });
+
+// Configuración global para Express apps de test
+global.createTestApp = (middleware = []) => {
+  const express = require('express');
+  const cookieParser = require('cookie-parser');
+  
+  const app = express();
+  app.use(express.json());
+  app.use(cookieParser());
+  
+  // Aplicar middleware adicional si se proporciona
+  if (Array.isArray(middleware)) {
+    middleware.forEach(m => app.use(m));
+  }
+  
+  return app;
+};

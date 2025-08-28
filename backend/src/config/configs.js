@@ -11,7 +11,7 @@ dotenv.config();
  * @property {string|undefined} jwtExpiresIn - JWT token expiration time
  */
 const configs = {
-    port: process.env.PORT,
+    PORT: process.env.PORT,
     mongoUrl: process.env.MONGO_URI,
     privateKeyJwt: process.env.PRIVATE_KEY_JWT,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN 
