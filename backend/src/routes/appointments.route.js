@@ -6,6 +6,7 @@ import {
     getAppointmentById,
     getAppointmentByDoctor,
     getAppointmentByPatient,
+    getMyAppointments,
     findAppointmentsByDateRange,
     findAppointmentsByStatus,
     getAvailableSlots,
@@ -48,8 +49,8 @@ appointmentsRoutes.post('/', requireRole(['admin', 'doctor', 'patient']), create
 
 /**
  * @route GET /api/appointments
- * @desc Get all appointments with optional filtering
- * @access Authenticated users (admin, doctor, patient)
+ * @desc Get all appointments with optional filtering (ADMIN ONLY)
+ * @access Admin only
  * @query {Object} filters - Optional filter criteria
  * @returns {Object} JSON response with filtered appointments
  * @example
@@ -57,7 +58,20 @@ appointmentsRoutes.post('/', requireRole(['admin', 'doctor', 'patient']), create
  * Headers: { "Authorization": "Bearer <jwt_token>" }
  * // Returns: { success: true, data: [appointment1, appointment2, ...] }
  */
-appointmentsRoutes.get('/', requireRole(['admin', 'doctor', 'patient']), getAllAppointments);
+appointmentsRoutes.get('/', requireRole(['admin']), getAllAppointments);
+
+/**
+ * @route GET /api/appointments/my-appointments
+ * @desc Get appointments for the currently logged-in user
+ * @access Authenticated users (admin, doctor, patient)
+ * @query {Object} filters - Optional filter criteria
+ * @returns {Object} JSON response with user's appointments
+ * @example
+ * GET /api/appointments/my-appointments?status=pending
+ * Headers: { "Authorization": "Bearer <jwt_token>" }
+ * // Returns: { success: true, data: [user's appointments] }
+ */
+appointmentsRoutes.get('/my-appointments', requireRole(['admin', 'doctor', 'patient']), getMyAppointments);
 
 /**
  * @route GET /api/appointments/date-range

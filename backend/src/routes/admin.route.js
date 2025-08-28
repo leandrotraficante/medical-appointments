@@ -2,7 +2,6 @@ import express from 'express';
 import { authenticateToken, requireRole } from '../middleware/auth.middleware.js';
 import {
     getAllAdmins,
-    getAdminProfile,
     activateDoctor,
     deactivateDoctor,
     updateDoctor,
@@ -26,18 +25,6 @@ adminRoutes.use(authenticateToken);
 adminRoutes.use(requireRole(['admin']));
 
 // ===== ADMIN MANAGEMENT ROUTES =====
-
-/**
- * @route GET /api/admin/profile
- * @desc Get current admin profile information
- * @access Admin only
- * @returns {Object} JSON response with admin profile data
- * @example
- * GET /api/admin/profile
- * Headers: { "Authorization": "Bearer <jwt_token>" }
- * // Returns: { success: true, data: {...}, message: "Admin profile retrieved successfully" }
- */
-adminRoutes.get('/profile', getAdminProfile);
 
 /**
  * @route GET /api/admin/admins

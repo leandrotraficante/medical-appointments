@@ -9,7 +9,8 @@ import {
     findInactivePatients,
     searchUsers,
     getDoctorById,
-    getPatientById
+    getPatientById,
+    getMyProfile
 } from '../controllers/users.controller.js';
 
 /**
@@ -127,6 +128,18 @@ usersRoutes.get('/doctors/:doctorId', requireRole(['admin', 'patient']), getDoct
  * Headers: { "Authorization": "Bearer <jwt_token>" }
  */
 usersRoutes.get('/patients/:patientId', requireRole(['admin']), getPatientById);
+
+/**
+ * @route GET /api/users/my-profile
+ * @desc Get current user's profile information
+ * @access Authenticated users (admin, doctor, patient)
+ * @returns {Object} JSON response with user profile data
+ * @example
+ * GET /api/users/my-profile
+ * Headers: { "Authorization": "Bearer <jwt_token>" }
+ * // Returns: { success: true, data: {...}, message: "Profile retrieved successfully" }
+ */
+usersRoutes.get('/my-profile', authenticateToken, getMyProfile);
 
 export default usersRoutes;
 

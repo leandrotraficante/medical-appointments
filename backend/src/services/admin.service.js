@@ -1,24 +1,6 @@
-import AdminRepository from '../repositories/admin.repository.js';
-
-const adminRepository = new AdminRepository();
+import adminRepository from '../repositories/admin.repository.js';
 
 // ===== ADMIN MANAGEMENT =====
-
-/**
- * Retrieves admin profile information
- * @param {string} adminId - Admin's MongoDB ID
- * @returns {Promise<Object>} - Admin profile object
- * @throws {Error} - If admin ID format is invalid or admin not found
- * @example
- * const adminProfile = await getAdminProfile('507f1f77bcf86cd799439011');
- */
-const getAdminProfile = async (adminId) => {
-    const adminProfile = await adminRepository.getAdminProfile(adminId);
-    if (!adminProfile) {
-        throw new Error('Admin not found');
-    }
-    return adminProfile;
-};
 
 /**
  * Retrieves all admins from the database
@@ -188,7 +170,6 @@ const deletePatient = async (patientId) => {
 
 export default {
     getAllAdmins,
-    getAdminProfile,
     activateDoctor,
     deactivateDoctor,
     updateDoctor,

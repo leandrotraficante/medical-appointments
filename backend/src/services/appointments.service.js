@@ -49,10 +49,17 @@ const createAppointmentService = async (appointmentData) => {
  * const pendingAppointments = await findAllAppointments({ status: 'pending' });
  * const doctorAppointments = await findAllAppointments({ doctor: '507f1f77bcf86cd799439012' });
  */
-const findAllAppointments = async (filters = {}) => {
-    const appointments = await appointmentsRepository.findAllAppointments(filters);
-    return appointments;
+const findAllAppointments = async (filters = {}, pagination = null) => {
+    if (pagination) {
+        // Con paginación
+        return await appointmentsRepository.findAllAppointmentsWithPagination(filters, pagination);
+    } else {
+        // Sin paginación (comportamiento original)
+        return await appointmentsRepository.findAllAppointments(filters);
+    }
 };
+
+
 
 /**
  * Finds an appointment by its unique ID

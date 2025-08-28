@@ -3,6 +3,8 @@ import doctorsModel from "../models/doctor.model.js";
 import patientsModel from "../models/patient.model.js";
 
 export default class AdminRepository {
+    // ===== ADMIN MANAGEMENT =====
+
     /**
      * Retrieves all admins from the database
      * @returns {Promise<Array>} - Array of all admin documents
@@ -11,19 +13,7 @@ export default class AdminRepository {
      * console.log(`Found ${admins.length} admins`);
      */
     getAllAdmins = async () => {
-        return await adminModel.find().select('name lastname email');
-    }
-
-    /**
-     * Retrieves admin profile information
-     * @param {string} adminId - Admin's MongoDB ID
-     * @returns {Promise<Object|null>} - Admin profile object
-     * @throws {Error} - If admin not found
-     * @example
-     * const adminProfile = await adminRepository.getAdminProfile('507f1f77bcf86cd799439011');
-     */
-    getAdminProfile = async (adminId) => {
-        return await adminModel.findById(adminId).select('-password');
+        return await adminModel.find().select('-password');
     }
 
     // ===== DOCTOR MANAGEMENT =====

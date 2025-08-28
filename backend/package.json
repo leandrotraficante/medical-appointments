@@ -6,10 +6,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
-    "test:unit": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --testPathPatterns=tests/unit",
-    "test:unit:fast": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --testPathPatterns=tests/unit --maxWorkers=1 --forceExit",
-    "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },
   "keywords": [],
   "author": "",

@@ -299,6 +299,38 @@ const searchPatientsByName = async (searchTerm) => {
     return patients;
 };
 
+const getMyProfile = async (userId, userRole) => {
+    if (!userId) {
+        throw new Error('User ID is required');
+    }
+    
+    if (!userRole) {
+        throw new Error('User role is required');
+    }
+    
+    let userProfile;
+    
+    switch (userRole) {
+        case 'admin':
+            userProfile = await userRepository.findAdminById(userId);
+            break;
+        case 'doctor':
+            userProfile = await userRepository.findDoctorById(userId);
+            break;
+        case 'patient':
+            userProfile = await userRepository.findPatientById(userId);
+            break;
+        default:
+            throw new Error('Invalid user role');
+    }
+    
+    if (!userProfile) {
+        throw new Error('User profile not found');
+    }
+    
+    return userProfile;
+};
+
 export default {
     getAllDoctors,
     getAllPatients,
@@ -313,5 +345,6 @@ export default {
     findPatientByPersonalId,
     findPatientByEmail,
     searchDoctorsByName,
-    searchPatientsByName
+    searchPatientsByName,
+    getMyProfile
 };

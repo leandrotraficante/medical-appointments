@@ -61,13 +61,68 @@ const createAppointment = async (req, res) => {
 const getAllAppointments = async (req, res) => {
     try {
         const filters = req.query;
-        const appointments = await appointmentsService.findAllAppointments(filters)
-        res.status(200).json({ success: true, data: appointments });
+        
+        // Extraer parámetros de paginación
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        // Remover parámetros de paginación de los filtros
+        const { page: _, limit: __, ...cleanFilters } = filters;
+        
+        const result = await appointmentsService.findAllAppointments(cleanFilters, { page, limit, skip });
+        res.status(200).json({ 
+            success: true, 
+            data: result.appointments,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(result.total / limit),
+                totalItems: result.total,
+                itemsPerPage: limit,
+                hasNextPage: page < Math.ceil(result.total / limit),
+                hasPrevPage: page > 1
+            }
+        });
     } catch (error) {
         if (error?.message === 'Invalid filter format') {
             res.status(400).json({ error: 'Invalid filter format. Please check your search parameters' });
         } else {
             res.status(500).json({ error: 'Unable to fetch appointments. Please try again later' });
+        }
+    }
+};
+
+/**
+ * Retrieves appointments for the currently logged-in user
+ * @param {Object} req - Express request object
+ * @param {Object} req.query - Query parameters for filtering
+ * @param {Object} req.user - User object from authentication middleware
+ * @param {Object} res - Express response object
+ * @returns {Object} - JSON response with user's appointments
+ * @example
+ * GET /api/appointments/my-appointments?status=pending
+ * // Returns: { success: true, data: [user's appointments] }
+ */
+const getMyAppointments = async (req, res) => {
+    try {
+        const filters = req.query;
+        const { id: userId, role: userRole } = req.user;
+        
+        // Filtrar según el rol del usuario
+        if (userRole === 'patient') {
+            filters.patient = userId;
+        } else if (userRole === 'doctor') {
+            filters.doctor = userId;
+        }
+        // Admin ve todas las citas (no se filtra)
+        
+        const appointments = await appointmentsService.findAllAppointments(filters);
+        res.status(200).json({ success: true, data: appointments });
+    } catch (error) {
+        if (error?.message === 'Invalid filter format') {
+            res.status(400).json({ error: 'Invalid filter format. Please check your search parameters' });
+        } else {
+            res.status(500).json({ error: 'Unable to fetch your appointments. Please try again later' });
         }
     }
 };
@@ -464,6 +519,7 @@ const cancelAllDoctorAppointmentsInWeek = async (req, res) => {
 export {
     createAppointment,
     getAllAppointments,
+    getMyAppointments,
     getAppointmentById,
     getAppointmentByDoctor,
     getAppointmentByPatient,

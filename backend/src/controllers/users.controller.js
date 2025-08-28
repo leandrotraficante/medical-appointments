@@ -447,6 +447,63 @@ const getPatientById = async (req, res) => {
     }
 }
 
+const getMyProfile = async (req, res) => {
+    try {
+        if (!req.user || !req.user.userId) {
+            return res.status(401).json({ error: 'User not authenticated' });
+        }
+
+        const userId = req.user.userId;
+        const userRole = req.user.role;
+
+        // Usar el service en lugar de llamar directamente al repository
+        const userProfile = await userService.getMyProfile(userId, userRole);
+
+        // Calcular edad si hay fecha de nacimiento
+        let age = null;
+        if (userProfile.dateOfBirth) {
+            const birthDate = new Date(userProfile.dateOfBirth);
+            const today = new Date();
+            age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+        }
+
+        // Retornar solo datos no sensibles
+        const profileData = {
+            name: userProfile.name,
+            lastname: userProfile.lastname || null,
+            age: age,
+            phone: userProfile.phone || null,
+            email: userProfile.email,
+            role: userProfile.role
+        };
+
+        // Agregar datos específicos según el rol
+        if (userRole === 'doctor') {
+            profileData.specialties = userProfile.specialties || [];
+            profileData.license = userProfile.license || null;
+        }
+
+        res.status(200).json({
+            success: true,
+            data: profileData,
+            message: 'Profile retrieved successfully'
+        });
+
+    } catch (error) {
+        console.error('Error getting profile:', error);
+        
+        if (error.message === 'User profile not found') {
+            return res.status(404).json({ error: 'User profile not found' });
+        }
+        
+        res.status(500).json({ error: 'Unable to retrieve profile. Please try again later' });
+    }
+};
+
 export {
     getAllDoctors,
     getAllPatients,
@@ -463,5 +520,6 @@ export {
     searchDoctorsByName,
     searchPatientsByName,
     getDoctorById,
-    getPatientById
+    getPatientById,
+    getMyProfile
 };

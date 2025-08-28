@@ -3,41 +3,13 @@ import adminService from '../services/admin.service.js';
 // ===== ADMIN MANAGEMENT =====
 
 /**
- * Retrieves current admin profile information
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @returns {Object} - JSON response with admin profile data
- * @example
- * GET /api/admin/profile
- * // Returns: { success: true, data: {...}, message: "Admin profile retrieved successfully" }
- */
-const getAdminProfile = async (req, res) => {
-    try {
-        const adminId = req.user.id; // From JWT token
-        const adminProfile = await adminService.getAdminProfile(adminId);
-        
-        res.status(200).json({
-            success: true,
-            data: adminProfile,
-            message: 'Admin profile retrieved successfully'
-        });
-    } catch (error) {
-        if (error.message === 'Admin not found') {
-            res.status(404).json({ error: 'Admin not found' });
-        } else {
-            res.status(500).json({ error: 'Unable to retrieve admin profile. Please try again later' });
-        }
-    }
-};
-
-/**
  * Retrieves all admins from the database
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @returns {Object} - JSON response with all admins
  * @example
  * GET /api/admin/admins
- * // Returns: { success: true, data: [...], message: "Found X admins" }
+ * // Returns: { success: true, data: [...], message: "Found X admin(s)" }
  */
 const getAllAdmins = async (req, res) => {
     try {
@@ -326,7 +298,6 @@ const deletePatient = async (req, res) => {
 export {
     // Admin Management
     getAllAdmins,
-    getAdminProfile,
     
     // Doctor Management
     activateDoctor,

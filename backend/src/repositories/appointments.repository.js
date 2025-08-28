@@ -50,6 +50,35 @@ export default class AppointmentsRepository {
     }
 
     /**
+     * Retrieves all appointments with pagination support
+     * @param {Object} [filters={}] - Filter criteria for appointments
+     * @param {Object} pagination - Pagination parameters
+     * @param {number} pagination.page - Current page number
+     * @param {number} pagination.limit - Number of items per page
+     * @param {number} pagination.skip - Number of items to skip
+     * @returns {Promise<Object>} - Object containing appointments and total count
+     * @example
+     * const result = await findAllAppointmentsWithPagination({ status: 'pending' }, { page: 1, limit: 10, skip: 0 });
+     * // Returns: { appointments: [...], total: 25 }
+     */
+    findAllAppointmentsWithPagination = async (filters = {}, pagination = {}) => {
+        const { page = 1, limit = 10, skip = 0 } = pagination;
+        
+        // Obtener el total de documentos que coinciden con los filtros
+        const total = await appointmentsModel.countDocuments(filters);
+        
+        // Obtener los documentos paginados
+        const appointments = await appointmentsModel.find(filters)
+            .populate('patient', 'name lastname personalId')
+            .populate('doctor', 'name lastname license specialties')
+            .sort({ date: 1 })
+            .skip(skip)
+            .limit(limit);
+            
+        return { appointments, total };
+    }
+
+    /**
      * Finds an appointment by its unique ID with populated references
      * @param {string} appointmentId - Appointment's MongoDB ID
      * @returns {Promise<Object|null>} - Appointment object with populated patient and doctor data, or null if not found
