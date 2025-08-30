@@ -480,7 +480,7 @@ npm start
 {
   "start": "node src/app.js",
   "dev": "nodemon src/app.js",
-  "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage=false"
 }
 ```
 
@@ -538,7 +538,8 @@ Content-Type: application/json
   "role": "doctor",
   "license": "MD12345",
   "specialties": ["Cardiology", "Internal Medicine"],
-  "phone": "+54 9 11 9876-5432"
+  "phone": "+54 9 11 9876-5432",
+  "dateOfBirth": "1980-05-15"
 }
 ```
 
@@ -558,6 +559,17 @@ Content-Type: application/json
 GET /api/profile
 Authorization: Bearer <JWT_TOKEN>
 ```
+
+### Campos del Registro
+- **name** (required): Nombre del usuario
+- **email** (required): Email único del usuario
+- **password** (required): Contraseña (mínimo 8 caracteres)
+- **personalId** (required): DNI único del usuario
+- **role** (required): Rol del usuario ('admin', 'doctor', 'patient')
+- **dateOfBirth** (optional): Fecha de nacimiento (formato: YYYY-MM-DD)
+- **phone** (optional): Número de teléfono
+- **license** (required solo para doctors): Número de licencia médica
+- **specialties** (required solo para doctors): Array de especialidades médicas
 
 ### Roles y Permisos
 - **Admin**: Acceso completo al sistema
@@ -579,7 +591,8 @@ POST /api/auth/register
   "password": "admin123",
   "personalId": "12345678",
   "role": "admin",
-  "phone": "+54 9 11 1234-5678"
+  "phone": "+54 9 11 1234-5678",
+  "dateOfBirth": "1985-01-15"
 }
 ```
 
@@ -594,7 +607,8 @@ POST /api/auth/register
   "role": "doctor",
   "license": "MD87654",
   "specialties": ["Pediatrics"],
-  "phone": "+54 9 11 8765-4321"
+  "phone": "+54 9 11 8765-4321",
+  "dateOfBirth": "1982-08-20"
 }
 ```
 
@@ -607,7 +621,8 @@ POST /api/auth/register
   "password": "patient123",
   "personalId": "11223344",
   "role": "patient",
-  "phone": "+54 9 11 1122-3344"
+  "phone": "+54 9 11 1122-3344",
+  "dateOfBirth": "1990-12-03"
 }
 ```
 
@@ -725,13 +740,3 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ---
 
-## 📞 Soporte
-
-Para soporte técnico o preguntas:
-- **Email**: soporte@medicalappointments.com
-- **Issues**: [GitHub Issues](https://github.com/username/medical-appointments/issues)
-- **Documentación**: [Wiki del Proyecto](https://github.com/username/medical-appointments/wiki)
-
----
-
-**¡Gracias por usar Medical Appointments System!** 🏥✨
