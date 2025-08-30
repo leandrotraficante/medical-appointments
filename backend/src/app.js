@@ -55,11 +55,11 @@ app.use('/api/admin', adminRoutes);
 
 mongoose.connect(configs.mongoUrl, {})
     .then(() => {
-        console.log('Connected to MongoDB');
+        // MongoDB connected successfully
         app.listen(PORT, () => {
-            console.log(`Server running on http://localhost:${PORT}`);
+            // Server started successfully
         });
     })
     .catch(err => {
-        console.error('Error connecting to MongoDB:', err);
+        // MongoDB connection failed
     });
