@@ -2,29 +2,29 @@ import UserRepository from "../repositories/user.repository.js";
 
 const userRepository = new UserRepository();
 
-const getAllDoctors = async () => {
-    const doctors = await userRepository.getAllDoctors();
-    return doctors;
+const getAllDoctors = async (page = null, limit = null) => {
+    const result = await userRepository.getAllDoctors(page, limit);
+    return result;
 };
 
-const getAllPatients = async () => {
-    const patients = await userRepository.getAllPatients();
-    return patients;
+const getAllPatients = async (page = null, limit = null) => {
+    const result = await userRepository.getAllPatients(page, limit);
+    return result;
 };
 
-const findActiveDoctors = async () => {
-    const activeDoctors = await userRepository.findActiveDoctors();
-    return activeDoctors;
+const findActiveDoctors = async (page = 1, limit = 5) => {
+    const result = await userRepository.findActiveDoctors(page, limit);
+    return result;
 };
 
-const findActivePatients = async () => {
-    const activePatients = await userRepository.findActivePatients();
-    return activePatients;
+const findActivePatients = async (page = 1, limit = 5) => {
+    const result = await userRepository.findActivePatients(page, limit);
+    return result;
 };
 
-const findInactiveDoctors = async () => {
-    const inactiveDoctors = await userRepository.findInactiveDoctors();
-    return inactiveDoctors;
+const findInactiveDoctors = async (page = 1, limit = 5) => {
+    const result = await userRepository.findInactiveDoctors(page, limit);
+    return result;
 };
 
 /**
@@ -39,9 +39,9 @@ const findInactiveDoctors = async () => {
  *   new Date(patient.updatedAt) < new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
  * );
  */
-const findInactivePatients = async () => {
-    const inactivePatients = await userRepository.findInactivePatients();
-    return inactivePatients;
+const findInactivePatients = async (page = 1, limit = 5) => {
+    const result = await userRepository.findInactivePatients(page, limit);
+    return result;
 };
 
 /**
@@ -76,227 +76,32 @@ const searchUsers = async (query) => {
 };
 
 /**
- * Finds a doctor by their medical license number
- * @param {string} license - Doctor's medical license number
- * @returns {Promise<Object>} - Doctor object if found
- * @throws {Error} - If license is missing or doctor not found
- * 
+ * Finds a doctor by their MongoDB ID
+ * @param {string} doctorId - Doctor's MongoDB ID
+ * @returns {Promise<Object|null>} - Doctor object if found, null otherwise
+ * @throws {Error} - If doctor ID is missing or invalid
  * @example
- * const doctor = await findDoctorByLicense('MD12345');
+ * const doctor = await findDoctorById('507f1f77bcf86cd799439011');
  * if (doctor) {
  *   console.log('Found doctor:', doctor.name, 'Specialties:', doctor.specialties);
- *   
- *   // Check if doctor is available for appointments
- *   if (doctor.isActive) {
- *     console.log('Doctor is available for new patients');
- *   }
- * }
- * 
- * // Handle not found case
- * try {
- *   const doctor = await findDoctorByLicense('INVALID123');
- * } catch (error) {
- *   console.log('Doctor not found:', error.message);
  * }
  */
-const findDoctorByLicense = async (license) => {
-    if (!license) {
-        throw new Error('License is required');
+const findDoctorById = async (doctorId) => {
+    if (!doctorId) {
+        throw new Error('Doctor ID is required');
     }
     
-    const doctor = await userRepository.findDoctorByLicense(license);
-    if (!doctor) {
-        throw new Error('Doctor not found');
-    }
-    
+    const doctor = await userRepository.findDoctorById(doctorId);
     return doctor;
 };
 
-/**
- * Finds a doctor by their personal ID/DNI
- * @param {string} personalId - Doctor's personal ID/DNI
- * @returns {Promise<Object>} - Doctor object if found
- * @throws {Error} - If personal ID is missing or doctor not found
- * 
- * @example
- * const doctor = await findDoctorByPersonalId('87654321');
- * if (doctor) {
- *   console.log('Found doctor:', doctor.name, 'Email:', doctor.email);
- *   
- *   // Validate doctor's active status
- *   if (!doctor.isActive) {
- *     console.log('Warning: Doctor account is inactive');
- *   }
- * }
- */
-const findDoctorByPersonalId = async (personalId) => {
-    if (!personalId) {
-        throw new Error('Personal ID is required');
+const findPatientById = async (patientId) => {
+    if (!patientId) {
+        throw new Error('Patient ID is required');
     }
     
-    const doctor = await userRepository.findDoctorByPersonalId(personalId);
-    if (!doctor) {
-        throw new Error('Doctor not found');
-    }
-    
-    return doctor;
-};
-
-/**
- * Finds a doctor by their email address
- * @param {string} email - Doctor's email address
- * @returns {Promise<Object>} - Doctor object if found
- * @throws {Error} - If email is missing or doctor not found
- * 
- * @example
- * const doctor = await findDoctorByEmail('john.doe@hospital.com');
- * if (doctor) {
- *   console.log('Found doctor:', doctor.name, 'License:', doctor.license);
- *   
- *   // Send notification to doctor
- *   sendAppointmentNotification(doctor.email, 'New appointment request');
- * }
- */
-const findDoctorByEmail = async (email) => {
-    if (!email) {
-        throw new Error('Email is required');
-    }
-    
-    const doctor = await userRepository.findDoctorByEmail(email);
-    if (!doctor) {
-        throw new Error('Doctor not found');
-    }
-    
-    return doctor;
-};
-
-/**
- * Finds a patient by their personal ID/DNI
- * @param {string} personalId - Patient's personal ID/DNI
- * @returns {Promise<Object>} - Patient object if found
- * @throws {Error} - If personal ID is missing or patient not found
- * 
- * @example
- * const patient = await findPatientByPersonalId('11223344');
- * if (patient) {
- *   console.log('Found patient:', patient.name, 'Email:', patient.email);
- *   
- *   // Check patient's active status
- *   if (patient.isActive) {
- *     console.log('Patient can book new appointments');
- *   }
- * }
- */
-const findPatientByPersonalId = async (personalId) => {
-    if (!personalId) {
-        throw new Error('Personal ID is required');
-    }
-    
-    const patient = await userRepository.findPatientByPersonalId(personalId);
-    if (!patient) {
-        throw new Error('Patient not found');
-    }
-    
+    const patient = await userRepository.findPatientById(patientId);
     return patient;
-};
-
-/**
- * Finds a patient by their email address
- * @param {string} email - Patient's email address
- * @returns {Promise<Object>} - Patient object if found
- * @throws {Error} - If email is missing or patient not found
- * 
- * @example
- * const patient = await findPatientByEmail('jane.smith@email.com');
- * if (patient) {
- *   console.log('Found patient:', patient.name, 'Phone:', patient.phone);
- *   
- *   // Send appointment reminder
- *   if (patient.phone) {
- *     sendSMSReminder(patient.phone, 'Appointment tomorrow at 10:00 AM');
- *   }
- * }
- */
-const findPatientByEmail = async (email) => {
-    if (!email) {
-        throw new Error('Email is required');
-    }
-    
-    const patient = await userRepository.findPatientByEmail(email);
-    if (!patient) {
-        throw new Error('Patient not found');
-    }
-    
-    return patient;
-};
-
-/**
- * Searches for doctors by name using partial matching
- * Performs case-insensitive search on both first name and last name fields
- * 
- * @param {string} searchTerm - Search term for doctor's name
- * @returns {Promise<Array>} - Array of matching doctor objects
- * @throws {Error} - If search term is missing or empty
- * 
- * @example
- * // Search by first name
- * const doctors = await searchDoctorsByName('John');
- * console.log(`Found ${doctors.length} doctors with name containing 'John'`);
- * 
- * // Search by last name
- * const smithDoctors = await searchDoctorsByName('Smith');
- * 
- * // Process results
- * doctors.forEach(doctor => {
- *   console.log(`${doctor.name} ${doctor.lastname} - ${doctor.specialties.join(', ')}`);
- * });
- * 
- * // Handle empty search
- * try {
- *   const results = await searchDoctorsByName('');
- * } catch (error) {
- *   console.log('Search error:', error.message);
- * }
- */
-const searchDoctorsByName = async (searchTerm) => {
-    if (!searchTerm || searchTerm.trim() === '') {
-        throw new Error('Search term is required');
-    }
-    
-    const doctors = await userRepository.searchDoctorsByName(searchTerm);
-    return doctors;
-};
-
-/**
- * Searches for patients by name using partial matching
- * Performs case-insensitive search on both first name and last name fields
- * 
- * @param {string} searchTerm - Search term for patient's name
- * @returns {Promise<Array>} - Array of matching patient objects
- * @throws {Error} - If search term is missing or empty
- * 
- * @example
- * // Search by first name
- * const patients = await searchPatientsByName('Jane');
- * console.log(`Found ${patients.length} patients with name containing 'Jane'`);
- * 
- * // Search by last name
- * const doePatients = await searchPatientsByName('Doe');
- * 
- * // Process results for notifications
- * patients.forEach(patient => {
- *   if (patient.isActive && patient.email) {
- *     sendNewsletter(patient.email, patient.name);
- *   }
- * });
- */
-const searchPatientsByName = async (searchTerm) => {
-    if (!searchTerm || searchTerm.trim() === '') {
-        throw new Error('Search term is required');
-    }
-    
-    const patients = await userRepository.searchPatientsByName(searchTerm);
-    return patients;
 };
 
 const getMyProfile = async (userId, userRole) => {
@@ -339,12 +144,7 @@ export default {
     findInactiveDoctors,
     findInactivePatients,
     searchUsers,
-    findDoctorByLicense,
-    findDoctorByPersonalId,
-    findDoctorByEmail,
-    findPatientByPersonalId,
-    findPatientByEmail,
-    searchDoctorsByName,
-    searchPatientsByName,
+    findDoctorById,
+    findPatientById,
     getMyProfile
 };

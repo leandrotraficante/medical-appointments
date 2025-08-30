@@ -41,41 +41,28 @@ export default class AppointmentsRepository {
      * const pendingAppointments = await findAllAppointments({ status: 'pending' });
      * const doctorAppointments = await findAllAppointments({ doctor: '507f1f77bcf86cd799439012' });
      */
-    findAllAppointments = async (filters = {}) => {
-        const allApp = await appointmentsModel.find(filters)
-            .populate('patient', 'name lastname personalId')
-            .populate('doctor', 'name lastname license specialties')
-            .sort({ date: 1 });
-        return allApp;
-    }
-
-    /**
-     * Retrieves all appointments with pagination support
-     * @param {Object} [filters={}] - Filter criteria for appointments
-     * @param {Object} pagination - Pagination parameters
-     * @param {number} pagination.page - Current page number
-     * @param {number} pagination.limit - Number of items per page
-     * @param {number} pagination.skip - Number of items to skip
-     * @returns {Promise<Object>} - Object containing appointments and total count
-     * @example
-     * const result = await findAllAppointmentsWithPagination({ status: 'pending' }, { page: 1, limit: 10, skip: 0 });
-     * // Returns: { appointments: [...], total: 25 }
-     */
-    findAllAppointmentsWithPagination = async (filters = {}, pagination = {}) => {
-        const { page = 1, limit = 10, skip = 0 } = pagination;
-        
-        // Obtener el total de documentos que coinciden con los filtros
-        const total = await appointmentsModel.countDocuments(filters);
-        
-        // Obtener los documentos paginados
-        const appointments = await appointmentsModel.find(filters)
-            .populate('patient', 'name lastname personalId')
-            .populate('doctor', 'name lastname license specialties')
-            .sort({ date: 1 })
-            .skip(skip)
-            .limit(limit);
-            
-        return { appointments, total };
+    findAllAppointments = async (filters = {}, page = null, limit = null) => {
+        if (page && limit) {
+            // Con paginación
+            const skip = (page - 1) * limit;
+            const [appointments, total] = await Promise.all([
+                appointmentsModel.find(filters)
+                    .populate('patient', 'name lastname personalId isActive')
+                    .populate('doctor', 'name lastname license specialties email isActive')
+                    .sort({ date: 1 })
+                    .skip(skip)
+                    .limit(limit),
+                appointmentsModel.countDocuments(filters)
+            ]);
+            return { appointments, total, pagination: true };
+        } else {
+            // Sin paginación (comportamiento original)
+            const allApp = await appointmentsModel.find(filters)
+                .populate('patient', 'name lastname personalId isActive')
+                .populate('doctor', 'name lastname license specialties email isActive')
+                .sort({ date: 1 });
+            return allApp;
+        }
     }
 
     /**
@@ -91,8 +78,8 @@ export default class AppointmentsRepository {
      */
     findAppointmentById = async (appointmentId) => {
         const appById = await appointmentsModel.findById(appointmentId)
-            .populate('patient', 'name lastname personalId')
-            .populate('doctor', 'name lastname license specialties');
+            .populate('patient', 'name lastname personalId isActive')
+            .populate('doctor', 'name lastname license specialties email isActive');
         return appById;
     }
 
@@ -108,7 +95,8 @@ export default class AppointmentsRepository {
     findAppointmentsByDoctor = async (doctorId, filters = {}) => {
         const query = { doctor: doctorId, ...filters };
         const appointments = await appointmentsModel.find(query)
-            .populate('patient', 'name lastname personalId')
+            .populate('patient', 'name lastname personalId isActive')
+            .populate('doctor', 'name lastname license specialties email isActive')
             .sort({ date: 1 });
         return appointments;
     }
@@ -125,7 +113,7 @@ export default class AppointmentsRepository {
     findAppointmentsByPatient = async (patientId, filters = {}) => {
         const query = { patient: patientId, ...filters };
         const appointments = await appointmentsModel.find(query)
-            .populate('doctor', 'name lastname license specialties')
+            .populate('doctor', 'name lastname license specialties email isActive')
             .sort({ date: 1 });
         return appointments;
     }
@@ -157,8 +145,8 @@ export default class AppointmentsRepository {
         };
         
         const appointments = await appointmentsModel.find(query)
-            .populate('patient', 'name lastname personalId')
-            .populate('doctor', 'name lastname license specialties')
+            .populate('patient', 'name lastname personalId isActive')
+            .populate('doctor', 'name lastname license specialties email isActive')
             .sort({ date: 1 });
             
         return appointments;
@@ -176,8 +164,8 @@ export default class AppointmentsRepository {
     findAppointmentsByStatus = async (status, filters = {}) => {
         const query = { status, ...filters };
         const appointments = await appointmentsModel.find(query)
-            .populate('patient', 'name lastname personalId')
-            .populate('doctor', 'name lastname license specialties')
+            .populate('patient', 'name lastname personalId isActive')
+            .populate('doctor', 'name lastname license specialties email isActive')
             .sort({ date: 1 });
         return appointments;
     }
@@ -194,34 +182,49 @@ export default class AppointmentsRepository {
      */
     findAvailableSlots = async (doctorId, date) => {
         // Obtener la fecha de inicio y fin del día
-        const startOfDay = new Date(date);
+        // Asegurar que la fecha se interprete en la zona horaria local
+        const dateObj = new Date(date + 'T00:00:00');
+        const startOfDay = new Date(dateObj);
         startOfDay.setHours(0, 0, 0, 0);
 
-        const endOfDay = new Date(date);
+        const endOfDay = new Date(dateObj);
         endOfDay.setHours(23, 59, 59, 999);
 
+        // Verificar que no sea fin de semana (0 = Domingo, 6 = Sábado)
+        const dayOfWeek = startOfDay.getDay();
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            return []; // No hay slots disponibles en fines de semana
+        }
+
         // Buscar turnos existentes del doctor en esa fecha
+        // Excluir citas canceladas, pero incluir pending y confirmed como ocupadas
         const existingAppointments = await appointmentsModel.find({
             doctor: doctorId,
-            date: { $gte: startOfDay, $lt: endOfDay },
-            status: { $nin: ['cancelled'] }
-        }).sort({ date: 1 });
+            date: {
+                $gte: startOfDay,
+                $lt: endOfDay
+            },
+            status: { $in: ['pending', 'confirmed'] }
+        });
 
-        // Generar slots disponibles (cada 30 minutos de 9:00 a 17:00)
         const availableSlots = [];
-        const startHour = 9; // 9:00 AM
-        const endHour = 17;  // 5:00 PM
-
-        for (let hour = startHour; hour < endHour; hour++) {
-            for (let minute = 0; minute < 60; minute += 30) {
+        for (let hour = 9; hour <= 17; hour++) {
+            for (let minute of [0, 30]) {
+                if (hour === 17 && minute === 30) break;
+                
                 const slotTime = new Date(date);
                 slotTime.setHours(hour, minute, 0, 0);
-
-                // Verificar si el slot está disponible
+                
                 const isOccupied = existingAppointments.some(app => {
                     const appTime = new Date(app.date);
-                    const timeDiff = Math.abs(appTime.getTime() - slotTime.getTime());
-                    return timeDiff < 30 * 60 * 1000; // 30 minutos
+                    const slotHour = slotTime.getHours();
+                    const slotMinute = slotTime.getMinutes();
+                    const appHour = appTime.getHours();
+                    const appMinute = appTime.getMinutes();
+                    
+                    const isOccupiedResult = slotHour === appHour && slotMinute === appMinute;
+                    
+                    return isOccupiedResult;
                 });
 
                 if (!isOccupied) {
@@ -253,8 +256,8 @@ export default class AppointmentsRepository {
             appointmentId,
             { status: newStatus },
             { new: true }
-        ).populate('patient', 'name lastname personalId')
-            .populate('doctor', 'name lastname license specialties');
+        ).populate('patient', 'name lastname personalId isActive')
+            .populate('doctor', 'name lastname license specialties email isActive');
         return updatedApp;
     }
 
@@ -287,8 +290,8 @@ export default class AppointmentsRepository {
             appointmentId,
             { date: newDateTime },
             { new: true }
-        ).populate('patient', 'name lastname personalId')
-            .populate('doctor', 'name lastname license specialties');
+        ).populate('patient', 'name lastname personalId isActive')
+            .populate('doctor', 'name lastname license specialties email isActive');
         return updatedApp;
     }
 

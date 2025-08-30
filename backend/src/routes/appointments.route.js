@@ -100,6 +100,8 @@ appointmentsRoutes.get('/date-range', requireRole(['admin', 'doctor']), findAppo
  */
 appointmentsRoutes.get('/status', requireRole(['admin', 'doctor']), findAppointmentsByStatus);
 
+
+
 /**
  * @route GET /api/appointments/available-slots/:doctorId
  * @desc Get available time slots for a doctor on a specific date

@@ -145,6 +145,29 @@ const adminSchema = new mongoose.Schema({
         }
     },
     /**
+     * Admin's date of birth
+     * @type {Date}
+     * @description Admin's birth date for age calculation and records
+     * @example '1980-05-20'
+     */
+    dateOfBirth: {
+        type: Date,
+        required: false,
+        validate: {
+            validator: function(date) {
+                if (!date) return true; // Campo opcional
+                const today = new Date();
+                const age = today.getFullYear() - date.getFullYear();
+                const monthDiff = today.getMonth() - date.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
+                    age--;
+                }
+                return age >= 18 && age <= 100; // Admins entre 18 y 100 años
+            },
+            message: 'Admin must be between 18 and 100 years old'
+        }
+    },
+    /**
      * Admin's role in the system (always 'admin')
      * @type {String}
      * @default 'admin'

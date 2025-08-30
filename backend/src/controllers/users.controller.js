@@ -1,6 +1,5 @@
 import userService from "../services/user.service.js";
 import { isValidObjectId } from "../utils/validation.js";
-import configs, { ROLE_CONFIG } from '../config/configs.js';
 
 /**
  * Retrieves all doctors from the system
@@ -13,13 +12,33 @@ import configs, { ROLE_CONFIG } from '../config/configs.js';
  */
 const getAllDoctors = async (req, res) => {
     try {
-        const doctors = await userService.getAllDoctors()
-        res.status(200).json({ success: true, data: doctors });
+        // Obtener parámetros de paginación
+        const page = parseInt(req.query.page) || null;
+        const limit = parseInt(req.query.limit) || null;
+        
+        const result = await userService.getAllDoctors(page, limit);
+        
+        if (result.pagination) {
+            // Respuesta con paginación
+            res.status(200).json({ 
+                success: true, 
+                data: result.doctors,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(result.total / limit),
+                    total: result.total,
+                    limit: limit
+                }
+            });
+        } else {
+            // Respuesta sin paginación (compatibilidad)
+            res.status(200).json({ success: true, data: result });
+        }
     } catch (error) {
         if (error?.message === 'No doctors found') {
             res.status(404).json({ error: 'No doctors found' });
         } else {
-        res.status(500).json({ error: 'Unable to get doctors. Please try again later' });
+            res.status(500).json({ error: 'Unable to get doctors. Please try again later' });
         }
     }
 }
@@ -35,13 +54,33 @@ const getAllDoctors = async (req, res) => {
  */
 const getAllPatients = async (req, res) => {
     try {
-        const patients = await userService.getAllPatients()
-        res.status(200).json({ success: true, data: patients });
+        // Obtener parámetros de paginación
+        const page = parseInt(req.query.page) || null;
+        const limit = parseInt(req.query.limit) || null;
+        
+        const result = await userService.getAllPatients(page, limit);
+        
+        if (result.pagination) {
+            // Respuesta con paginación
+            res.status(200).json({ 
+                success: true, 
+                data: result.patients,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(result.total / limit),
+                    total: result.total,
+                    limit: limit
+                }
+            });
+        } else {
+            // Respuesta sin paginación (compatibilidad)
+            res.status(200).json({ success: true, data: result });
+        }
     } catch (error) {
         if (error?.message === 'No patients found') {
             res.status(404).json({ error: 'No patients found' });
         } else {
-        res.status(500).json({ error: 'Unable to get patients. Please try again later' });
+            res.status(500).json({ error: 'Unable to get patients. Please try again later' });
         }
     }
 }
@@ -57,8 +96,28 @@ const getAllPatients = async (req, res) => {
  */
 const findActiveDoctors = async (req, res) => {
     try {
-        const activeDoctors = await userService.findActiveDoctors();
-        res.status(200).json({ success: true, data: activeDoctors });
+        // Obtener parámetros de paginación
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        
+        const result = await userService.findActiveDoctors(page, limit);
+        
+        if (result.pagination) {
+            // Respuesta con paginación
+            res.status(200).json({ 
+                success: true, 
+                data: result.doctors,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(result.total / limit),
+                    total: result.total,
+                    limit: limit
+                }
+            });
+        } else {
+            // Respuesta sin paginación (compatibilidad)
+            res.status(200).json({ success: true, data: result });
+        }
     } catch (error) {
         if (error?.message === 'No active doctors found') {
             res.status(404).json({ error: 'No active doctors found' });
@@ -79,8 +138,28 @@ const findActiveDoctors = async (req, res) => {
  */
 const findActivePatients = async (req, res) => {
     try {
-        const activePatients = await userService.findActivePatients();
-        res.status(200).json({ success: true, data: activePatients });
+        // Obtener parámetros de paginación
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        
+        const result = await userService.findActivePatients(page, limit);
+        
+        if (result.pagination) {
+            // Respuesta con paginación
+            res.status(200).json({ 
+                success: true, 
+                data: result.patients,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(result.total / limit),
+                    total: result.total,
+                    limit: limit
+                }
+            });
+        } else {
+            // Respuesta sin paginación (compatibilidad)
+            res.status(200).json({ success: true, data: result });
+        }
     } catch (error) {
         if (error?.message === 'No active patients found') {
             res.status(404).json({ error: 'No active patients found' });
@@ -101,8 +180,28 @@ const findActivePatients = async (req, res) => {
  */
 const findInactiveDoctors = async (req, res) => {
     try {
-        const inactiveDoctors = await userService.findInactiveDoctors();
-        res.status(200).json({ success: true, data: inactiveDoctors });
+        // Obtener parámetros de paginación
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        
+        const result = await userService.findInactiveDoctors(page, limit);
+        
+        if (result.pagination) {
+            // Respuesta con paginación
+            res.status(200).json({ 
+                success: true, 
+                data: result.doctors,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(result.total / limit),
+                    total: result.total,
+                    limit: limit
+                }
+            });
+        } else {
+            // Respuesta sin paginación (compatibilidad)
+            res.status(200).json({ success: true, data: result });
+        }
     } catch (error) {
         if (error?.message === 'No inactive doctors found') {
             res.status(404).json({ error: 'No inactive doctors found' });
@@ -123,8 +222,28 @@ const findInactiveDoctors = async (req, res) => {
  */
 const findInactivePatients = async (req, res) => {
     try {
-        const inactivePatients = await userService.findInactivePatients();
-        res.status(200).json({ success: true, data: inactivePatients });
+        // Obtener parámetros de paginación
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        
+        const result = await userService.findInactivePatients(page, limit);
+        
+        if (result.pagination) {
+            // Respuesta con paginación
+            res.status(200).json({ 
+                success: true, 
+                data: result.patients,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(result.total / limit),
+                    total: result.total,
+                    limit: limit
+                }
+            });
+        } else {
+            // Respuesta sin paginación (compatibilidad)
+            res.status(200).json({ success: true, data: result });
+        }
     } catch (error) {
         if (error?.message === 'No inactive patients found') {
             res.status(404).json({ error: 'No inactive patients found' });
@@ -161,14 +280,11 @@ const searchUsers = async (req, res) => {
     try {
         const results = await userService.searchUsers(q);
         
-        if (results.length === 0) {
-            return res.status(404).json({ error: 'No users found matching your search' });
-        }
-        
+        // Siempre devolver 200, incluso si no hay resultados
         res.status(200).json({ 
             success: true, 
             data: results,
-            message: `Found ${results.length} user(s) matching "${q}"`
+            message: results.length > 0 ? `Found ${results.length} user(s) matching "${q}"` : `No users found matching "${q}"`
         });
     } catch (error) {
         if (error?.message === 'Search query is required') {
@@ -179,215 +295,19 @@ const searchUsers = async (req, res) => {
     }
 };
 
-/**
- * Finds a doctor by their medical license number
- * @param {Object} req - Express request object
- * @param {string} req.params.license - Doctor's medical license number
- * @param {Object} res - Express response object
- * @returns {Object} - JSON response with doctor data
- * @throws {Error} - If license is missing or doctor not found
- * @example
- * GET /api/users/doctors/license/MD12345
- * // Returns: { success: true, data: { doctor details } }
- */
-const findDoctorByLicense = async (req, res) => {
-    const { license } = req.params;
-    
-    if (!license) {
-        return res.status(400).json({ error: 'License is required' });
-    }
-    
-    try {
-        const doctor = await userService.findDoctorByLicense(license);
-        res.status(200).json({ success: true, data: doctor });
-    } catch (error) {
-        if (error?.message === 'Doctor not found') {
-            res.status(404).json({ error: 'Doctor not found' });
-        } else {
-            res.status(500).json({ error: 'Unable to get doctor. Please try again later' });
-        }
-    }
-}
 
-/**
- * Finds a doctor by their personal ID/DNI
- * @param {Object} req - Express request object
- * @param {string} req.params.personalId - Doctor's personal ID/DNI
- * @param {Object} res - Express response object
- * @returns {Object} - JSON response with doctor data
- * @throws {Error} - If personal ID is missing or doctor not found
- * @example
- * GET /api/users/doctors/personal-id/87654321
- * // Returns: { success: true, data: { doctor details } }
- */
-const findDoctorByPersonalId = async (req, res) => {
-    const { personalId } = req.params;
-    
-    if (!personalId) {
-        return res.status(400).json({ error: 'Personal ID is required' });
-    }
-    
-    try {
-        const doctor = await userService.findDoctorByPersonalId(personalId);
-        res.status(200).json({ success: true, data: doctor });
-    } catch (error) {
-        if (error?.message === 'Doctor not found') {
-            res.status(404).json({ error: 'Doctor not found' });
-        } else {
-            res.status(500).json({ error: 'Unable to get doctor. Please try again later' });
-        }
-    }
-}
 
-/**
- * Finds a doctor by their email address
- * @param {Object} req - Express request object
- * @param {string} req.params.email - Doctor's email address
- * @param {Object} res - Express response object
- * @returns {Object} - JSON response with doctor data
- * @throws {Error} - If email is missing or doctor not found
- * @example
- * GET /api/users/doctors/email/john.doe@hospital.com
- * // Returns: { success: true, data: { doctor details } }
- */
-const findDoctorByEmail = async (req, res) => {
-    const { email } = req.params;
-    
-    if (!email) {
-        return res.status(400).json({ error: 'Email is required' });
-    }
-    
-    try {
-        const doctor = await userService.findDoctorByEmail(email);
-        res.status(200).json({ success: true, data: doctor });
-    } catch (error) {
-        if (error?.message === 'Doctor not found') {
-            res.status(404).json({ error: 'Doctor not found' });
-        } else {
-            res.status(500).json({ error: 'Unable to get doctor. Please try again later' });
-        }
-    }
-}
 
-/**
- * Finds a patient by their personal ID/DNI
- * @param {Object} req - Express request object
- * @param {string} req.params.personalId - Patient's personal ID/DNI
- * @param {Object} res - Express response object
- * @returns {Object} - JSON response with patient data
- * @throws {Error} - If personal ID is missing or patient not found
- * @example
- * GET /api/users/doctors/personal-id/11223344
- * // Returns: { success: true, data: { patient details } }
- */
-const findPatientByPersonalId = async (req, res) => {
-    const { personalId } = req.params;
-    
-    if (!personalId) {
-        return res.status(400).json({ error: 'Personal ID is required' });
-    }
-    
-    try {
-        const patient = await userService.findPatientByPersonalId(personalId);
-        res.status(200).json({ success: true, data: patient });
-    } catch (error) {
-        if (error?.message === 'Patient not found') {
-            res.status(404).json({ error: 'Patient not found' });
-        } else {
-            res.status(500).json({ error: 'Unable to get patient. Please try again later' });
-        }
-    }
-}
 
-/**
- * Finds a patient by their email address
- * @param {Object} req - Express request object
- * @param {string} req.params.email - Patient's email address
- * @param {Object} res - Express response object
- * @returns {Object} - JSON response with patient data
- * @throws {Error} - If email is missing or patient not found
- * @example
- * GET /api/users/doctors/email/jane.smith@email.com
- * // Returns: { success: true, data: { patient details } }
- */
-const findPatientByEmail = async (req, res) => {
-    const { email } = req.params;
-    
-    if (!email) {
-        return res.status(400).json({ error: 'Email is required' });
-    }
-    
-    try {
-        const patient = await userService.findPatientByEmail(email);
-        res.status(200).json({ success: true, data: patient });
-    } catch (error) {
-        if (error?.message === 'Patient not found') {
-            res.status(404).json({ error: 'Patient not found' });
-        } else {
-            res.status(500).json({ error: 'Unable to get patient. Please try again later' });
-        }
-    }
-}
 
-/**
- * Searches for doctors by name (partial match)
- * @param {Object} req - Express request object
- * @param {string} req.query.searchTerm - Search term for doctor's name
- * @param {Object} res - Express response object
- * @returns {Object} - JSON response with matching doctors
- * @throws {Error} - If search term is missing or no doctors found
- * @example
- * GET /api/users/doctors-by-name?searchTerm=John
- * // Returns: { success: true, data: [doctor1, doctor2, ...] }
- */
-const searchDoctorsByName = async (req, res) => {
-    const { searchTerm } = req.query;
-    
-    if (!searchTerm || searchTerm.trim() === '') {
-        return res.status(400).json({ error: 'Search term is required' });
-    }
-    
-    try {
-        const doctors = await userService.searchDoctorsByName(searchTerm);
-        res.status(200).json({ success: true, data: doctors });
-    } catch (error) {
-        if (error?.message === 'No doctors found with that name') {
-            res.status(404).json({ error: 'No doctors found with that name' });
-        } else {
-            res.status(500).json({ error: 'Unable to search doctors. Please try again later' });
-        }
-    }
-}
 
-/**
- * Searches for patients by name (partial match)
- * @param {Object} req - Express request object
- * @param {string} req.query.searchTerm - Search term for patient's name
- * @param {Object} res - Express response object
- * @returns {Object} - JSON response with matching patients
- * @throws {Error} - If search term is missing or no patients found
- * @example
- * GET /api/users/doctors-by-name?searchTerm=Jane
- * // Returns: { success: true, data: [patient1, patient2, ...] }
- */
-const searchPatientsByName = async (req, res) => {
-    const { searchTerm } = req.query;
-    
-    if (!searchTerm || searchTerm.trim() === '') {
-        return res.status(400).json({ error: 'Search term is required' });
-    }
-    
-    try {
-        const patients = await userService.searchPatientsByName(searchTerm);
-        res.status(200).json({ success: true, data: patients });
-    } catch (error) {
-        if (error?.message === 'No patients found with that name') {
-            res.status(404).json({ error: 'No patients found with that name' });
-        } else {
-            res.status(500).json({ error: 'Unable to search patients. Please try again later' });
-        }
-    }
-}
+
+
+
+
+
+
+
 
 /**
  * Retrieves a specific doctor by ID
@@ -405,6 +325,10 @@ const getDoctorById = async (req, res) => {
     
     if (!doctorId) {
         return res.status(400).json({ error: 'Doctor ID is required' });
+    }
+    
+    if (!isValidObjectId(doctorId)) {
+        return res.status(400).json({ error: 'Invalid doctor ID format' });
     }
     
     try {
@@ -473,12 +397,17 @@ const getMyProfile = async (req, res) => {
 
         // Retornar solo datos no sensibles
         const profileData = {
+            _id: userProfile._id, // ID necesario para operaciones como crear citas
             name: userProfile.name,
             lastname: userProfile.lastname || null,
             age: age,
+            dateOfBirth: userProfile.dateOfBirth || null,
             phone: userProfile.phone || null,
             email: userProfile.email,
-            role: userProfile.role
+            role: userProfile.role,
+            personalId: userProfile.personalId || null,
+            isActive: userProfile.isActive,
+            createdAt: userProfile.createdAt || null
         };
 
         // Agregar datos específicos según el rol
@@ -494,7 +423,6 @@ const getMyProfile = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error getting profile:', error);
         
         if (error.message === 'User profile not found') {
             return res.status(404).json({ error: 'User profile not found' });
@@ -512,13 +440,6 @@ export {
     findInactiveDoctors,
     findInactivePatients,
     searchUsers,
-    findDoctorByLicense,
-    findDoctorByPersonalId,
-    findDoctorByEmail,
-    findPatientByPersonalId,
-    findPatientByEmail,
-    searchDoctorsByName,
-    searchPatientsByName,
     getDoctorById,
     getPatientById,
     getMyProfile

@@ -123,7 +123,7 @@ const updateDoctor = async (req, res) => {
         if (error.message === 'Doctor not found') {
             res.status(404).json({ error: 'Doctor not found' });
         } else if (error.message === 'Update data is required' || error.message === 'No valid fields to update') {
-            res.status(400).json({ error: error.message });
+            res.status(400).json({ error: 'Invalid update data provided' });
         } else {
             res.status(500).json({ error: 'Unable to update doctor. Please try again later' });
         }
@@ -258,7 +258,7 @@ const updatePatient = async (req, res) => {
         if (error.message === 'Patient not found') {
             res.status(404).json({ error: 'Patient not found' });
         } else if (error.message === 'Update data is required' || error.message === 'No valid fields to update') {
-            res.status(400).json({ error: error.message });
+            res.status(400).json({ error: 'Invalid update data provided' });
         } else {
             res.status(500).json({ error: 'Unable to update patient. Please try again later' });
         }

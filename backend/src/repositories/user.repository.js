@@ -10,8 +10,19 @@ export default class UserRepository {
      * const doctors = await userRepository.getAllDoctors();
      * console.log(`Found ${doctors.length} doctors`);
      */
-    getAllDoctors = async () => {
-        return await doctorsModel.find().select('-password');
+    getAllDoctors = async (page = null, limit = null) => {
+        if (page && limit) {
+            // Con paginación
+            const skip = (page - 1) * limit;
+            const [doctors, total] = await Promise.all([
+                doctorsModel.find().select('-password').skip(skip).limit(limit),
+                doctorsModel.countDocuments()
+            ]);
+            return { doctors, total, pagination: true };
+        } else {
+            // Sin paginación (comportamiento original)
+            return await doctorsModel.find().select('-password');
+        }
     }
 
     /**
@@ -21,8 +32,19 @@ export default class UserRepository {
      * const patients = await userRepository.getAllPatients();
      * console.log(`Found ${patients.length} patients`);
      */
-    getAllPatients = async () => {
-        return await patientsModel.find().select('-password');
+    getAllPatients = async (page = null, limit = null) => {
+        if (page && limit) {
+            // Con paginación
+            const skip = (page - 1) * limit;
+            const [patients, total] = await Promise.all([
+                patientsModel.find().select('-password').skip(skip).limit(limit),
+                patientsModel.countDocuments()
+            ]);
+            return { patients, total, pagination: true };
+        } else {
+            // Sin paginación (comportamiento original)
+            return await patientsModel.find().select('-password');
+        }
     }
 
     /**
@@ -32,8 +54,19 @@ export default class UserRepository {
      * const activeDoctors = await userRepository.findActiveDoctors();
      * console.log(`Found ${activeDoctors.length} active doctors`);
      */
-    findActiveDoctors = async () => {
-        return await doctorsModel.find({ isActive: true }).select('-password');
+    findActiveDoctors = async (page = 1, limit = 5) => {
+        if (page && limit) {
+            // Con paginación
+            const skip = (page - 1) * limit;
+            const [doctors, total] = await Promise.all([
+                doctorsModel.find({ isActive: true }).select('-password').skip(skip).limit(limit),
+                doctorsModel.countDocuments({ isActive: true })
+            ]);
+            return { doctors, total, pagination: true };
+        } else {
+            // Sin paginación (comportamiento original)
+            return await doctorsModel.find({ isActive: true }).select('-password');
+        }
     }
 
     /**
@@ -43,8 +76,19 @@ export default class UserRepository {
      * const activePatients = await userRepository.findActivePatients();
      * console.log(`Found ${activePatients.length} active patients`);
      */
-    findActivePatients = async () => {
-        return await patientsModel.find({ isActive: true }).select('-password');
+    findActivePatients = async (page = 1, limit = 5) => {
+        if (page && limit) {
+            // Con paginación
+            const skip = (page - 1) * limit;
+            const [patients, total] = await Promise.all([
+                patientsModel.find({ isActive: true }).select('-password').skip(skip).limit(limit),
+                patientsModel.countDocuments({ isActive: true })
+            ]);
+            return { patients, total, pagination: true };
+        } else {
+            // Sin paginación (comportamiento original)
+            return await patientsModel.find({ isActive: true }).select('-password');
+        }
     }
 
     /**
@@ -54,8 +98,19 @@ export default class UserRepository {
      * const inactiveDoctors = await userRepository.findInactiveDoctors();
      * console.log(`Found ${inactiveDoctors.length} inactive doctors`);
      */
-    findInactiveDoctors = async () => {
-        return await doctorsModel.find({ isActive: false }).select('-password');
+    findInactiveDoctors = async (page = 1, limit = 5) => {
+        if (page && limit) {
+            // Con paginación
+            const skip = (page - 1) * limit;
+            const [doctors, total] = await Promise.all([
+                doctorsModel.find({ isActive: false }).select('-password').skip(skip).limit(limit),
+                doctorsModel.countDocuments({ isActive: false })
+            ]);
+            return { doctors, total, pagination: true };
+        } else {
+            // Sin paginación (comportamiento original)
+            return await doctorsModel.find({ isActive: false }).select('-password');
+        }
     }
 
     /**
@@ -65,8 +120,19 @@ export default class UserRepository {
      * const inactivePatients = await userRepository.findInactivePatients();
      * console.log(`Found ${inactivePatients.length} inactive patients`);
      */
-    findInactivePatients = async () => {
-        return await patientsModel.find({ isActive: false }).select('-password');
+    findInactivePatients = async (page = 1, limit = 5) => {
+        if (page && limit) {
+            // Con paginación
+            const skip = (page - 1) * limit;
+            const [patients, total] = await Promise.all([
+                patientsModel.find({ isActive: false }).select('-password').skip(skip).limit(limit),
+                patientsModel.countDocuments({ isActive: false })
+            ]);
+            return { patients, total, pagination: true };
+        } else {
+            // Sin paginación (comportamiento original)
+            return await patientsModel.find({ isActive: false }).select('-password');
+        }
     }
 
     /**
@@ -153,92 +219,5 @@ export default class UserRepository {
         patients.forEach(patient => results.push({ user: patient, type: 'patient' }));
         
         return results;
-    }
-
-    /**
-     * Finds a doctor by their medical license number
-     * @param {string} license - Doctor's medical license number
-     * @returns {Promise<Object|null>} - Doctor object if found, null otherwise
-     * @example
-     * const doctor = await userRepository.findDoctorByLicense('MD12345');
-     */
-    findDoctorByLicense = async (license) => {
-        return await doctorsModel.findOne({ license });
-    }
-
-    /**
-     * Finds a doctor by their personal ID/DNI
-     * @param {string} personalId - Doctor's personal ID/DNI
-     * @returns {Promise<Object|null>} - Doctor object if found, null otherwise
-     * @example
-     * const doctor = await userRepository.findDoctorByPersonalId('87654321');
-     */
-    findDoctorByPersonalId = async (personalId) => {
-        return await doctorsModel.findOne({ personalId });
-    }
-
-    /**
-     * Finds a doctor by their email address
-     * @param {string} email - Doctor's email address
-     * @returns {Promise<Object|null>} - Doctor object if found, null otherwise
-     * @example
-     * const doctor = await userRepository.findDoctorByEmail('john.doe@hospital.com');
-     */
-    findDoctorByEmail = async (email) => {
-        return await doctorsModel.findOne({ email });
-    }
-
-    /**
-     * Finds a patient by their personal ID/DNI
-     * @param {string} personalId - Patient's personal ID/DNI
-     * @returns {Promise<Object|null>} - Doctor object if found, null otherwise
-     * @example
-     * const patient = await userRepository.findPatientByPersonalId('11223344');
-     */
-    findPatientByPersonalId = async (personalId) => {
-        return await patientsModel.findOne({ personalId });
-    }
-
-    /**
-     * Finds a patient by their email address
-     * @param {string} email - Patient's email address
-     * @returns {Promise<Object|null>} - Doctor object if found, null otherwise
-     * @example
-     * const patient = await userRepository.findPatientByEmail('jane.smith@email.com');
-     */
-    findPatientByEmail = async (email) => {
-        return await patientsModel.findOne({ email });
-    }
-
-    /**
-     * Searches for doctors by name using partial matching
-     * @param {string} searchTerm - Search term for doctor's name
-     * @returns {Promise<Array>} - Array of matching doctor objects
-     * @example
-     * const doctors = await userRepository.searchDoctorsByName('John');
-     */
-    searchDoctorsByName = async (searchTerm) => {
-        return await doctorsModel.find({
-            $or: [
-                { name: { $regex: searchTerm, $options: 'i' } },
-                { lastname: { $regex: searchTerm, $options: 'i' } }
-            ]
-        });
-    }
-
-    /**
-     * Searches for patients by name using partial matching
-     * @param {string} searchTerm - Search term for patient's name
-     * @returns {Promise<Array>} - Array of matching patient objects
-     * @example
-     * const patients = await userRepository.searchPatientsByName('Jane');
-     */
-    searchPatientsByName = async (searchTerm) => {
-        return await patientsModel.find({
-            $or: [
-                { name: { $regex: searchTerm, $options: 'i' } },
-                { lastname: { $regex: searchTerm, $options: 'i' } }
-            ]
-        });
     }
 }

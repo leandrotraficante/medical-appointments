@@ -195,6 +195,29 @@ const doctorsSchema = new mongoose.Schema({
         }
     },
     /**
+     * Doctor's date of birth
+     * @type {Date}
+     * @description Doctor's birth date for age calculation and medical records
+     * @example '1985-03-15'
+     */
+    dateOfBirth: {
+        type: Date,
+        required: false,
+        validate: {
+            validator: function(date) {
+                if (!date) return true; // Campo opcional
+                const today = new Date();
+                const age = today.getFullYear() - date.getFullYear();
+                const monthDiff = today.getMonth() - date.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
+                    age--;
+                }
+                return age >= 18 && age <= 100; // Doctores entre 18 y 100 años
+            },
+            message: 'Doctor must be between 18 and 100 years old'
+        }
+    },
+    /**
      * Doctor's role in the system (always 'doctor')
      * @type {String}
      * @default 'doctor'

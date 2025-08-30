@@ -1,4 +1,6 @@
-import adminRepository from '../repositories/admin.repository.js';
+import AdminRepository from '../repositories/admin.repository.js';
+
+const adminRepository = new AdminRepository();
 
 // ===== ADMIN MANAGEMENT =====
 

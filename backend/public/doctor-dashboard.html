@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Doctor - Centro Médico San Lucas</title>
+    <link rel="stylesheet" href="css/doctor-dashboard.css">
+    <link rel="stylesheet" href="css/pagination.css">
+</head>
+<body>
+    <!-- Navbar Fijo -->
+    <nav class="dashboard-navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <h1>🏥 Centro Médico San Lucas</h1>
+
+            </div>
+            <div class="navbar-actions">
+                <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal con Sidebar -->
+    <div class="dashboard-container">
+        <!-- Sidebar Lateral -->
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <h3>Navegación</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <button onclick="doctorDashboard.showView('doctor-info')" class="sidebar-btn active">
+                    Mi Perfil
+                </button>
+                <button onclick="doctorDashboard.showView('my-appointments')" class="sidebar-btn">
+                    Mis Citas
+                </button>
+                <button onclick="doctorDashboard.showView('today-appointments')" class="sidebar-btn">
+                    Citas del Día
+                </button>
+                <button onclick="doctorDashboard.showView('bulk-cancellation')" class="sidebar-btn">
+                    Cancelación Masiva
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Información del Doctor -->
+            <section id="doctor-info" class="dashboard-section profile-section">
+                <div class="section-header">
+                    <h2>Mi Perfil</h2>
+                    <p>Información de tu cuenta médica</p>
+                </div>
+                <div class="section-content">
+                    <div id="profile-data" class="profile-card">
+                        <p>Cargando información del perfil...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mis Citas Asignadas -->
+            <section id="my-appointments" class="dashboard-section appointments-section">
+                <div class="section-header">
+                    <h2>Mis Citas Asignadas</h2>
+                    <p>Gestioná todas tus citas médicas</p>
+                </div>
+                <div class="section-content">
+                    <!-- Sub-tabs para filtrar citas por estado -->
+                    <div class="appointments-tabs">
+                        <button class="tab-btn active" data-filter="all" onclick="doctorDashboard.filterAppointments('all')">
+                            📋 Todas mis citas
+                        </button>
+                        <button class="tab-btn" data-filter="pending" onclick="doctorDashboard.filterAppointments('pending')">
+                            ⏳ Pendientes
+                        </button>
+                        <button class="tab-btn" data-filter="confirmed" onclick="doctorDashboard.filterAppointments('confirmed')">
+                            ✅ Confirmadas
+                        </button>
+                        <button class="tab-btn" data-filter="completed" onclick="doctorDashboard.filterAppointments('completed')">
+                            🎯 Completadas
+                        </button>
+                        <button class="tab-btn" data-filter="cancelled" onclick="doctorDashboard.filterAppointments('cancelled')">
+                            ❌ Canceladas
+                        </button>
+                    </div>
+                    
+                    <div id="appointments-list" class="appointments-container">
+                        <p>Cargando citas...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Citas del Día -->
+            <section id="today-appointments" class="dashboard-section today-section">
+                <div class="section-header">
+                    <h2>Citas del Día</h2>
+                    <p>Vista rápida de tus citas de hoy</p>
+                </div>
+                <div class="section-content">
+                    <div id="today-appointments-list" class="appointments-container">
+                        <p>Cargando citas del día...</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Gestión de Citas -->
+            <section id="appointment-management" class="dashboard-section management-section" style="display: none;">
+                <div class="section-header">
+                    <h2>Gestión de Cita</h2>
+                    <p>Cambiá el estado de la cita seleccionada</p>
+                </div>
+                <div class="section-content">
+                    <div id="appointment-detail-content" class="appointment-detail-card"></div>
+                    <div class="appointment-actions">
+                        <button id="confirmBtn" onclick="doctorDashboard.confirmAppointment()" class="action-btn confirm-btn">
+                            Confirmar Cita
+                        </button>
+                        <button id="completeBtn" onclick="doctorDashboard.completeAppointment()" class="action-btn complete-btn">
+                            Marcar como Completada
+                        </button>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cancelación Masiva Semanal -->
+            <section id="bulk-cancellation" class="dashboard-section cancellation-section">
+                <div class="section-header">
+                    <h2>Cancelación Masiva Semanal</h2>
+                    <p>Cancelá todas las citas de una semana específica</p>
+                </div>
+                <div class="section-content">
+                    <div class="cancellation-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="startDate">Fecha de inicio de la semana</label>
+                                <input type="date" id="startDate" min="${new Date().toISOString().split('T')[0]}" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="endDate">Fecha de fin de la semana</label>
+                                <input type="date" id="endDate" min="${new Date().toISOString().split('T')[0]}" class="form-input">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cancellationReason">Motivo de la cancelación</label>
+                            <textarea id="cancellationReason" placeholder="Ej: Vacaciones, Emergencia médica, etc." rows="3" class="form-textarea"></textarea>
+                        </div>
+                        <button onclick="doctorDashboard.cancelWeekAppointments()" class="cancel-btn">
+                            Cancelar Todas las Citas de la Semana
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            </main>
+        </div>
+
+        <!-- Mensajes -->
+        <div id="message-container" class="message-container"></div>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <p>&copy; 2025 Centro Médico San Lucas - Sistema de Citas Médicas</p>
+        </footer>
+
+        <!-- Scripts -->
+        <script src="js/auth.js"></script>
+        <script src="js/main.js"></script>
+        <script src="js/doctor-dashboard.js"></script>
+    </body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Centro Médico San Lucas</title>
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+    <link rel="stylesheet" href="css/pagination.css">
+</head>
+
+<body>
+    <!-- Navbar Fijo -->
+    <nav class="dashboard-navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <h1>Centro Médico San Lucas</h1>
+
+            </div>
+            <div class="navbar-actions">
+                <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal con Sidebar -->
+    <div class="dashboard-container">
+        <!-- Sidebar Lateral -->
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <h3>Navegación</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <button onclick="adminDashboard.showView('admin-info')">
+                    Mi Perfil
+                </button>
+                <button onclick="adminDashboard.showView('users-management')">
+                    Gestión de Usuarios
+                </button>
+                <button onclick="adminDashboard.showView('appointments-management')">
+                    Gestión de Citas
+                </button>
+                <button onclick="adminDashboard.showView('system-stats')">
+                    Estadísticas del Sistema
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Información del Admin -->
+            <section id="admin-info" class="dashboard-section profile-section">
+                <div class="section-header">
+                    <h2>Mi Perfil</h2>
+                    <p>Información de tu cuenta de administrador</p>
+                </div>
+                <div class="section-content">
+                    <div id="profile-data" class="profile-card">
+                        <p>Cargando información del perfil...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gestión de Usuarios -->
+            <section id="users-management" class="dashboard-section users-section">
+                <div class="section-header">
+                    <h2>Gestión de Usuarios</h2>
+                    <p>Administrá todos los usuarios del sistema</p>
+                </div>
+                <div class="section-content">
+                    <div class="users-tabs">
+                        <button onclick="adminDashboard.showUsersTab('doctors')">Doctores</button>
+                        <button onclick="adminDashboard.showUsersTab('patients')">Pacientes</button>
+                        <button onclick="adminDashboard.showUsersTab('admins')">Administradores</button>
+                    </div>
+
+                    <div id="doctors-subtabs" class="users-subtabs" style="display: none;">
+                        <button onclick="adminDashboard.loadDoctors('all')">Todos los Doctores</button>
+                        <button onclick="adminDashboard.loadDoctors('active')">Doctores Activos</button>
+                        <button onclick="adminDashboard.loadDoctors('inactive')">Doctores Inactivos</button>
+                    </div>
+
+                    <div id="patients-subtabs" class="users-subtabs" style="display: none;">
+                        <button onclick="adminDashboard.loadPatients('all')">Todos los Pacientes</button>
+                        <button onclick="adminDashboard.loadPatients('active')">Pacientes Activos</button>
+                        <button onclick="adminDashboard.loadPatients('inactive')">Pacientes Inactivos</button>
+                    </div>
+
+                    <div id="users-content" class="users-content">
+                        <p>Seleccioná una categoría de usuarios para gestionar</p>
+                    </div>
+                    
+                    <!-- Modal para ver perfil de paciente -->
+                    <div id="patient-detail-modal" class="modal" style="display: none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Perfil del Paciente</h3>
+                                <button onclick="adminDashboard.closePatientModal()" class="modal-close">×</button>
+                            </div>
+                            <div class="modal-body" id="patient-detail-content">
+                                <p>Cargando información del paciente...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal de confirmación para eliminar -->
+                    <div id="delete-confirmation-modal" class="modal" style="display: none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Confirmar Eliminación</h3>
+                                <button onclick="adminDashboard.closeDeleteModal()" class="modal-close">×</button>
+                            </div>
+                            <div class="modal-body">
+                                <p id="delete-confirmation-message">¿Estás seguro de que quieres eliminar este usuario?</p>
+                                <div class="delete-actions">
+                                    <button onclick="adminDashboard.confirmDelete()" class="confirm-delete-btn">Sí, Eliminar</button>
+                                    <button onclick="adminDashboard.closeDeleteModal()" class="cancel-delete-btn">Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal para ver perfil de usuario (doctor, paciente, admin) -->
+                    <div id="profile-modal" class="modal" style="display: none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Perfil del Usuario</h3>
+                                <button onclick="adminDashboard.hideProfileModal()" class="modal-close">×</button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="profile-info">
+                                    <p>Cargando información del usuario...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gestión de Citas -->
+            <section id="appointments-management" class="dashboard-section appointments-section">
+                <div class="section-header">
+                    <h2>Gestión de Citas</h2>
+                    <p>Administrá todas las citas del sistema</p>
+                </div>
+                <div class="section-content">
+                    <div class="appointments-controls">
+                        <div class="filters">
+                            <select onchange="adminDashboard.filterAppointmentsByStatus(this.value)">
+                                <option value="">Todos los estados</option>
+                                <option value="pending">Pendiente</option>
+                                <option value="confirmed">Confirmada</option>
+                                <option value="completed">Completada</option>
+                                <option value="cancelled">Cancelada</option>
+                            </select>
+                            <button onclick="adminDashboard.loadAllAppointments()">Ver Citas</button>
+                        </div>
+                    </div>
+                    <div id="appointments-content" class="appointments-content">
+                        <p>Hacé clic en "Ver Todas las Citas" para cargar la información</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Estadísticas del Sistema -->
+            <section id="system-stats" class="dashboard-section stats-section">
+                <div class="section-header">
+                    <h2>Estadísticas del Sistema</h2>
+                    <p>Métricas y reportes del centro médico</p>
+                </div>
+                <div class="section-content">
+                    <div id="stats-content" class="stats-content">
+                        <p>Cargando estadísticas del sistema...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Mensajes -->
+    <div id="message-container" class="message-container"></div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <p>&copy; 2025 Centro Médico San Lucas - Sistema de Citas Médicas</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+</body>
+
+</html>

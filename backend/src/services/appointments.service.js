@@ -28,6 +28,11 @@ const createAppointmentService = async (appointmentData) => {
         throw new Error('Doctor not found');
     }
 
+    // Validar que el doctor esté activo
+    if (!doctorExists.isActive) {
+        throw new Error('Cannot create appointment with inactive doctor');
+    }
+
     const patientExists = await userRepository.findPatientById(patient);
     if (!patientExists) {
         throw new Error('Patient not found');
@@ -49,14 +54,9 @@ const createAppointmentService = async (appointmentData) => {
  * const pendingAppointments = await findAllAppointments({ status: 'pending' });
  * const doctorAppointments = await findAllAppointments({ doctor: '507f1f77bcf86cd799439012' });
  */
-const findAllAppointments = async (filters = {}, pagination = null) => {
-    if (pagination) {
-        // Con paginación
-        return await appointmentsRepository.findAllAppointmentsWithPagination(filters, pagination);
-    } else {
-        // Sin paginación (comportamiento original)
-        return await appointmentsRepository.findAllAppointments(filters);
-    }
+const findAllAppointments = async (filters = {}, page = null, limit = null) => {
+    const result = await appointmentsRepository.findAllAppointments(filters, page, limit);
+    return result;
 };
 
 
@@ -203,6 +203,11 @@ const updateAppointmentStatus = async (appointmentId, newStatus) => {
         throw new Error('Cannot modify cancelled appointment');
     }
 
+    // Verificar que el doctor de la cita esté activo (excepto para cancelar)
+    if (newStatus !== 'cancelled' && existingAppointment.doctor && !existingAppointment.doctor.isActive) {
+        throw new Error('Cannot modify appointment with inactive doctor');
+    }
+
     const appointmentToUpdate = await appointmentsRepository.updateAppointmentStatus(appointmentId, newStatus);
     if (!appointmentToUpdate) {
         throw new Error('Appointment not found');
@@ -234,6 +239,11 @@ const updateAppointmentDateTime = async (appointmentId, newDateTime) => {
 
     if (existingAppointment.status === 'cancelled') {
         throw new Error('Cannot modify cancelled appointment');
+    }
+
+    // Verificar que el doctor de la cita esté activo
+    if (existingAppointment.doctor && !existingAppointment.doctor.isActive) {
+        throw new Error('Cannot modify appointment with inactive doctor');
     }
 
     const appointmentToUpdate = await appointmentsRepository.updateAppointmentDateTime(appointmentId, newDateTime);

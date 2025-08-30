@@ -20,6 +20,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Servir archivos estáticos
+app.use(express.static('public'));
+
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,

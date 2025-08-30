@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Paciente - Centro Médico San Lucas</title>
+    <link rel="stylesheet" href="css/patient-dashboard.css">
+    <link rel="stylesheet" href="css/pagination.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="#" class="navbar-brand">Centro Médico San Lucas</a>
+            <ul class="navbar-nav">
+
+                <li><button onclick="logout()" class="nav-link logout-btn">Cerrar Sesión</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Dashboard Layout -->
+            <div class="dashboard-content">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">Navegación</h3>
+                        <ul class="sidebar-nav">
+                            <li><a href="#" onclick="patientDashboard.showView('patient-info')" class="active">Mi Perfil</a></li>
+                            <li><a href="#" onclick="patientDashboard.showView('doctor-search')">Buscar Doctores</a></li>
+                            <li><a href="#" onclick="patientDashboard.showView('my-appointments')">Mis Citas</a></li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <!-- Main Dashboard Content -->
+                <div class="dashboard-main">
+                    <!-- Información del Paciente -->
+                    <section id="patient-info" class="dashboard-section">
+                        <div class="section-header">
+                            <h2 class="section-title">Mi Perfil</h2>
+                            <p class="section-subtitle">Revisá y actualizá tu información personal y médica</p>
+                        </div>
+                        <div class="section-content">
+                            <div id="profile-data" class="card">
+                                <p>Cargando información del perfil...</p>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <!-- Búsqueda de Doctores -->
+                    <section id="doctor-search" class="dashboard-section">
+                        <div class="section-header">
+                            <h2 class="section-title">Buscar Doctores</h2>
+                            <p class="section-subtitle">Encontrá y agendá citas con los mejores especialistas</p>
+                        </div>
+                        <div class="section-content">
+                            <div class="form-card">
+                                <div class="form-group">
+                                    <input type="text" id="searchInput" placeholder="Buscar por nombre o especialidad..." class="form-input">
+                                    <button onclick="patientDashboard.searchDoctors()" class="form-button">Buscar</button>
+                                </div>
+                                <button onclick="patientDashboard.loadAllDoctors()" class="btn btn-secondary">Ver Todos los Doctores</button>
+                            </div>
+                            <div id="search-results" class="search-results">
+                                <div class="search-placeholder">
+                                    <h3>Encontrá el especialista que necesitás</h3>
+                                    <p>Podés buscar por nombre del doctor o por especialidad médica</p>
+                                    <div class="search-suggestions">
+                                        <span class="suggestion">Ejemplo: "Cardiología"</span>
+                                        <span class="suggestion">Ejemplo: "Dr. García"</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <!-- Mis Citas -->
+                    <section id="my-appointments" class="dashboard-section">
+                        <div class="section-header">
+                            <h2 class="section-title">Mis Citas</h2>
+                            <p class="section-subtitle">Revisá y gestioná todas tus citas médicas programadas</p>
+                        </div>
+                        <div class="section-content">
+                            <div id="appointments-list" class="appointments-container">
+                                <p>Cargando citas...</p>
+                            </div>
+
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vistas Individuales (ocultas por defecto) -->
+    <div id="doctor-detail-view" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalles del Doctor</h3>
+                <button onclick="patientDashboard.backToSearch()" class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="doctor-detail-content"></div>
+                <div class="card-actions">
+                    <button onclick="patientDashboard.showSlots()" class="btn btn-primary">Ver Slots Disponibles</button>
+                    <button onclick="patientDashboard.showBookAppointment()" class="btn btn-success">Agendar Cita</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="slots-view" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Slots Disponibles</h3>
+                <button onclick="patientDashboard.backToSearch()" class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="slots-content"></div>
+                <div class="card-actions">
+                    <button onclick="patientDashboard.showDoctorDetail()" class="btn btn-primary">Ver Doctor</button>
+                    <button onclick="patientDashboard.showBookAppointment()" class="btn btn-success">Agendar Cita</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="book-appointment-view" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agendar Cita</h3>
+                <button onclick="patientDashboard.backToSearch()" class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="book-appointment-content"></div>
+                <div class="card-actions">
+                    <button onclick="patientDashboard.showDoctorDetail()" class="btn btn-primary">Ver Doctor</button>
+                    <button onclick="patientDashboard.showSlots()" class="btn btn-secondary">Ver Slots Disponibles</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="appointment-detail-view" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalles de la Cita</h3>
+                <button onclick="patientDashboard.backToSearch()" class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="appointment-detail-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    <div id="message-container" class="message-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/patient-dashboard.js"></script>
+</body>
+</html>

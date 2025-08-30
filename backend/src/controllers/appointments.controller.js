@@ -26,6 +26,15 @@ const createAppointment = async (req, res) => {
             return res.status(400).json({ error: 'Patient, doctor and date are required' });
         }
 
+        // Validate ObjectId format
+        if (!isValidObjectId(patient)) {
+            return res.status(400).json({ error: 'Invalid patient ID format' });
+        }
+
+        if (!isValidObjectId(doctor)) {
+            return res.status(400).json({ error: 'Invalid doctor ID format' });
+        }
+
         if (isNaN(new Date(date).getTime())) {
             return res.status(400).json({ error: 'Invalid date format' });
         }
@@ -38,6 +47,8 @@ const createAppointment = async (req, res) => {
             res.status(404).json({ error: 'The specified patient was not found' });
         } else if (error?.message === 'Doctor not found') {
             res.status(404).json({ error: 'The specified doctor was not found' });
+        } else if (error?.message === 'Cannot create appointment with inactive doctor') {
+            res.status(400).json({ error: 'Cannot create appointment with inactive doctor. Please select an active doctor.' });
         } else if (error?.message === 'Appointment date must be in the future') {
             res.status(400).json({ error: 'Appointment date must be in the future' });
         } else if (error?.message === 'The doctor already has an appointment at this date and time') {
@@ -70,7 +81,7 @@ const getAllAppointments = async (req, res) => {
         // Remover parámetros de paginación de los filtros
         const { page: _, limit: __, ...cleanFilters } = filters;
         
-        const result = await appointmentsService.findAllAppointments(cleanFilters, { page, limit, skip });
+        const result = await appointmentsService.findAllAppointments(cleanFilters, page, limit);
         res.status(200).json({ 
             success: true, 
             data: result.appointments,
@@ -108,16 +119,41 @@ const getMyAppointments = async (req, res) => {
         const filters = req.query;
         const { id: userId, role: userRole } = req.user;
         
+        // Extraer parámetros de paginación
+        const page = parseInt(req.query.page) || null;
+        const limit = parseInt(req.query.limit) || null;
+        
+        // Remover parámetros de paginación de los filtros
+        const { page: _, limit: __, ...cleanFilters } = filters;
+        
         // Filtrar según el rol del usuario
         if (userRole === 'patient') {
-            filters.patient = userId;
+            cleanFilters.patient = userId;
         } else if (userRole === 'doctor') {
-            filters.doctor = userId;
+            cleanFilters.doctor = userId;
         }
         // Admin ve todas las citas (no se filtra)
         
-        const appointments = await appointmentsService.findAllAppointments(filters);
-        res.status(200).json({ success: true, data: appointments });
+        const result = await appointmentsService.findAllAppointments(cleanFilters, page, limit);
+        
+        // Si hay paginación, devolver con metadata
+        if (page && limit && result.pagination) {
+            res.status(200).json({ 
+                success: true, 
+                data: result.appointments,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(result.total / limit),
+                    totalItems: result.total,
+                    itemsPerPage: limit,
+                    hasNextPage: page < Math.ceil(result.total / limit),
+                    hasPrevPage: page > 1
+                }
+            });
+        } else {
+            // Sin paginación (comportamiento original)
+            res.status(200).json({ success: true, data: result });
+        }
     } catch (error) {
         if (error?.message === 'Invalid filter format') {
             res.status(400).json({ error: 'Invalid filter format. Please check your search parameters' });
@@ -380,6 +416,8 @@ const updateAppointmentStatus = async (req, res) => {
     } catch (error) {
         if (error?.message === 'Appointment not found') {
             res.status(404).json({ error: 'Appointment not found' });
+        } else if (error?.message === 'Cannot modify appointment with inactive doctor') {
+            res.status(400).json({ error: 'Cannot modify appointment with inactive doctor. Please activate the doctor first or assign a new one.' });
         } else if (error?.message === 'Cannot modify cancelled appointment') {
             res.status(400).json({ error: 'Cannot modify a cancelled appointment' });
         } else {
@@ -427,6 +465,8 @@ const updateAppointmentDate = async (req, res) => {
     } catch (error) {
         if (error?.message === 'Appointment not found') {
             res.status(404).json({ error: 'Appointment not found' });
+        } else if (error?.message === 'Cannot modify appointment with inactive doctor') {
+            res.status(400).json({ error: 'Cannot modify appointment with inactive doctor. Please activate the doctor first or assign a new one.' });
         } else if (error?.message === 'The doctor already has an appointment at this date and time') {
             res.status(400).json({ error: 'The doctor is not available at this time. Please choose another time slot' });
         } else {

@@ -1,0 +1,97 @@
+/* ===== PAGINACIÓN BÁSICA CONSISTENTE ===== */
+/* Estilos unificados para todos los dashboards */
+
+.pagination-controls {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.pagination-info {
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.pagination-info p {
+    margin: 0;
+    color: #333;
+}
+
+.pagination-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pagination-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.pagination-buttons .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.pagination-buttons .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.pagination-buttons .btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.pagination-buttons .btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pagination-controls {
+        padding: 10px;
+        margin: 15px 0;
+    }
+    
+    .pagination-buttons {
+        gap: 8px;
+    }
+    
+    .pagination-buttons button {
+        padding: 6px 12px;
+        font-size: 13px;
+        min-width: 80px;
+    }
+    
+    .pagination-info {
+        font-size: 13px;
+    }
+}
+
+/* Estados de hover y focus */
+.pagination-buttons button:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pagination-buttons button:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.pagination-buttons button:active {
+    transform: translateY(0);
+}

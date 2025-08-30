@@ -45,10 +45,6 @@ const register = async (req, res) => {
             message: 'User registered successfully'
         });
     } catch (error) {
-        if (process.env.NODE_ENV === 'development') {
-            console.error('Error in register:', error);
-        }
-        
         if (error.name === 'ValidationError') {
             const validationErrors = Object.values(error.errors).map(err => err.message);
             return res.status(400).json({ 
@@ -61,7 +57,7 @@ const register = async (req, res) => {
             return res.status(409).json({ error: 'User already exists' });
         }
         
-        return res.status(500).json({ error: error.message || 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 };
 

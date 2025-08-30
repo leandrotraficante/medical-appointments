@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro Médico San Lucas - Gestión de Citas</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="#" class="navbar-brand">Centro Médico San Lucas</a>
+            <ul class="navbar-nav">
+                <li><a href="#servicios" class="nav-link">Servicios</a></li>
+                <li><a href="#horarios" class="nav-link">Horarios</a></li>
+                <li><a href="#contacto" class="nav-link">Contacto</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <h1 class="hero-title">Centro Médico San Lucas</h1>
+                <p class="hero-subtitle">Excelencia en atención médica desde 1995. Institución de salud líder comprometida con la excelencia médica y la atención personalizada de nuestros pacientes.</p>
+            </section>
+
+            <!-- Auth Forms -->
+            <section class="auth-container">
+                <!-- Login Form -->
+                <div id="login-form" class="auth-form">
+                    <h2 class="form-title">Iniciar Sesión</h2>
+                    <form id="loginForm" class="form">
+                        <div class="form-group">
+                            <label for="loginEmail" class="form-label">Email</label>
+                            <input type="email" id="loginEmail" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword" class="form-label">Contraseña</label>
+                            <input type="password" id="loginPassword" required class="form-input">
+                        </div>
+                        <button type="submit" class="form-button">Iniciar Sesión</button>
+                    </form>
+                    <p class="text-center mt-2">¿No tenés cuenta? <a href="#" onclick="showRegister()" class="nav-link">Registrate aquí</a></p>
+                    <div id="loginMessage" class="message-container"></div>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register-form" style="display: none;" class="auth-form">
+                    <h2 class="form-title">Registrarse</h2>
+                    <form id="registerForm" class="form" onsubmit="handleUserRegister(event)">
+                        <!-- Credenciales de ingreso -->
+                        <div class="form-group">
+                            <label for="registerEmail" class="form-label">Email</label>
+                            <input type="email" id="registerEmail" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword" class="form-label">Contraseña</label>
+                            <input type="password" id="registerPassword" required class="form-input">
+                        </div>
+                        
+                        <!-- Información personal -->
+                        <div class="form-group">
+                            <label for="registerName" class="form-label">Nombre</label>
+                            <input type="text" id="registerName" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerLastname" class="form-label">Apellido</label>
+                            <input type="text" id="registerLastname" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPersonalId" class="form-label">DNI</label>
+                            <input type="text" id="registerPersonalId" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerBirthDate" class="form-label">Fecha de Nacimiento</label>
+                            <input type="date" id="registerBirthDate" required class="form-input">
+                        </div>
+                        
+                        <!-- Rol (oculto, se asigna automáticamente) -->
+                        <input type="hidden" id="registerRole" value="patient">
+                        
+                        <button type="submit" class="form-button">Registrarse</button>
+                    </form>
+                    <p class="text-center mt-2">¿Ya tenés cuenta? <a href="#" onclick="showLogin()" class="nav-link">Iniciá sesión aquí</a></p>
+                    <div id="registerMessage" class="message-container"></div>
+                </div>
+            </section>
+
+            <!-- Services Section -->
+            <section id="servicios" class="services-section">
+                <h2 class="section-title">Nuestros Servicios</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <h3>Medicina General</h3>
+                        <p>Atención primaria y consultas generales</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Cardiología</h3>
+                        <p>Especialistas en salud cardiovascular</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Dermatología</h3>
+                        <p>Cuidado de la piel y tratamientos especializados</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Ginecología</h3>
+                        <p>Salud femenina integral</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Pediatría</h3>
+                        <p>Cuidado especializado para niños</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Traumatología</h3>
+                        <p>Tratamiento de lesiones y rehabilitación</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Schedule Section -->
+            <section id="horarios" class="schedule-section">
+                <h2 class="section-title">Horarios de Atención</h2>
+                <div class="schedule-grid">
+                    <div class="schedule-card">
+                        <h3>Lunes a Viernes</h3>
+                        <p class="schedule-time">8:00 AM - 5:00 PM</p>
+                    </div>
+                    <div class="schedule-card">
+                        <h3>Sábados</h3>
+                        <p class="schedule-time">8:00 AM - 2:00 PM</p>
+                    </div>
+                    <div class="schedule-card emergency">
+                        <h3>Emergencias</h3>
+                        <p class="schedule-time">24/7</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Centro Médico San Lucas. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>

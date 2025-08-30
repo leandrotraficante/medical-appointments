@@ -128,9 +128,10 @@ const patientsSchema = new mongoose.Schema({
      */
     dateOfBirth: {
         type: Date,
+        required: [true, 'Date of birth is required'],
         validate: {
             validator: function(value) {
-                if (!value) return true; // Opcional
+                if (!value) return false; // Ahora es obligatorio
                 
                 const today = new Date();
                 const birthDate = new Date(value);

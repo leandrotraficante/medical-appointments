@@ -17,7 +17,7 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 - [🚀 Instalación y Uso](#-instalación-y-uso)
 - [📋 Guía de Endpoints](#-guía-de-endpoints)
 - [🔐 Autenticación](#-autenticación)
-- [🧪 Testing](#-testing)
+- [🔒 Seguridad](#-seguridad)
 - [📚 Documentación](#-documentación)
 
 ---
@@ -26,13 +26,13 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 
 **Medical Appointments System** es una API REST completa para gestionar citas médicas entre pacientes y doctores. El sistema implementa:
 
-- **Autenticación JWT** con roles diferenciados
-- **Arquitectura en capas** (MVC + Repository Pattern)
-- **Gestión de usuarios** por roles (Admin, Doctor, Patient)
-- **Búsqueda inteligente** de doctores y especialidades
-- **Gestión de citas** con estados y validaciones
-- **Perfiles personales** editables
-- **Endpoints públicos** para búsqueda sin autenticación
+- **Autenticación JWT** con roles diferenciados (Admin, Doctor, Patient)
+- **Arquitectura en capas** (Controller → Service → Repository → Model)
+- **Gestión de usuarios** con activación/desactivación
+- **Sistema de citas** con validaciones de negocio
+- **Búsqueda inteligente** de usuarios y especialidades
+- **Paginación unificada** en todas las consultas
+- **Validaciones robustas** en múltiples niveles
 
 ---
 
@@ -46,15 +46,15 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 │ • Validation    │    │ • Validation    │    │ • Queries       │
 │ • Response      │    │ • Coordination  │    │ • Transactions  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                       │
-                                ▼                       ▼
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │     Models      │    │   Middleware    │
-                       │                 │    │                 │
-                       │ • Data Schema   │    │ • Auth          │
-                       │ • Validation    │    │ • Role Control  │
-                       │ • Indexes       │    │ • Error Handling│
-                       └─────────────────┘    └─────────────────┘
+                               │                       │
+                               ▼                       ▼
+                      ┌─────────────────┐    ┌─────────────────┐
+                      │     Models      │    │   Middleware    │
+                      │                 │    │                 │
+                      │ • Data Schema   │    │ • Auth          │
+                      │ • Validation    │    │ • Role Control  │
+                      │ • Indexes       │    │ • Rate Limiting │
+                      └─────────────────┘    └─────────────────┘
 ```
 
 ---
@@ -68,22 +68,16 @@ backend/
 │   │   ├── admin.controller.js
 │   │   ├── appointments.controller.js
 │   │   ├── auth.controller.js
-│   │   ├── profile.controller.js
-│   │   ├── public.controller.js
 │   │   └── users.controller.js
 │   ├── services/             # Lógica de negocio
 │   │   ├── admin.service.js
 │   │   ├── appointments.service.js
 │   │   ├── auth.service.js
-│   │   ├── profile.service.js
-│   │   ├── public.service.js
 │   │   └── user.service.js
 │   ├── repositories/         # Acceso a datos
 │   │   ├── admin.repository.js
 │   │   ├── appointments.repository.js
 │   │   ├── auth.repository.js
-│   │   ├── profile.repository.js
-│   │   ├── public.repository.js
 │   │   └── user.repository.js
 │   ├── models/               # Esquemas MongoDB
 │   │   ├── admin.model.js
@@ -94,20 +88,22 @@ backend/
 │   │   ├── admin.route.js
 │   │   ├── appointments.route.js
 │   │   ├── auth.route.js
-│   │   ├── profile.route.js
-│   │   ├── public.route.js
 │   │   └── users.route.js
 │   ├── middleware/           # Middleware personalizado
 │   │   └── auth.middleware.js
-│   ├── utils/                # Utilidades del sistema
+│   ├── utils/                # Utilidades
 │   │   ├── custom.exceptions.js
 │   │   ├── utils.js
 │   │   └── validation.js
-│   ├── config/               # Configuraciones
+│   ├── config/               # Configuración
 │   │   └── configs.js
-│   └── app.js               # Punto de entrada
+│   └── app.js                # Aplicación principal
+├── public/                   # Frontend estático
+│   ├── css/                  # Estilos CSS
+│   ├── js/                   # JavaScript frontend
+│   └── *.html                # Páginas HTML
 ├── package.json
-└── README.md
+└── jest.config.js
 ```
 
 ---
@@ -156,43 +152,21 @@ Maneja autenticación y registro de usuarios.
 | `login` | Autentica usuario | `POST /api/auth/login` |
 | `logout` | Cierra sesión | `GET /api/auth/logout` |
 
-### Profile Controller
-Gestiona perfiles personales de usuarios.
-
-| Método | Descripción | Endpoint |
-|--------|-------------|----------|
-| `getMyProfile` | Obtiene perfil del usuario logueado | `GET /api/profile` |
-| `updateMyProfile` | Actualiza perfil del usuario | `PUT /api/profile` |
-
-### Public Controller
-Endpoints públicos para búsqueda de doctores.
-
-| Método | Descripción | Endpoint |
-|--------|-------------|----------|
-| `getActiveDoctors` | Lista doctores activos (público) | `GET /api/public/doctors` |
-| `getAllSpecialties` | Lista todas las especialidades | `GET /api/public/specialties` |
-| `searchDoctorsBySpecialty` | Busca doctores por especialidad | `GET /api/public/doctors/search` |
-| `getDoctorSchedule` | Obtiene información de doctor | `GET /api/public/doctors/:id/schedule` |
-
 ### Users Controller
 Gestión y búsqueda de usuarios del sistema.
 
 | Método | Descripción | Endpoint |
 |--------|-------------|----------|
-| `getAllDoctors` | Lista todos los doctores | `GET /api/users/doctors` |
-| `getAllPatients` | Lista todos los pacientes | `GET /api/users/patients` |
-| `findActiveDoctors` | Lista doctores activos | `GET /api/users/active-doctors` |
-| `findActivePatients` | Lista pacientes activos | `GET /api/users/active-patients` |
+| `getAllDoctors` | Lista todos los doctores con paginación | `GET /api/users/doctors` |
+| `getAllPatients` | Lista todos los pacientes con paginación | `GET /api/users/patients` |
+| `findActiveDoctors` | Lista doctores activos con paginación | `GET /api/users/active-doctors` |
+| `findActivePatients` | Lista pacientes activos con paginación | `GET /api/users/active-patients` |
 | `findInactiveDoctors` | Lista doctores inactivos | `GET /api/users/inactive-doctors` |
-| `findInactivePatients` | Lista pacientes inactivos | `GET /api/users/inactive-patients` |
+| `findInactivePatients` | Lista pacientes inactivos con paginación | `GET /api/users/inactive-patients` |
 | `searchUsers` | Búsqueda unificada inteligente | `GET /api/users/search?q=query` |
-| `findDoctorByLicense` | Busca doctor por licencia | `GET /api/users/doctors/license/:license` |
-| `findDoctorByPersonalId` | Busca doctor por DNI | `GET /api/users/doctors/personal-id/:id` |
-| `findDoctorByEmail` | Busca doctor por email | `GET /api/users/doctors/email/:email` |
-| `findPatientByPersonalId` | Busca paciente por DNI | `GET /api/users/patients/personal-id/:id` |
-| `findPatientByEmail` | Busca paciente por email | `GET /api/users/patients/email/:email` |
-| `searchDoctorsByName` | Busca doctores por nombre | `GET /api/users/doctors-by-name?searchTerm=name` |
-| `searchPatientsByName` | Busca pacientes por nombre | `GET /api/users/patients-by-name?searchTerm=name` |
+| `getDoctorById` | Obtiene doctor por ID | `GET /api/users/doctors/:id` |
+| `getPatientById` | Obtiene paciente por ID | `GET /api/users/patients/:id` |
+| `getMyProfile` | Obtiene perfil del usuario autenticado | `GET /api/users/profile` |
 
 ---
 
@@ -204,61 +178,49 @@ Lógica de negocio para gestión administrativa.
 - **`getAllAdmins()`** - Obtiene todos los administradores
 - **`activateDoctor(doctorId)`** - Activa cuenta de doctor
 - **`deactivateDoctor(doctorId)`** - Desactiva cuenta de doctor
-- **`updateDoctor(doctorId, updateData)`** - Actualiza información de doctor
-- **`deleteDoctor(doctorId)`** - Desactiva doctor (soft delete)
+- **`updateDoctor(doctorId, updateData)`** - Actualiza información de doctor con validación de campos
+- **`deleteDoctor(doctorId)`** - Elimina doctor del sistema
 - **`activatePatient(patientId)`** - Activa cuenta de paciente
 - **`deactivatePatient(patientId)`** - Desactiva cuenta de paciente
-- **`updatePatient(patientId, updateData)`** - Actualiza información de paciente
-- **`deletePatient(patientId)`** - Desactiva paciente (soft delete)
+- **`updatePatient(patientId, updateData)`** - Actualiza información de paciente con validación de campos
+- **`deletePatient(patientId)`** - Elimina paciente del sistema
 
 ### Appointments Service
 Lógica de negocio para citas médicas.
 
-- **`createAppointmentService(appointmentData)`** - Crea nueva cita
-- **`findAllAppointments(filters)`** - Lista citas con filtros
-- **`findAppointmentById(appointmentId)`** - Obtiene cita por ID
-- **`findAppointmentsByDoctor(doctorId, filters)`** - Lista citas de un doctor
-- **`findAppointmentsByPatient(patientId, filters)`** - Lista citas de un paciente
-- **`findAvailableSlots(doctorId, date)`** - Obtiene horarios disponibles
-- **`updateAppointmentDateTime(appointmentId, newDateTime)`** - Actualiza fecha/hora
+- **`createAppointmentService(appointmentData)`** - Crea nueva cita con validación de doctor activo
+- **`findAllAppointments(filters, page, limit)`** - Lista citas con filtros y paginación
+- **`findAppointmentById(appointmentId)`** - Obtiene cita por ID con población de datos
+- **`findAppointmentsByDoctor(doctorId, filters)`** - Lista citas de un doctor específico
+- **`findAppointmentsByPatient(patientId, filters)`** - Lista citas de un paciente específico
+- **`findAppointmentsByDateRange(startDate, endDate, filters)`** - Busca citas por rango de fechas
+- **`findAppointmentsByStatus(status, filters)`** - Busca citas por estado específico
+- **`findAvailableSlots(doctorId, date)`** - Obtiene horarios disponibles excluyendo ocupados
+- **`updateAppointmentStatus(appointmentId, newStatus)`** - Actualiza estado con validaciones
+- **`updateAppointmentDateTime(appointmentId, newDateTime)`** - Actualiza fecha/hora con validación de conflictos
+- **`deleteAppointment(appointmentId)`** - Cancela cita (soft delete)
+- **`cancelAllDoctorAppointmentsInWeek(doctorId, startDate, endDate, reason)`** - Cancela múltiples citas
 
 ### Auth Service
-Lógica de autenticación y registro.
+Lógica de autenticación y registro con validaciones.
 
-- **`register(userData, role)`** - Registra nuevo usuario
-- **`login(email, password)`** - Autentica usuario
-
-### Profile Service
-Lógica para gestión de perfiles.
-
-- **`getMyProfile(userId, role)`** - Obtiene perfil de usuario
-- **`updateMyProfile(userId, role, updateData)`** - Actualiza perfil
-
-### Public Service
-Lógica para endpoints públicos.
-
-- **`getActiveDoctors()`** - Lista doctores activos
-- **`getAllSpecialties()`** - Lista todas las especialidades
-- **`searchDoctorsBySpecialty(specialty)`** - Busca doctores por especialidad
-- **`getDoctorSchedule(doctorId)`** - Obtiene información de doctor
+- **`register(userData, role)`** - Registra nuevo usuario con validación de email único
+- **`login(email, password)`** - Autentica usuario con validación de cuenta activa
+- **`logout(userId)`** - Maneja cierre de sesión
 
 ### User Service
-Lógica para gestión de usuarios.
+Lógica para gestión de usuarios con paginación.
 
-- **`getAllDoctors()`** - Lista todos los doctores
-- **`getAllPatients()`** - Lista todos los pacientes
-- **`findActiveDoctors()`** - Lista doctores activos
-- **`findActivePatients()`** - Lista pacientes activos
-- **`findInactiveDoctors()`** - Lista doctores inactivos
-- **`findInactivePatients()`** - Lista pacientes inactivos
-- **`searchUsers(query)`** - Búsqueda unificada inteligente
-- **`findDoctorByLicense(license)`** - Busca doctor por licencia
-- **`findDoctorByPersonalId(personalId)`** - Busca doctor por DNI
-- **`findDoctorByEmail(email)`** - Busca doctor por email
-- **`findPatientByPersonalId(personalId)`** - Busca paciente por DNI
-- **`findPatientByEmail(email)`** - Busca paciente por email
-- **`searchDoctorsByName(searchTerm)`** - Busca doctores por nombre
-- **`searchPatientsByName(searchTerm)`** - Busca pacientes por nombre
+- **`getAllDoctors(page, limit)`** - Lista todos los doctores con paginación opcional
+- **`getAllPatients(page, limit)`** - Lista todos los pacientes con paginación opcional
+- **`findActiveDoctors(page, limit)`** - Lista doctores activos con paginación
+- **`findActivePatients(page, limit)`** - Lista pacientes activos con paginación
+- **`findInactiveDoctors(page, limit)`** - Lista doctores inactivos con paginación
+- **`findInactivePatients(page, limit)`** - Lista pacientes inactivos con paginación
+- **`searchUsers(query)`** - Búsqueda unificada inteligente en todos los campos
+- **`findDoctorById(doctorId)`** - Busca doctor por ID
+- **`findPatientById(patientId)`** - Busca paciente por ID
+- **`getMyProfile(userId, userRole)`** - Obtiene perfil del usuario autenticado
 
 ---
 
@@ -271,70 +233,49 @@ Acceso a datos para gestión administrativa.
 - **`activateDoctor(doctorId)`** - Activa cuenta de doctor
 - **`deactivateDoctor(doctorId)`** - Desactiva cuenta de doctor
 - **`updateDoctor(doctorId, updateData)`** - Actualiza información de doctor
-- **`deleteDoctor(doctorId)`** - Desactiva doctor (soft delete)
+- **`deleteDoctor(doctorId)`** - Elimina doctor del sistema (hard delete)
 - **`activatePatient(patientId)`** - Activa cuenta de paciente
 - **`deactivatePatient(patientId)`** - Desactiva cuenta de paciente
 - **`updatePatient(patientId, updateData)`** - Actualiza información de paciente
-- **`deletePatient(patientId)`** - Desactiva paciente (soft delete)
+- **`deletePatient(patientId)`** - Elimina paciente del sistema (hard delete)
 
 ### Appointments Repository
-Acceso a datos para citas médicas.
+Acceso a datos para citas médicas con validaciones.
 
 - **`createAppointment(appointmentData)`** - Crea nueva cita
-- **`findAllAppointments(filters)`** - Lista citas con filtros
-- **`findAppointmentById(appointmentId)`** - Obtiene cita por ID
+- **`findAllAppointments(filters, page, limit)`** - Lista citas con filtros y paginación
+- **`findAppointmentById(appointmentId)`** - Obtiene cita por ID con población
 - **`findAppointmentsByDoctor(doctorId, filters)`** - Lista citas de un doctor
 - **`findAppointmentsByPatient(patientId, filters)`** - Lista citas de un paciente
 - **`findAppointmentsByDateRange(startDate, endDate, filters)`** - Busca citas por rango de fechas
 - **`findAppointmentsByStatus(status, filters)`** - Busca citas por estado
-- **`findAvailableSlots(doctorId, date)`** - Obtiene horarios disponibles
+- **`findAvailableSlots(doctorId, date)`** - Genera slots disponibles (9:00-17:00, 30min)
 - **`updateAppointmentStatus(appointmentId, newStatus)`** - Actualiza estado de cita
-- **`updateAppointmentDateTime(appointmentId, newDateTime)`** - Actualiza fecha/hora
-- **`deleteAppointment(appointmentId)`** - Cancela cita
-- **`cancelAllDoctorAppointmentsInWeek(doctorId, startDate, endDate, reason)`** - Cancela todas las citas de un doctor en una semana
+- **`updateAppointmentDateTime(appointmentId, newDateTime)`** - Actualiza fecha/hora con validación de conflictos
+- **`deleteAppointment(appointmentId)`** - Cancela cita (soft delete)
+- **`cancelAllDoctorAppointmentsInWeek(doctorId, startDate, endDate, reason)`** - Cancela múltiples citas
 
 ### Auth Repository
-Acceso a datos para autenticación.
+Acceso a datos para autenticación y registro.
 
 - **`createAdmin(adminData)`** - Crea nuevo administrador
 - **`createDoctor(doctorData)`** - Crea nuevo doctor
 - **`createPatient(patientData)`** - Crea nuevo paciente
-- **`checkEmailExists(email)`** - Verifica si email ya existe
-
-### Profile Repository
-Acceso a datos para perfiles.
-
-- **`findUserByIdAndRole(userId, role)`** - Busca usuario por ID y rol
-- **`updateUserProfile(userId, role, updateData)`** - Actualiza perfil de usuario
-
-### Public Repository
-Acceso a datos para endpoints públicos.
-
-- **`getActiveDoctors()`** - Lista doctores activos
-- **`getAllSpecialties()`** - Lista todas las especialidades
-- **`searchDoctorsBySpecialty(specialty)`** - Busca doctores por especialidad
-- **`getDoctorSchedule(doctorId)`** - Obtiene información de doctor
+- **`checkEmailExists(email)`** - Verifica si email ya existe en cualquier rol
 
 ### User Repository
-Acceso a datos para gestión de usuarios.
+Acceso a datos para gestión de usuarios con paginación.
 
-- **`getAllDoctors()`** - Lista todos los doctores
-- **`getAllPatients()`** - Lista todos los pacientes
-- **`findActiveDoctors()`** - Lista doctores activos
-- **`findActivePatients()`** - Lista pacientes activos
+- **`getAllDoctors(page, limit)`** - Lista todos los doctores con paginación opcional
+- **`getAllPatients(page, limit)`** - Lista todos los pacientes con paginación opcional
+- **`findActiveDoctors(page, limit)`** - Lista doctores activos con paginación
+- **`findActivePatients(page, limit)`** - Lista pacientes activos con paginación
 - **`findInactiveDoctors()`** - Lista doctores inactivos
-- **`findInactivePatients()`** - Lista pacientes inactivos
+- **`findInactivePatients(page, limit)`** - Lista pacientes inactivos con paginación
 - **`findAdminById(adminId)`** - Busca administrador por ID
 - **`findDoctorById(doctorId)`** - Busca doctor por ID
 - **`findPatientById(patientId)`** - Busca paciente por ID
-- **`searchUsers(query)`** - Búsqueda unificada inteligente
-- **`findDoctorByLicense(license)`** - Busca doctor por licencia
-- **`findDoctorByPersonalId(personalId)`** - Busca doctor por DNI
-- **`findDoctorByEmail(email)`** - Busca doctor por email
-- **`findPatientByPersonalId(personalId)`** - Busca paciente por DNI
-- **`findPatientByEmail(email)`** - Busca paciente por email
-- **`searchDoctorsByName(searchTerm)`** - Busca doctores por nombre
-- **`searchPatientsByName(searchTerm)`** - Busca pacientes por nombre
+- **`searchUsers(query)`** - Búsqueda unificada inteligente en todos los campos (nombre, email, DNI, licencia, especialidades)
 
 ---
 
@@ -343,22 +284,14 @@ Acceso a datos para gestión de usuarios.
 ### Admin Model
 ```javascript
 {
-  email: String,           // Email único (username)
-  password: String,        // Contraseña hasheada
-  name: String,            // Nombre
-  lastname: String,        // Apellido
-  personalId: String,      // DNI único
-  phone: String,           // Teléfono
-  role: String,            // Siempre 'admin'
-  isActive: Boolean,       // Estado activo/inactivo
-  permissions: {           // Permisos del sistema
-    manageDoctors: Boolean,
-    managePatients: Boolean,
-    manageAppointments: Boolean,
-    viewReports: Boolean,
-    systemAdmin: Boolean
-  },
-  last_connection: Date,   // Última conexión
+  email: String,           // Email único (required)
+  password: String,        // Contraseña hasheada (required)
+  name: String,            // Nombre (required)
+  lastname: String,        // Apellido (optional)
+  personalId: String,      // DNI único (required)
+  phone: String,           // Teléfono (optional)
+  dateOfBirth: Date,       // Fecha de nacimiento (optional)
+  isActive: Boolean,       // Estado activo/inactivo (default: true)
   timestamps: true         // createdAt, updatedAt
 }
 ```
@@ -366,17 +299,16 @@ Acceso a datos para gestión de usuarios.
 ### Doctor Model
 ```javascript
 {
-  email: String,           // Email único (username)
-  password: String,        // Contraseña hasheada
-  personalId: String,      // DNI único
-  name: String,            // Nombre
-  lastname: String,        // Apellido
-  specialties: [String],   // Array de especialidades
-  license: String,         // Número de licencia único
-  phone: String,           // Teléfono
-  role: String,            // Siempre 'doctor'
-  isActive: Boolean,       // Estado activo/inactivo
-  last_connection: Date,   // Última conexión
+  email: String,           // Email único (required)
+  password: String,        // Contraseña hasheada (required)
+  personalId: String,      // DNI único (required)
+  name: String,            // Nombre (required)
+  lastname: String,        // Apellido (optional)
+  specialties: [String],   // Array de especialidades (required)
+  license: String,         // Número de licencia único (required)
+  phone: String,           // Teléfono (optional)
+  dateOfBirth: Date,       // Fecha de nacimiento (optional)
+  isActive: Boolean,       // Estado activo/inactivo (default: true)
   timestamps: true         // createdAt, updatedAt
 }
 ```
@@ -384,16 +316,14 @@ Acceso a datos para gestión de usuarios.
 ### Patient Model
 ```javascript
 {
-  email: String,           // Email único (username)
-  password: String,        // Contraseña hasheada
-  personalId: String,      // DNI único
-  name: String,            // Nombre
-  lastname: String,        // Apellido (opcional)
-  dateOfBirth: Date,       // Fecha de nacimiento
-  phone: String,           // Teléfono (opcional)
-  role: String,            // Siempre 'patient'
-  isActive: Boolean,       // Estado activo/inactivo
-  last_connection: Date,   // Última conexión
+  email: String,           // Email único (required)
+  password: String,        // Contraseña hasheada (required)
+  personalId: String,      // DNI único (required)
+  name: String,            // Nombre (required)
+  lastname: String,        // Apellido (optional)
+  dateOfBirth: Date,       // Fecha de nacimiento (optional)
+  phone: String,           // Teléfono (optional)
+  isActive: Boolean,       // Estado activo/inactivo (default: true)
   timestamps: true         // createdAt, updatedAt
 }
 ```
@@ -462,10 +392,10 @@ Acceso a datos para gestión de usuarios.
 - **`GET /inactive-patients`** - Lista pacientes inactivos
 - **`GET /search`** - Búsqueda unificada inteligente
 - **`GET /doctors/license/:license`** - Busca doctor por licencia
-- **`GET /doctors/personal-id/:id`** - Busca doctor por DNI
-- **`GET /doctors/email/:email`** - Busca doctor por email
-- **`GET /patients/personal-id/:id`** - Busca paciente por DNI
-- **`GET /patients/email/:email`** - Busca paciente por email
+
+
+
+
 - **`GET /doctors-by-name`** - Busca doctores por nombre
 - **`GET /patients-by-name`** - Busca pacientes por nombre
 
@@ -518,28 +448,31 @@ JWT_EXPIRES_IN=24h
 ## 🚀 Instalación y Uso
 
 ### Prerrequisitos
-- Node.js 16+
-- MongoDB 5+
+- Node.js 18+
+- MongoDB 6+
 - npm o yarn
 
 ### Instalación
 ```bash
-# Clonar repositorio
-git clone <repository-url>
-cd MedicalAppointments/backend
+# Navegar al directorio backend
+cd backend
 
 # Instalar dependencias
 npm install
 
 # Configurar variables de entorno
-cp .env.example .env
-# Editar .env con tus configuraciones
+# Crear archivo .env con:
+PRIVATE_KEY_JWT=your_secret_key_here
+JWT_EXPIRES_IN=24h
+MONGO_URI=mongodb://localhost:27017/medical_appointments
+PORT=8080
+NODE_ENV=development
 
-# Iniciar servidor
-npm start
-
-# Modo desarrollo
+# Iniciar servidor de desarrollo
 npm run dev
+
+# Iniciar servidor de producción
+npm start
 ```
 
 ### Scripts Disponibles
@@ -547,9 +480,14 @@ npm run dev
 {
   "start": "node src/app.js",
   "dev": "nodemon src/app.js",
-  "test": "jest"
+  "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
 }
 ```
+
+### Acceso a la Aplicación
+- **Frontend**: `http://localhost:8080`
+- **API**: `http://localhost:8080/api`
+- **Login**: `http://localhost:8080/index.html`
 
 ---
 
@@ -698,6 +636,42 @@ GET /api/public/doctors/search?specialty=Cardiology
 
 # Ver especialidades disponibles
 GET /api/public/specialties
+```
+
+---
+
+## 🔒 Seguridad
+
+### Autenticación y Autorización
+- **JWT Tokens** con cookies HttpOnly para prevenir XSS
+- **Role-based Access Control** (RBAC) con middleware
+- **Password hashing** con bcrypt y salt rounds
+- **Token expiration** configurable
+- **Account deactivation** para suspender usuarios
+
+### Rate Limiting
+- **Global rate limiting**: 100 requests/15min por IP
+- **Auth rate limiting**: 5 intentos de login/15min por IP
+- **Protection against brute force** attacks
+
+### Validaciones de Entrada
+- **MongoDB ObjectId validation** en parámetros
+- **Input sanitization** en búsquedas
+- **Date validation** para citas futuras
+- **Business rules validation** en múltiples capas
+
+### Protección de Datos
+- **Password exclusion** en todas las consultas (`.select('-password')`)
+- **Sensitive data filtering** en responses
+- **Error message sanitization** para no exponer información del sistema
+
+### Recomendaciones de Producción
+```javascript
+// Variables de entorno requeridas
+PRIVATE_KEY_JWT=your_secret_key_here
+JWT_EXPIRES_IN=24h
+MONGO_URI=mongodb://localhost:27017/medical_appointments
+NODE_ENV=production
 ```
 
 ---

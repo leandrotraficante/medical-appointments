@@ -26,6 +26,8 @@ usersRoutes.use(authenticateToken);
 
 // ===== USER MANAGEMENT ROUTES =====
 
+
+
 /**
  * @route GET /api/users/doctors
  * @desc Get all doctors in the system
@@ -95,7 +97,7 @@ usersRoutes.get('/inactive-patients', requireRole(['admin']), findInactivePatien
 /**
  * @route GET /api/users/search
  * @desc Unified search across all user types and fields
- * @access Admin only
+ * @access Admin, doctor, and patient
  * @query {string} q - Search query to find users
  * @returns {Object} JSON response with matching users and their types
  * @example
@@ -103,7 +105,7 @@ usersRoutes.get('/inactive-patients', requireRole(['admin']), findInactivePatien
  * Headers: { "Authorization": "Bearer <jwt_token>" }
  * // Returns users with name, email, DNI, or specialty containing "john"
  */
-usersRoutes.get('/search', requireRole(['admin']), searchUsers);
+usersRoutes.get('/search', requireRole(['admin', 'doctor', 'patient']), searchUsers);
 
 /**
  * @route GET /api/users/doctors/:doctorId
