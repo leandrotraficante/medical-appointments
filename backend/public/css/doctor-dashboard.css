@@ -9,7 +9,7 @@
 }
 
 body {
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     line-height: 1.6;
     color: #333;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -126,6 +126,7 @@ body {
     position: sticky;
     top: 100px;
     transition: all 0.3s ease;
+    min-width: 250px;
 }
 
 .sidebar-nav {
@@ -182,8 +183,6 @@ body {
 
 .sidebar-btn.active::before {
     display: none;
-}
-    min-width: 250px;
 }
 
 .sidebar-header h3 {
@@ -403,6 +402,11 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
+    justify-content: center;
+    flex: 0 0 180px;
 }
 
 .action-btn.confirm-btn {
@@ -479,14 +483,18 @@ body {
 }
 
 .action-btn {
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-radius: 8px;
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 120px;
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
+    justify-content: center;
+    flex: 0 0 180px;
 }
 
 .confirm-btn {
@@ -570,30 +578,6 @@ body {
     outline: none;
     border-color: #2196f3;
     box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.cancel-btn {
-    width: 100%;
-    padding: 0.875rem 1.5rem;
-    background: #f44336;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 1rem;
-}
-
-.cancel-btn:hover {
-    background: #d32f2f;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
-}
-
-.cancel-btn:active {
-    transform: translateY(0);
 }
 
 /* ===== MESSAGE CONTAINER ===== */
@@ -812,7 +796,7 @@ body {
 }
 
 .appointment-actions-detail .action-btn {
-    padding: 0.875rem 1.5rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-radius: 8px;
     font-size: 0.875rem;
@@ -822,14 +806,18 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    min-width: 140px;
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
     justify-content: center;
+    flex: 0 0 180px;
 }
 
 .appointment-actions-detail .confirm-btn {
     background: linear-gradient(135deg, #4caf50, #45a049);
     color: white;
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+
 }
 
 .appointment-actions-detail .confirm-btn:hover {
@@ -838,17 +826,6 @@ body {
     box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
 }
 
-.appointment-actions-detail .cancel-btn {
-    background: linear-gradient(135deg, #f44336, #d32f2f);
-    color: white;
-    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
-}
-
-.appointment-actions-detail .cancel-btn:hover {
-    background: linear-gradient(135deg, #d32f2f, #c62828);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
-}
 
 .appointment-actions-detail .complete-btn {
     background: linear-gradient(135deg, #ff9800, #f57c00);
@@ -917,8 +894,10 @@ body {
     }
     
     .action-btn {
-        flex: 1;
-        min-width: auto;
+        flex: 0 0 180px !important;
+        width: 180px !important;
+        min-width: 180px !important;
+        max-width: 180px !important;
     }
     
     .appointments-tabs {
@@ -992,8 +971,4 @@ body {
         gap: 0.5rem;
     }
     
-    .appointment-actions-detail .action-btn {
-        width: 100%;
-        min-width: auto;
-    }
 }

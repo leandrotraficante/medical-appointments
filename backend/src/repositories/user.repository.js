@@ -25,6 +25,8 @@ export default class UserRepository {
         }
     }
 
+
+
     /**
      * Retrieves all patients from the database
      * @returns {Promise<Array>} - Array of all patient documents
@@ -98,19 +100,8 @@ export default class UserRepository {
      * const inactiveDoctors = await userRepository.findInactiveDoctors();
      * console.log(`Found ${inactiveDoctors.length} inactive doctors`);
      */
-    findInactiveDoctors = async (page = 1, limit = 5) => {
-        if (page && limit) {
-            // Con paginación
-            const skip = (page - 1) * limit;
-            const [doctors, total] = await Promise.all([
-                doctorsModel.find({ isActive: false }).select('-password').skip(skip).limit(limit),
-                doctorsModel.countDocuments({ isActive: false })
-            ]);
-            return { doctors, total, pagination: true };
-        } else {
-            // Sin paginación (comportamiento original)
-            return await doctorsModel.find({ isActive: false }).select('-password');
-        }
+    findInactiveDoctors = async () => {
+        return await doctorsModel.find({ isActive: false }).select('-password');
     }
 
     /**
@@ -220,4 +211,18 @@ export default class UserRepository {
         
         return results;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

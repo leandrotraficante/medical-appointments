@@ -65,6 +65,8 @@ export default class AppointmentsRepository {
         }
     }
 
+
+
     /**
      * Finds an appointment by its unique ID with populated references
      * @param {string} appointmentId - Appointment's MongoDB ID
@@ -132,23 +134,23 @@ export default class AppointmentsRepository {
         // Convertir a objetos Date si vienen como strings
         const startDateObj = new Date(startDate);
         const endDateObj = new Date(endDate);
-        
+
         // Ajustar endDate para incluir todo el día
         endDateObj.setHours(23, 59, 59, 999);
-        
+
         // Limpiar filters - excluir startDate y endDate que no son campos de la BD
         const { startDate: _, endDate: __, ...cleanFilters } = filters;
-        
+
         const query = {
             date: { $gte: startDateObj, $lte: endDateObj },
             ...cleanFilters
         };
-        
+
         const appointments = await appointmentsModel.find(query)
             .populate('patient', 'name lastname personalId isActive')
             .populate('doctor', 'name lastname license specialties email isActive')
             .sort({ date: 1 });
-            
+
         return appointments;
     }
 
@@ -200,45 +202,54 @@ export default class AppointmentsRepository {
         // Excluir citas canceladas, pero incluir pending y confirmed como ocupadas
         const existingAppointments = await appointmentsModel.find({
             doctor: doctorId,
-            date: {
-                $gte: startOfDay,
-                $lt: endOfDay
-            },
-            status: { $in: ['pending', 'confirmed'] }
-        });
+            date: { $gte: startOfDay, $lt: endOfDay },
+            status: { $nin: ['cancelled'] }
+        }).sort({ date: 1 });
 
+
+
+        // Generar slots disponibles (cada 30 minutos de 9:00 a 17:00)
         const availableSlots = [];
-        for (let hour = 9; hour <= 17; hour++) {
-            for (let minute of [0, 30]) {
-                if (hour === 17 && minute === 30) break;
-                
-                const slotTime = new Date(date);
-                slotTime.setHours(hour, minute, 0, 0);
-                
+        const startHour = 9; // 9:00 AM
+        const endHour = 17;  // 5:00 PM
+
+        for (let hour = startHour; hour < endHour; hour++) {
+            for (let minute = 0; minute < 60; minute += 30) {
+                // Crear la fecha usando la hora local para evitar problemas de zona horaria
+                const slotTime = new Date(date + `T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`);
+
+                // Verificar si el slot está disponible
                 const isOccupied = existingAppointments.some(app => {
                     const appTime = new Date(app.date);
+
+                    // Comparar solo la hora y minuto, ignorando segundos y milisegundos
                     const slotHour = slotTime.getHours();
                     const slotMinute = slotTime.getMinutes();
                     const appHour = appTime.getHours();
                     const appMinute = appTime.getMinutes();
-                    
-                    const isOccupiedResult = slotHour === appHour && slotMinute === appMinute;
-                    
+
+                    // Un slot está ocupado si la cita está en la misma hora y minuto
+                    const isOccupiedResult = (slotHour === appHour && slotMinute === appMinute);
+
+                    // Debug log para cada slot
+                    if (isOccupiedResult) {
+
+                    }
+
                     return isOccupiedResult;
                 });
 
                 if (!isOccupied) {
                     availableSlots.push({
                         time: slotTime,
-                        formatted: slotTime.toLocaleTimeString('es-AR', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
+                        formatted: slotTime.toLocaleTimeString('es-AR', {
+                            hour: '2-digit',
+                            minute: '2-digit'
                         })
                     });
                 }
             }
         }
-
         return availableSlots;
     }
 

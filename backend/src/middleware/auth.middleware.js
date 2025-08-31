@@ -1,3 +1,4 @@
+import authService from '../services/auth.service.js';
 import UserRepository from '../repositories/user.repository.js';
 import { verifyToken } from '../utils/utils.js';
 
@@ -34,6 +35,7 @@ export const authenticateToken = async (req, res, next) => {
         
         req.user = {
             id: decoded.userId,
+            userId: decoded.userId,
             email: decoded.email,
             role: decoded.role,
             name: decoded.name

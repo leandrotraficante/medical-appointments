@@ -78,6 +78,7 @@
                         <button onclick="adminDashboard.loadDoctors('all')">Todos los Doctores</button>
                         <button onclick="adminDashboard.loadDoctors('active')">Doctores Activos</button>
                         <button onclick="adminDashboard.loadDoctors('inactive')">Doctores Inactivos</button>
+                        <button onclick="adminDashboard.showCreateDoctorForm()" class="create-doctor-btn">Registrar Nuevo Doctor</button>
                     </div>
 
                     <div id="patients-subtabs" class="users-subtabs" style="display: none;">
@@ -175,6 +176,84 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Modal para crear nuevo doctor -->
+    <div id="create-doctor-modal" class="modal" style="display: none;">
+        <div class="modal-content create-doctor-modal">
+            <div class="modal-header">
+                <h3>Registrar Nuevo Doctor</h3>
+                <button onclick="adminDashboard.closeCreateDoctorModal()" class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="create-doctor-form" class="create-doctor-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="doctor-name">Nombre *</label>
+                            <input type="text" id="doctor-name" name="name" required minlength="2" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="doctor-lastname">Apellido *</label>
+                            <input type="text" id="doctor-lastname" name="lastname" required minlength="2" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="doctor-email">Email *</label>
+                            <input type="email" id="doctor-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="doctor-password">Contraseña *</label>
+                            <input type="password" id="doctor-password" name="password" required minlength="8">
+                            <small>Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="doctor-personalId">DNI *</label>
+                            <input type="text" id="doctor-personalId" name="personalId" required minlength="7" maxlength="8" pattern="[0-9]{7,8}">
+                            <small>Solo números, entre 7 y 8 dígitos</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="doctor-license">Matrícula *</label>
+                            <input type="text" id="doctor-license" name="license" required minlength="5" maxlength="15" pattern="[A-Z]{2,4}[0-9]{3,10}">
+                            <small>Formato: 2-4 letras + 3-10 números (ej: MD12345)</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="doctor-phone">Teléfono *</label>
+                            <input type="text" id="doctor-phone" name="phone" required minlength="10" maxlength="20">
+                            <small>Mínimo 10 caracteres</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="doctor-dateOfBirth">Fecha de Nacimiento *</label>
+                            <input type="date" id="doctor-dateOfBirth" name="dateOfBirth" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctor-specialties">Especialidades *</label>
+                        <div class="specialties-container">
+                            <div class="specialty-inputs">
+                                <input type="text" class="specialty-input" placeholder="Especialidad 1" required>
+                                <input type="text" class="specialty-input" placeholder="Especialidad 2 (opcional)">
+                                <input type="text" class="specialty-input" placeholder="Especialidad 3 (opcional)">
+                            </div>
+                            <small>Mínimo 1 especialidad, máximo 3</small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Registrar Doctor</button>
+                        <button type="button" onclick="adminDashboard.closeCreateDoctorModal()" class="btn btn-secondary">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Mensajes -->

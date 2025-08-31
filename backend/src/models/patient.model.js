@@ -128,19 +128,14 @@ const patientsSchema = new mongoose.Schema({
      */
     dateOfBirth: {
         type: Date,
-        required: [true, 'Date of birth is required'],
+        required: true,
         validate: {
             validator: function(value) {
-                if (!value) return false; // Ahora es obligatorio
-                
+                if (!value) return false; // Campo obligatorio
                 const today = new Date();
-                const birthDate = new Date(value);
-                const age = today.getFullYear() - birthDate.getFullYear();
-                
-                // Debe ser en el pasado y tener entre 0 y 120 años
-                return birthDate < today && age >= 0 && age <= 120;
+                return value < today; // Solo verificar que sea en el pasado
             },
-            message: 'Date of birth must be in the past and represent a reasonable age (0-120 years)'
+            message: 'Date of birth is required and must be in the past'
         }
     },
     /**
@@ -152,6 +147,7 @@ const patientsSchema = new mongoose.Schema({
      */
     phone: {
         type: String,
+        required: true,
         trim: true,
         minlength: [10, 'Phone must be at least 10 characters long'],
         maxlength: [20, 'Phone cannot exceed 20 characters'],

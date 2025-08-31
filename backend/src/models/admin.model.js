@@ -152,19 +152,14 @@ const adminSchema = new mongoose.Schema({
      */
     dateOfBirth: {
         type: Date,
-        required: false,
+        required: true,
         validate: {
-            validator: function(date) {
-                if (!date) return true; // Campo opcional
+            validator: function(value) {
+                if (!value) return false; // Campo obligatorio
                 const today = new Date();
-                const age = today.getFullYear() - date.getFullYear();
-                const monthDiff = today.getMonth() - date.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
-                    age--;
-                }
-                return age >= 18 && age <= 100; // Admins entre 18 y 100 años
+                return value < today; // Solo verificar que sea en el pasado
             },
-            message: 'Admin must be between 18 and 100 years old'
+            message: 'Date of birth is required and must be in the past'
         }
     },
     /**

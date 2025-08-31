@@ -5,6 +5,8 @@ class PatientDashboard {
         this.currentDoctor = null; // Para mantener referencia al doctor seleccionado
         this.currentUserId = null; // Para mantener referencia al ID del usuario actual
         this.isViewingAppointments = false; // Flag para controlar si estamos viendo citas
+        this.currentAppointmentsFilter = 'all'; // Filtro actual de citas
+        this.previousView = null; // Para recordar la vista anterior
         this.init();
     }
 
@@ -43,20 +45,20 @@ class PatientDashboard {
         }
     }
 
-    async loadAppointments(page = 1, limit = 5) {
-        try {
-            console.log('🔍 Cargando citas del paciente...');
-            const response = await fetch(`${this.baseURL}/appointments/my-appointments?page=${page}&limit=${limit}`, {
+    async loadAppointments(page = 1, limit = 5, filter = 'all') {
+        try {            
+            // Construir URL con filtros
+            let url = `${this.baseURL}/appointments/my-appointments?page=${page}&limit=${limit}`;
+            if (filter && filter !== 'all') {
+                url += `&status=${filter}`;
+            }
+                        
+            const response = await fetch(url, {
                 credentials: 'include'
             });
 
-            console.log('📡 Response status:', response.status);
-            console.log('📡 Response ok:', response.ok);
-
             if (response.ok) {
                 const data = await response.json();
-                console.log('📊 Datos recibidos:', data);
-                console.log('👥 Citas encontradas:', data.data ? data.data.length : 'No data');
                 
                 if (data.data && data.data.length > 0) {
                     // Ordenar citas por fecha de la cita (más cercana cronológicamente primero)
@@ -68,15 +70,10 @@ class PatientDashboard {
                         // Ordenar de más cercana a más lejana cronológicamente
                         return dateA - dateB;
                     });
-                    console.log('📅 Citas ordenadas por fecha de cita:', sortedAppointments.map(apt => ({
-                        id: apt._id,
-                        date: apt.date,
-                        formattedDate: new Date(apt.date).toLocaleString('es-AR')
-                    })));
-                    this.displayAppointments(sortedAppointments, data.pagination);
+
+                    this.displayAppointments(sortedAppointments, data.pagination, filter);
                 } else {
-                    console.log('❌ No hay citas en data.data');
-                    this.displayAppointments([], null);
+                    this.displayAppointments([], null, filter);
                 }
                 this.isViewingAppointments = true; // Marcar que estamos viendo citas
             } else {
@@ -93,19 +90,14 @@ class PatientDashboard {
     displayProfile(profile) {
         const profileContainer = document.getElementById('profile-data');
         if (profileContainer) {
-            console.log('Profile data received:', profile);
-            console.log('dateOfBirth value:', profile.dateOfBirth);
-            console.log('dateOfBirth type:', typeof profile.dateOfBirth);
             
             // Formatear fecha de nacimiento de manera segura
             let birthDateDisplay = 'No especificada';
             if (profile.dateOfBirth) {
                 try {
                     const birthDate = new Date(profile.dateOfBirth);
-                    console.log('Parsed birthDate:', birthDate);
                     if (!isNaN(birthDate.getTime())) {
                         birthDateDisplay = birthDate.toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit', year: 'numeric'});
-                        console.log('Formatted birthDate:', birthDateDisplay);
                     }
                 } catch (error) {
                     console.error('Error formateando fecha de nacimiento:', error);
@@ -148,19 +140,7 @@ class PatientDashboard {
             // Agregar controles de filtro
             const filterControls = `
                 <div class="appointments-filters">
-                    <h4>Filtros</h4>
-                    <div class="filter-controls">
-                        <select id="statusFilter" onchange="patientDashboard.filterAppointments()">
-                            <option value="">Todos los estados</option>
-                            <option value="pending">Pendiente</option>
-                            <option value="confirmed">Confirmada</option>
-                            <option value="completed">Completada</option>
-                            <option value="cancelled">Cancelada</option>
-                        </select>
-                        
-                        <button onclick="patientDashboard.clearFilters()" class="clear-filters-btn">
-                            Limpiar Filtros
-                        </button>
+                    
                     </div>
                 </div>
             `;
@@ -249,8 +229,6 @@ class PatientDashboard {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('📊 Datos de paginación:', data.pagination);
-                console.log('👥 Total de doctores:', data.data.length);
                 
                 // Filtrar solo doctores activos y ordenar alfabéticamente por apellido
                 const activeDoctors = data.data.filter(doctor => doctor.isActive !== false);
@@ -303,10 +281,8 @@ class PatientDashboard {
 
             // Agregar controles de paginación si existen
             let paginationHTML = '';
-            console.log('🔍 Paginación recibida:', pagination);
-            
+     
             if (pagination && pagination.totalPages > 1) {
-                console.log('✅ Generando controles de paginación');
                 paginationHTML = `
                     <div class="pagination-controls">
                         <div class="pagination-info">
@@ -318,10 +294,7 @@ class PatientDashboard {
                         </div>
                     </div>
                 `;
-            } else {
-                console.log('❌ No hay paginación o solo una página');
             }
-
             // Agregar solo controles de paginación
             resultsContainer.innerHTML = doctorsHTML + paginationHTML;
         }
@@ -338,6 +311,10 @@ class PatientDashboard {
             this.showMessage('No hay doctor seleccionado', 'error');
             return;
         }
+
+        // Guardar la vista anterior para poder regresar
+        this.previousView = 'doctor-search';
+        console.log('💾 showDoctorDetail - Guardando vista anterior:', this.previousView);
 
         try {
             const response = await fetch(`${this.baseURL}/users/doctors/${this.currentDoctor}`, {
@@ -380,6 +357,10 @@ class PatientDashboard {
             this.showMessage('No hay doctor seleccionado', 'error');
             return;
         }
+
+        // Guardar la vista anterior para poder regresar
+        this.previousView = 'doctor-search';
+        console.log('💾 showSlots - Guardando vista anterior:', this.previousView);
 
         // Mostrar formulario para seleccionar fecha
         const contentContainer = document.getElementById('slots-content');
@@ -615,12 +596,6 @@ class PatientDashboard {
             }
 
             // Verificar que el slot no esté ocupado antes de crear la cita
-            console.log('🔍 Patient Dashboard - Verificando disponibilidad del slot:', {
-                doctor: this.currentDoctor,
-                date: dateTime,
-                patientId
-            });
-
             const response = await fetch(`${this.baseURL}/appointments`, {
                 method: 'POST',
                 headers: {
@@ -738,6 +713,9 @@ class PatientDashboard {
     // ===== NAVEGACIÓN =====
 
     showView(viewId) {
+        console.log('🔍 showView llamada con:', viewId);
+        console.log('🔍 previousView actual:', this.previousView);
+        
         // Ocultar todas las vistas
         document.getElementById('doctor-search').style.display = 'none';
         document.getElementById('my-appointments').style.display = 'none';
@@ -760,10 +738,12 @@ class PatientDashboard {
         // Actualizar sidebar activo
         this.updateSidebarActive(viewId);
 
-        // Si volvemos a doctor-search, solo limpiar vistas de doctores
-        if (viewId === 'doctor-search') {
+        // Si volvemos a doctor-search, solo limpiar vistas de doctores si no venimos de un modal
+        if (viewId === 'doctor-search' && !this.previousView) {
             this.clearDoctorViews();
         }
+        
+        console.log('✅ Vista mostrada:', viewId);
     }
 
     updateSidebarActive(viewId) {
@@ -815,7 +795,18 @@ class PatientDashboard {
     }
 
     backToSearch() {
-        this.showView('doctor-search');
+        console.log('🔍 backToSearch llamada');
+        console.log('🔍 previousView:', this.previousView);
+        
+        // Si hay una vista anterior, regresar a ella, sino ir a doctor-search
+        if (this.previousView) {
+            console.log('🔄 Regresando a vista anterior:', this.previousView);
+            this.showView(this.previousView);
+            this.previousView = null; // Limpiar la vista anterior
+        } else {
+            console.log('🔄 No hay vista anterior, yendo a doctor-search');
+            this.showView('doctor-search');
+        }
         // No limpiar el estado aquí porque clearDoctorViews ya lo hace
     }
 
@@ -846,39 +837,30 @@ class PatientDashboard {
         this.selectedDate = null;
     }
 
-    // ===== FILTROS DE CITAS =====
+        // ===== FILTROS DE CITAS =====
 
-    filterAppointments() {
-        const statusFilter = document.getElementById('statusFilter').value;
+    filterAppointments(filter) {
         
-        // Aplicar filtros a las citas existentes
-        const appointmentCards = document.querySelectorAll('.appointment-card');
+        // Guardar el filtro actual
+        this.currentAppointmentsFilter = filter;
         
-        appointmentCards.forEach(card => {
-            let showCard = true;
-            
-            // Filtro por estado
-            if (statusFilter) {
-                const statusBadge = card.querySelector('.statusBadge');
-                if (statusBadge && statusBadge.textContent !== statusFilter) {
-                    showCard = false;
-                }
-            }
-            
-            card.style.display = showCard ? 'block' : 'none';
-        });
+        // Actualizar botones de tabs
+        this.updateTabButtons(filter);
         
-        // Mostrar mensaje si no hay resultados
-        const visibleCards = document.querySelectorAll('.appointment-card[style="display: block"], .appointment-card:not([style])');
-        if (visibleCards.length === 0) {
-            const noResultsMsg = document.createElement('p');
-            noResultsMsg.textContent = 'No se encontraron citas con los filtros seleccionados';
-            noResultsMsg.className = 'no-results-message';
-            document.getElementById('appointments-list').appendChild(noResultsMsg);
+        // Cargar citas con el filtro seleccionado
+        this.loadAppointments(1, 5, filter);
+    }
+
+    updateTabButtons(activeFilter) {
+        // Remover clase active de todos los tabs
+        const allTabs = document.querySelectorAll('.tab-btn');
+        allTabs.forEach(tab => tab.classList.remove('active'));
+        
+        // Agregar clase active al tab seleccionado
+        const activeTab = document.querySelector(`[data-filter="${activeFilter}"]`);
+        if (activeTab) {
+            activeTab.classList.add('active');
         }
-        
-        // Reordenar las citas visibles por fecha (más reciente primero)
-        this.reorderVisibleAppointments();
     }
     
     reorderVisibleAppointments() {
@@ -948,7 +930,8 @@ class PatientDashboard {
     changePage(type, page, limit) {
         switch (type) {
             case 'appointments':
-                this.loadAppointments(page, limit);
+                // Usar el filtro actual guardado
+                this.loadAppointments(page, limit, this.currentAppointmentsFilter);
                 break;
             case 'doctors':
                 this.loadDoctorsPage(page);

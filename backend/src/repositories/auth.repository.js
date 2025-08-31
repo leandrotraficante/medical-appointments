@@ -1,6 +1,6 @@
-import AdminModel from '../models/admin.model.js';
-import DoctorModel from '../models/doctor.model.js';
-import PatientModel from '../models/patient.model.js';
+import adminModel from '../models/admin.model.js';
+import doctorModel from '../models/doctor.model.js';
+import patientModel from '../models/patient.model.js';
 
 /**
  * Repository class for handling authentication-related database operations
@@ -28,7 +28,7 @@ class AuthRepository {
      * const newAdmin = await createAdmin(adminData);
      */
     async createAdmin(adminData) {
-        return await AdminModel.create(adminData);
+        return await adminModel.create(adminData);
     }
 
     /**
@@ -56,7 +56,7 @@ class AuthRepository {
      * const newDoctor = await createDoctor(doctorData);
      */
     async createDoctor(doctorData) {
-        return await DoctorModel.create(doctorData);
+        return await doctorModel.create(doctorData);
     }
 
     /**
@@ -82,7 +82,7 @@ class AuthRepository {
      * const newPatient = await createPatient(patientData);
      */
     async createPatient(patientData) {
-        return await PatientModel.create(patientData);
+        return await patientModel.create(patientData);
     }
 
     /**
@@ -96,13 +96,13 @@ class AuthRepository {
      * }
      */
     async checkEmailExists(email) {
-        const admin = await AdminModel.findOne({ email });
+        const admin = await adminModel.findOne({ email });
         if (admin) return admin;
 
-        const doctor = await DoctorModel.findOne({ email });
+        const doctor = await doctorModel.findOne({ email });
         if (doctor) return doctor;
 
-        const patient = await PatientModel.findOne({ email });
+        const patient = await patientModel.findOne({ email });
         if (patient) return patient;
 
         return null;

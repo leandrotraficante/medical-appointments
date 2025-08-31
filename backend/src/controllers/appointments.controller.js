@@ -26,15 +26,6 @@ const createAppointment = async (req, res) => {
             return res.status(400).json({ error: 'Patient, doctor and date are required' });
         }
 
-        // Validate ObjectId format
-        if (!isValidObjectId(patient)) {
-            return res.status(400).json({ error: 'Invalid patient ID format' });
-        }
-
-        if (!isValidObjectId(doctor)) {
-            return res.status(400).json({ error: 'Invalid doctor ID format' });
-        }
-
         if (isNaN(new Date(date).getTime())) {
             return res.status(400).json({ error: 'Invalid date format' });
         }

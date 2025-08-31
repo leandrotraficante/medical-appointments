@@ -58,9 +58,7 @@ class DoctorDashboard {
             if (filter !== 'all') {
                 url += `&status=${filter}`;
             }
-            
-            console.log('🔍 Doctor Dashboard - Cargando citas:', { page, limit, filter, url });
-            
+                       
             const response = await fetch(url, {
                 credentials: 'include'
             });
@@ -90,9 +88,7 @@ class DoctorDashboard {
         }
     }
 
-    filterAppointments(filter) {
-        console.log('🔍 Doctor Dashboard - Filtrando citas por:', filter);
-        
+    filterAppointments(filter) {       
         // Actualizar botones de tabs
         const tabButtons = document.querySelectorAll('.tab-btn');
         tabButtons.forEach(btn => {
@@ -187,11 +183,11 @@ class DoctorDashboard {
 
                 appointmentsHTML += `
                     <div class="appointment-card">
-                        <div class="appointment-header">
-                            <h4>👤 ${appointment.patient.name} ${appointment.patient.lastname}</h4>
-                            <span class="status-badge ${appointment.status}">${appointment.status}</span>
-                        </div>
-                        <div class="appointment-info">
+                    <div class="appointment-header">
+                        <h4>👤 ${appointment.patient.name} ${appointment.patient.lastname}</h4>
+                        <span class="status-badge ${appointment.status}">${appointment.status}</span>
+                    </div>
+                    <div class="appointment-info">
                             <p><strong>📅 Fecha:</strong> ${new Date(appointment.date).toLocaleString('es-AR', {
                                 year: 'numeric',
                                 month: '2-digit',
@@ -199,19 +195,19 @@ class DoctorDashboard {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}</p>
-                            <p><strong>🆔 DNI:</strong> ${appointment.patient.personalId || 'No especificado'}</p>
+                        <p><strong>🆔 DNI:</strong> ${appointment.patient.personalId || 'No especificado'}</p>
                             <p><strong>📞 Teléfono:</strong> ${appointment.patient.phone || 'No especificado'}</p>
-                        </div>
+                    </div>
                         ${actionButtons}
                         <div class="appointment-detail-link">
                             <button onclick="doctorDashboard.showAppointmentDetail('${appointment._id}')" class="detail-btn">
                                 📋 Ver Detalles
-                            </button>
-                        </div>
+                        </button>
                     </div>
+                </div>
                 `;
             });
-            
+
             appointmentsHTML += '</div>';
             appointmentsContainer.innerHTML = appointmentsHTML;
         }
@@ -301,7 +297,6 @@ class DoctorDashboard {
 
     // Función para cambiar de página
     changePage(type, page, limit) {
-        console.log('🔍 Doctor Dashboard - Cambiando página:', { type, page, limit });
         
         // Hacer scroll al inicio de la lista
         const mainContent = document.querySelector('.dashboard-main');
@@ -392,9 +387,7 @@ class DoctorDashboard {
                         <button onclick="doctorDashboard.showView('today-appointments')" class="btn-secondary">
                             📅 Ver Citas de Hoy
                         </button>
-                        <button onclick="doctorDashboard.showView('appointment-management')" class="btn-secondary">
-                            🔧 Gestionar Cita
-                        </button>
+
                     </div>
                     
                     <!-- Botones de acción para la cita actual -->
@@ -406,12 +399,12 @@ class DoctorDashboard {
                         ` : ''}
                         ${(appointment.status === 'pending' || appointment.status === 'confirmed') ? `
                             <button onclick="doctorDashboard.cancelAppointment('${appointment._id}')" class="action-btn cancel-btn">
-                                ❌ Cancelar Cita
+                                ❌ Cancelar
                             </button>
                         ` : ''}
                         ${appointment.status === 'confirmed' ? `
                             <button onclick="doctorDashboard.completeAppointment()" class="action-btn complete-btn">
-                                🎯 Marcar como Completada
+                                🎯 Completada
                             </button>
                         ` : ''}
                     </div>
@@ -546,7 +539,6 @@ class DoctorDashboard {
 
     async confirmAppointment(appointmentId) {
         try {
-            console.log('🔍 Doctor Dashboard - Confirmando cita:', appointmentId);
             
             this.showConfirmModal(
                 '¿Estás seguro de que querés confirmar esta cita?',
@@ -590,7 +582,6 @@ class DoctorDashboard {
 
     async cancelAppointment(appointmentId) {
         try {
-            console.log('🔍 Doctor Dashboard - Cancelando cita:', appointmentId);
             
             this.showConfirmModal(
                 '¿Estás seguro de que querés cancelar esta cita?',
@@ -656,9 +647,9 @@ class DoctorDashboard {
             `¿Estás seguro de que querés cancelar TODAS las citas del ${startDate} al ${endDate}?\n\nMotivo: ${reason}\n\nEsta acción no se puede deshacer.`,
             `doctorDashboard.cancelWeekAppointmentsAction('${startDate}', '${endDate}', '${reason}')`
         );
-        return;
+            return;
 
-    }
+        }
 
     async cancelWeekAppointmentsAction(startDate, endDate, reason) {
         try {
@@ -713,9 +704,7 @@ class DoctorDashboard {
 
     // ===== NAVEGACIÓN =====
 
-    showView(viewId) {
-        console.log('🔍 Doctor Dashboard - Cambiando a vista:', viewId);
-        
+    showView(viewId) {        
         // Ocultar todas las vistas
         const sections = ['my-appointments', 'today-appointments', 'appointment-management', 'doctor-info', 'bulk-cancellation'];
         sections.forEach(sectionId => {

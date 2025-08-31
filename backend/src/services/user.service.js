@@ -75,6 +75,20 @@ const searchUsers = async (query) => {
     return results;
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Finds a doctor by their MongoDB ID
  * @param {string} doctorId - Doctor's MongoDB ID

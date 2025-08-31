@@ -3,6 +3,7 @@ import { generateToken } from '../utils/utils.js';
 
 const register = async (req, res) => {
     try {
+
         const { name, lastname, email, personalId, dateOfBirth, phone, password, role, license, specialties } = req.body;
 
         if (!name || !email || !personalId || !password || !role) {
@@ -13,51 +14,59 @@ const register = async (req, res) => {
             return res.status(400).json({ error: 'Invalid date format' });
         }
 
-        const userData = { 
-            name, 
-            email: email.toLowerCase(), 
-            personalId, 
+        const userData = {
+            name,
+            email: email.toLowerCase(),
+            personalId,
             password,
+            phone,
+            dateOfBirth,
             ...(lastname && { lastname }),
-            ...(dateOfBirth && { dateOfBirth }),
-            ...(phone && { phone }),
             ...(role === 'doctor' && license && { license }),
             ...(role === 'doctor' && specialties && { specialties: Array.isArray(specialties) ? specialties : [specialties] })
         };
-        
+
         const user = await authService.register(userData, role);
 
         if (!user) {
             return res.status(400).json({ error: 'Cannot create user: email already exists' });
         }
+        
+        // Solo generar token si NO viene de la ruta de admin (create-doctor)
+        if (req.originalUrl !== '/api/auth/create-doctor') {
+            const token = generateToken(user);
 
-        const token = generateToken(user);
-        
-        res.cookie('jwt', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 24 * 60 * 60 * 1000
-        });
-        
+            res.cookie('jwt', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 24 * 60 * 60 * 1000
+            });
+        }
+
         res.status(201).json({
             user: user,
             message: 'User registered successfully'
         });
     } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Error in register:', error);
+        }
+
         if (error.name === 'ValidationError') {
             const validationErrors = Object.values(error.errors).map(err => err.message);
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: 'Validation error',
-                details: validationErrors 
+                details: validationErrors
             });
+            
         }
-        
+
         if (error.code === 11000) {
             return res.status(409).json({ error: 'User already exists' });
         }
-        
-        return res.status(500).json({ error: 'Internal server error' });
+
+        return res.status(500).json({ error: error.message || 'Internal server error' });
     }
 };
 
@@ -81,7 +90,7 @@ const login = async (req, res) => {
             sameSite: 'strict',
             maxAge: 24 * 60 * 60 * 1000
         });
-        
+
         res.status(200).json({
             user: result.user,
             message: 'Login successful'
@@ -100,15 +109,15 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
     try {
         const userId = req.user?.userId || 'unknown';
-        
+
         const result = await authService.logout(userId);
-        
+
         res.clearCookie('jwt', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict'
         });
-        
+
         res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ error: 'Unable to log out. Please try again later' });

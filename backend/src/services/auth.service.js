@@ -51,7 +51,7 @@ const register = async (user, role) => {
     }
 
     const hashedPassword = createHash(user.password);
-    const newUser = { ...user, password: hashedPassword };
+    const newUser = { ...user, password: hashedPassword};
 
     return await authRepository[ROLE_CONFIG.handlers[role]](newUser);
 };

@@ -61,7 +61,7 @@
                         <div class="section-content">
                             <div class="form-card">
                                 <div class="form-group">
-                                    <input type="text" id="searchInput" placeholder="Buscar por nombre o especialidad..." class="form-input">
+                                    <input type="text" id="searchInput" placeholder="Buscar por nombre o especialidad..." class="form-input" onkeypress="if(event.key === 'Enter') patientDashboard.searchDoctors()">
                                     <button onclick="patientDashboard.searchDoctors()" class="form-button">Buscar</button>
                                 </div>
                                 <button onclick="patientDashboard.loadAllDoctors()" class="btn btn-secondary">Ver Todos los Doctores</button>
@@ -87,10 +87,27 @@
                             <p class="section-subtitle">Revisá y gestioná todas tus citas médicas programadas</p>
                         </div>
                         <div class="section-content">
+                            <!-- Sub-tabs para filtrar citas -->
+                            <div class="appointments-tabs">
+                                <button class="tab-btn active" onclick="patientDashboard.filterAppointments('all')" data-filter="all">
+                                    Todas mis citas
+                                </button>
+                                <button class="tab-btn" onclick="patientDashboard.filterAppointments('pending')" data-filter="pending">
+                                    Pendientes
+                                </button>
+                                <button class="tab-btn" onclick="patientDashboard.filterAppointments('confirmed')" data-filter="confirmed">
+                                    Confirmadas
+                                </button>
+                                <button class="tab-btn" onclick="patientDashboard.filterAppointments('completed')" data-filter="completed">
+                                    Completadas
+                                </button>
+                                <button class="tab-btn" onclick="patientDashboard.filterAppointments('cancelled')" data-filter="cancelled">
+                                    Canceladas
+                                </button>
+                            </div>
                             <div id="appointments-list" class="appointments-container">
                                 <p>Cargando citas...</p>
                             </div>
-
                         </div>
                     </section>
                 </div>
@@ -109,7 +126,6 @@
                 <div id="doctor-detail-content"></div>
                 <div class="card-actions">
                     <button onclick="patientDashboard.showSlots()" class="btn btn-primary">Ver Slots Disponibles</button>
-                    <button onclick="patientDashboard.showBookAppointment()" class="btn btn-success">Agendar Cita</button>
                 </div>
             </div>
         </div>
@@ -125,7 +141,6 @@
                 <div id="slots-content"></div>
                 <div class="card-actions">
                     <button onclick="patientDashboard.showDoctorDetail()" class="btn btn-primary">Ver Doctor</button>
-                    <button onclick="patientDashboard.showBookAppointment()" class="btn btn-success">Agendar Cita</button>
                 </div>
             </div>
         </div>

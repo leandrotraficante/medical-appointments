@@ -1,5 +1,6 @@
 import express from 'express';
 import { register, login, logout } from '../controllers/auth.controller.js';
+import { authenticateToken, requireRole } from '../middleware/auth.middleware.js';
 
 /**
  * Router for authentication-related endpoints
@@ -53,5 +54,28 @@ authRoutes.post('/login', login);
  * Headers: { "Authorization": "Bearer <jwt_token>" }
  */
 authRoutes.post('/logout', logout);
+
+/**
+ * @route POST /api/auth/create-doctor
+ * @desc Create a new doctor (admin only)
+ * @access Admin users only
+ * @body {Object} doctorData - Doctor registration data
+ * @returns {Object} JSON response with created doctor data
+ * @example
+ * POST /api/auth/create-doctor
+ * Headers: { "Authorization": "Bearer <jwt_token>" }
+ * Body: {
+ *   "name": "Dr. John Doe",
+ *   "lastname": "Smith",
+ *   "email": "john.smith@hospital.com",
+ *   "password": "secure123",
+ *   "personalId": "87654321",
+ *   "license": "MD12345",
+ *   "specialties": ["Cardiology", "Internal Medicine"],
+ *   "phone": "+54 9 11 9876-5432",
+ *   "dateOfBirth": "1985-03-15"
+ * }
+ */
+authRoutes.post('/create-doctor', authenticateToken, requireRole('admin'), register);
 
 export default authRoutes;
