@@ -26,7 +26,6 @@ import mongoose from 'mongoose';
  *   specialties: { $in: ['Cardiology'] },
  *   isActive: true 
  * });
- * console.log(`Found ${cardiologists.length} active cardiologists`);
  */
 const doctorsCollection = 'doctors';
 

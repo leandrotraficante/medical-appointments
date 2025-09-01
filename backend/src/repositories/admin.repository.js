@@ -10,7 +10,6 @@ export default class AdminRepository {
      * @returns {Promise<Array>} - Array of all admin documents
      * @example
      * const admins = await adminRepository.getAllAdmins();
-     * console.log(`Found ${admins.length} admins`);
      */
     getAllAdmins = async () => {
         return await adminModel.find().select('-password');

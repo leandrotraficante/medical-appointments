@@ -9,7 +9,6 @@ const adminRepository = new AdminRepository();
  * @returns {Promise<Array>} - Array of all admin documents
  * @example
  * const admins = await getAllAdmins();
- * console.log(`Found ${admins.length} admins`);
  */
 const getAllAdmins = async () => {
     const admins = await adminRepository.getAllAdmins();

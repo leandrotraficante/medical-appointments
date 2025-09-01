@@ -8,7 +8,6 @@ export default class UserRepository {
      * @returns {Promise<Array>} - Array of all doctor documents
      * @example
      * const doctors = await userRepository.getAllDoctors();
-     * console.log(`Found ${doctors.length} doctors`);
      */
     getAllDoctors = async (page = null, limit = null) => {
         if (page && limit) {
@@ -32,7 +31,6 @@ export default class UserRepository {
      * @returns {Promise<Array>} - Array of all patient documents
      * @example
      * const patients = await userRepository.getAllPatients();
-     * console.log(`Found ${patients.length} patients`);
      */
     getAllPatients = async (page = null, limit = null) => {
         if (page && limit) {
@@ -54,7 +52,6 @@ export default class UserRepository {
      * @returns {Promise<Array>} - Array of active doctor documents
      * @example
      * const activeDoctors = await userRepository.findActiveDoctors();
-     * console.log(`Found ${activeDoctors.length} active doctors`);
      */
     findActiveDoctors = async (page = 1, limit = 5) => {
         if (page && limit) {
@@ -76,7 +73,6 @@ export default class UserRepository {
      * @returns {Promise<Array>} - Array of active patient documents
      * @example
      * const activePatients = await userRepository.findActivePatients();
-     * console.log(`Found ${activePatients.length} active patients`);
      */
     findActivePatients = async (page = 1, limit = 5) => {
         if (page && limit) {
@@ -98,7 +94,6 @@ export default class UserRepository {
      * @returns {Promise<Array>} - Array of inactive doctor documents
      * @example
      * const inactiveDoctors = await userRepository.findInactiveDoctors();
-     * console.log(`Found ${inactiveDoctors.length} inactive doctors`);
      */
     findInactiveDoctors = async () => {
         return await doctorsModel.find({ isActive: false }).select('-password');
@@ -109,7 +104,6 @@ export default class UserRepository {
      * @returns {Promise<Array>} - Array of inactive patient documents
      * @example
      * const inactivePatients = await userRepository.findInactivePatients();
-     * console.log(`Found ${inactivePatients.length} inactive patients`);
      */
     findInactivePatients = async (page = 1, limit = 5) => {
         if (page && limit) {

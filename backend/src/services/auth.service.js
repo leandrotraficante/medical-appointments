@@ -106,19 +106,8 @@ const login = async (email, password) => {
  * const result = await logout('507f1f77bcf86cd799439011');
  * // Returns: { message: 'Logout successful', userId: '507f1f77bcf86cd799439011' }
  */
-const logout = async (userId) => {
-    // In a JWT system, logout is typically client-side
-    // But we can add server-side logic here if needed (e.g., blacklisting tokens)
-    
-    return {
-        message: 'Logout successful',
-        userId: userId,
-        clearCookie: true // Indicador para el controller borrar la cookie
-    };
-}
 
 export default {
     register,
-    login,
-    logout
+    login
 };

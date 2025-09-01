@@ -1,4 +1,3 @@
-import authService from '../services/auth.service.js';
 import UserRepository from '../repositories/user.repository.js';
 import { verifyToken } from '../utils/utils.js';
 
@@ -13,7 +12,7 @@ export const authenticateToken = async (req, res, next) => {
         }
 
         const decoded = await verifyToken(token);
-        
+
         let user;
         switch (decoded.role) {
             case 'admin':
@@ -28,11 +27,11 @@ export const authenticateToken = async (req, res, next) => {
             default:
                 return res.status(401).json({ error: 'Invalid user role' });
         }
-        
+
         if (!user || !user.isActive) {
             return res.status(401).json({ error: 'Your account has been deactivated or not found. Please contact support' });
         }
-        
+
         req.user = {
             id: decoded.userId,
             userId: decoded.userId,
@@ -45,7 +44,7 @@ export const authenticateToken = async (req, res, next) => {
         if (error.message === 'Token has expired') {
             return res.status(401).json({ error: 'Your session has expired. Please log in again' });
         } else if (error.message === 'Invalid token') {
-            return res.status(401).json({ error: 'Invalid or corrupted authentication token' });
+            return res.status(401).json({ error: 'Authentication failed. Please log in again' });
         } else {
             return res.status(401).json({ error: 'Authentication failed. Please log in again' });
         }
@@ -57,11 +56,11 @@ export const requireRole = (allowedRoles) => {
         if (!req.user) {
             return res.status(401).json({ error: 'Authentication required. Please log in to continue' });
         }
-        
+
         if (!allowedRoles.includes(req.user.role)) {
             return res.status(403).json({ error: 'You do not have permission to access this resource' });
         }
-        
+
         next();
     };
 };

@@ -32,7 +32,6 @@ const findInactiveDoctors = async (page = 1, limit = 5) => {
  * @returns {Promise<Array>} - Array of inactive patient documents
  * @example
  * const inactivePatients = await findInactivePatients();
- * console.log(`Found ${inactivePatients.length} inactive patients`);
  * 
  * // Clean up inactive patient data
  * const oldInactivePatients = inactivePatients.filter(patient => 
@@ -67,7 +66,7 @@ const findInactivePatients = async (page = 1, limit = 5) => {
  * 
  * // Process search results
  * results.forEach(result => {
- *   console.log(`${result.type}: ${result.user.name} - ${result.user.email}`);
+ *   (`${result.type}: ${result.user.name} - ${result.user.email}`);
  * });
  */
 const searchUsers = async (query) => {
@@ -97,7 +96,7 @@ const searchUsers = async (query) => {
  * @example
  * const doctor = await findDoctorById('507f1f77bcf86cd799439011');
  * if (doctor) {
- *   console.log('Found doctor:', doctor.name, 'Specialties:', doctor.specialties);
+ *   ('Found doctor:', doctor.name, 'Specialties:', doctor.specialties);
  * }
  */
 const findDoctorById = async (doctorId) => {

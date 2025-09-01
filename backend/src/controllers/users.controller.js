@@ -338,7 +338,6 @@ const getDoctorById = async (req, res) => {
         }
         res.status(200).json({ success: true, data: doctor });
     } catch (error) {
-        console.error('Error getting doctor by ID:', error);
         res.status(500).json({ error: 'Unable to get doctor. Please try again later' });
     }
 }

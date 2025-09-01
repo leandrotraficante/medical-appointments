@@ -21,7 +21,6 @@ import mongoose from 'mongoose';
  * @example
  * // Find active admins
  * const activeAdmins = await AdminModel.find({ isActive: true });
- * console.log(`Found ${activeAdmins.length} active administrators`);
  */
 const adminCollection = 'admins';
 

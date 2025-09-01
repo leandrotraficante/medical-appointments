@@ -27,7 +27,6 @@ class DoctorDashboard {
                 this.showMessage('Error al cargar el perfil', 'error');
             }
         } catch (error) {
-            console.error('Error cargando perfil:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -83,7 +82,6 @@ class DoctorDashboard {
                 this.showMessage('Error al cargar las citas', 'error');
             }
         } catch (error) {
-            console.error('Error cargando citas:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -131,7 +129,6 @@ class DoctorDashboard {
                 this.showMessage('Error al cargar las citas del día', 'error');
             }
         } catch (error) {
-            console.error('Error cargando citas del día:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -332,7 +329,6 @@ class DoctorDashboard {
                 this.showMessage('Error al cargar detalles de la cita', 'error');
             }
         } catch (error) {
-            console.error('Error cargando detalles de la cita:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -461,7 +457,6 @@ class DoctorDashboard {
                 this.showMessage(`❌ ${errorData.error || 'Error al confirmar la cita'}`, 'error');
             }
         } catch (error) {
-            console.error('Error confirmando cita:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -503,7 +498,6 @@ class DoctorDashboard {
                 this.showMessage(`❌ ${errorData.error || 'Error al marcar como completada'}`, 'error');
             }
         } catch (error) {
-            console.error('Error marcando cita como completada:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -545,7 +539,6 @@ class DoctorDashboard {
                 `doctorDashboard.confirmAppointmentAction('${appointmentId}')`
             );
         } catch (error) {
-            console.error('Error confirmando cita:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -575,7 +568,6 @@ class DoctorDashboard {
                 this.showMessage(`❌ Error al confirmar la cita: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error confirmando cita:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -588,7 +580,6 @@ class DoctorDashboard {
                 `doctorDashboard.cancelAppointmentAction('${appointmentId}')`
             );
         } catch (error) {
-            console.error('Error cancelando cita:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -620,7 +611,6 @@ class DoctorDashboard {
                 this.showMessage(`❌ Error al cancelar la cita: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error cancelando cita:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -697,7 +687,6 @@ class DoctorDashboard {
                 this.showMessage(`❌ ${errorData.error || 'Error al cancelar las citas'}`, 'error');
             }
         } catch (error) {
-            console.error('Error cancelando citas semanales:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }

@@ -23,7 +23,6 @@ import mongoose from 'mongoose';
  *   doctor: '507f1f77bcf86cd799439012',
  *   status: 'confirmed'
  * }).populate('patient', 'name lastname');
- * console.log(`Found ${confirmedAppointments.length} confirmed appointments`);
  */
 const appointmentsCollection = 'appointments';
 

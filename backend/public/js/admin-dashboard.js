@@ -126,8 +126,6 @@ class AdminDashboard {
         if (modal) {
             modal.style.display = 'block';
             this.setupCreateDoctorForm();
-        } else {
-            console.error('No se encontró el modal de crear doctor');
         }
     }
 
@@ -153,9 +151,9 @@ class AdminDashboard {
         }
     }
 
-        async handleCreateDoctorSubmit(event) {
+    async handleCreateDoctorSubmit(event) {
         event.preventDefault();
-        
+
         const formData = new FormData(event.target);
         const doctorData = {
             name: formData.get('name'),
@@ -177,13 +175,12 @@ class AdminDashboard {
                 specialties.push(input.value.trim());
             }
         });
-        
+
         if (specialties.length === 0) {
-            console.error('No se agregaron especialidades');
             this.showMessage('Debes agregar al menos una especialidad', 'error');
             return;
         }
-        
+
         doctorData.specialties = specialties;
 
         try {
@@ -203,11 +200,9 @@ class AdminDashboard {
                 this.loadDoctors('all');
             } else {
                 const errorData = await response.json();
-                console.error('Error del servidor:', errorData);
                 this.showMessage(`Error: ${errorData.message || 'No se pudo registrar el doctor'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión:', error);
             this.showMessage('Error de conexión al registrar el doctor', 'error');
         }
     }
@@ -264,7 +259,6 @@ class AdminDashboard {
 
         const usersContent = document.getElementById('users-content');
         if (!usersContent) {
-            console.error('No se encontró el contenedor de usuarios');
             return;
         }
 
@@ -371,7 +365,6 @@ class AdminDashboard {
 
         const usersContent = document.getElementById('users-content');
         if (!usersContent) {
-            console.error('No se encontró el contenedor de usuarios');
             return;
         }
 
@@ -443,11 +436,9 @@ class AdminDashboard {
                 this.displayAdmins(data.data, data.pagination);
             } else {
                 const errorData = await response.json();
-                console.error('Error cargando administradores:', errorData);
                 this.showMessage(`Error al cargar administradores: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión cargando administradores:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -456,7 +447,6 @@ class AdminDashboard {
 
         const usersContent = document.getElementById('users-content');
         if (!usersContent) {
-            console.error('No se encontró el contenedor de usuarios');
             return;
         }
 
@@ -519,26 +509,19 @@ class AdminDashboard {
                 stats.doctors.total = doctorsData.data.length;
                 stats.doctors.active = doctorsData.data.filter(d => d.isActive).length;
                 stats.doctors.inactive = doctorsData.data.filter(d => !d.isActive).length;
-            } else {
-                console.error('Error obteniendo estadísticas de doctores:', doctorsResponse.status);
             }
-
             // Procesar pacientes
             if (patientsResponse.ok) {
                 const patientsData = await patientsResponse.json();
                 stats.patients.total = patientsData.data.length;
                 stats.patients.active = patientsData.data.filter(p => p.isActive).length;
                 stats.patients.inactive = patientsData.data.filter(p => !p.isActive).length;
-            } else {
-                console.error('Error obteniendo estadísticas de pacientes:', patientsResponse.status);
             }
 
             // Procesar administradores
             if (adminsResponse.ok) {
                 const adminsData = await adminsResponse.json();
                 stats.admins.total = adminsData.data.length;
-            } else {
-                console.error('Error obteniendo estadísticas de administradores:', adminsResponse.status);
             }
 
             // Procesar citas
@@ -570,13 +553,9 @@ class AdminDashboard {
                     stats.appointments.completed = 0;
                     stats.appointments.cancelled = 0;
                 }
-            } else {
-                console.error('Error obteniendo estadísticas de citas:', appointmentsResponse.status);
             }
-
             this.displaySystemStats(stats);
         } catch (error) {
-            console.error('Error cargando estadísticas del sistema:', error);
             this.showMessage('Error al cargar las estadísticas', 'error');
         }
     }
@@ -618,11 +597,9 @@ class AdminDashboard {
                 }
             } else {
                 const errorData = await response.json();
-                console.error('Error cargando citas:', errorData);
                 this.showMessage(`Error al cargar las citas: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión cargando citas:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -631,7 +608,6 @@ class AdminDashboard {
 
         const statsContent = document.getElementById('stats-content');
         if (!statsContent) {
-            console.error('No se encontró el contenedor de estadísticas del sistema');
             return;
         }
 
@@ -693,7 +669,6 @@ class AdminDashboard {
 
         const appointmentsContainer = document.getElementById('appointments-content');
         if (!appointmentsContainer) {
-            console.error('No se encontró el contenedor de citas');
             return;
         }
 
@@ -843,7 +818,6 @@ class AdminDashboard {
 
             return `${dateStr} ${timeStr}`;
         } catch (error) {
-            console.error('Error formateando fecha:', error);
             return 'Error de formato';
         }
     }
@@ -876,11 +850,9 @@ class AdminDashboard {
                 this.displayAppointments(appointments, data.pagination);
             } else {
                 const errorData = await response.json();
-                console.error('Error filtrando citas por estado:', errorData);
                 this.showMessage(`Error al filtrar las citas por estado: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión al filtrar citas por estado:', error);
             this.showMessage('Error de conexión al filtrar', 'error');
         }
     }
@@ -909,11 +881,9 @@ class AdminDashboard {
                 }, 500);
             } else {
                 const errorData = await response.json();
-                console.error('Error activando doctor:', errorData);
                 this.showMessage(`Error al activar doctor: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión al activar doctor:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -941,11 +911,9 @@ class AdminDashboard {
                 }, 500);
             } else {
                 const errorData = await response.json();
-                console.error('Error desactivando doctor:', errorData);
                 this.showMessage(`Error al desactivar doctor: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión al desactivar doctor:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -975,11 +943,9 @@ class AdminDashboard {
                 }, 500);
             } else {
                 const errorData = await response.json();
-                console.error('Error activando paciente:', errorData);
                 this.showMessage(`Error al activar paciente: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión al activar paciente:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -1009,11 +975,9 @@ class AdminDashboard {
                 }, 500);
             } else {
                 const errorData = await response.json();
-                console.error('Error desactivando paciente:', errorData);
                 this.showMessage(`Error al desactivar paciente: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión al desactivar paciente:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -1041,11 +1005,9 @@ class AdminDashboard {
                 this.displayPatientProfile(data.data);
             } else {
                 const errorData = await response.json();
-                console.error('Error obteniendo perfil del paciente:', errorData);
                 this.showMessage(`Error al obtener perfil: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión al obtener perfil del paciente:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -1063,11 +1025,9 @@ class AdminDashboard {
                 this.displayDoctorProfile(data.data);
             } else {
                 const errorData = await response.json();
-                console.error('Error obteniendo perfil del doctor:', errorData);
                 this.showMessage(`Error al obtener perfil: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión al obtener perfil del doctor:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -1077,13 +1037,11 @@ class AdminDashboard {
         // Usar el modal que ya existe
         const modal = document.getElementById('patient-detail-modal');
         if (!modal) {
-            console.error('No se encontró el modal de perfil');
             return;
         }
 
         const modalContent = modal.querySelector('#patient-detail-content');
         if (!modalContent) {
-            console.error('No se encontró el contenido del modal');
             return;
         }
 
@@ -1112,13 +1070,11 @@ class AdminDashboard {
         // Usar el modal que ya existe
         const modal = document.getElementById('patient-detail-modal');
         if (!modal) {
-            console.error('No se encontró el modal de perfil');
             return;
         }
 
         const modalContent = modal.querySelector('#patient-detail-content');
         if (!modalContent) {
-            console.error('No se encontró el contenido del modal');
             return;
         }
 
@@ -1146,13 +1102,11 @@ class AdminDashboard {
 
         const modal = document.getElementById('profile-modal');
         if (!modal) {
-            console.error('No se encontró el modal de perfil');
             return;
         }
 
         const modalContent = modal.querySelector('.modal-content');
         if (!modalContent) {
-            console.error('No se encontró el contenido del modal');
             return;
         }
 
@@ -1187,7 +1141,6 @@ class AdminDashboard {
 
         const messageContainer = document.getElementById('message-container');
         if (!messageContainer) {
-            console.error('No se encontró el contenedor de mensajes');
             return;
         }
 
@@ -1221,13 +1174,11 @@ class AdminDashboard {
 
         const modal = document.getElementById('delete-confirmation-modal');
         if (!modal) {
-            console.error('No se encontró el modal de eliminación');
             return;
         }
 
         const modalContent = modal.querySelector('.modal-content');
         if (!modalContent) {
-            console.error('No se encontró el contenido del modal de eliminación');
             return;
         }
 
@@ -1255,8 +1206,6 @@ class AdminDashboard {
             modal.style.display = 'none';
             this.deleteType = null;
             this.deleteId = null;
-        } else {
-            console.error('No se encontró el modal de eliminación para ocultar');
         }
     }
 
@@ -1265,14 +1214,11 @@ class AdminDashboard {
         const modal = document.getElementById('profile-modal');
         if (modal) {
             modal.style.display = 'none';
-        } else {
-            console.error('No se encontró el modal de perfil para ocultar');
         }
     }
 
     async confirmDelete() {
         if (!this.deleteId || !this.deleteType) {
-            console.error('No hay ID o tipo de eliminación configurado');
             return;
         }
 
@@ -1315,11 +1261,9 @@ class AdminDashboard {
                 }
             } else {
                 const errorData = await response.json();
-                console.error('Error eliminando:', errorData);
                 this.showMessage(`Error al eliminar: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión al eliminar:', error);
             this.showMessage('Error de conexión', 'error');
         } finally {
             this.hideDeleteModal();
@@ -1387,7 +1331,6 @@ class AdminDashboard {
                 this.loadAllAppointments(page, limit);
                 break;
             default:
-                console.warn('Tipo de paginación no reconocido:', type);
         }
     }
 
@@ -1413,11 +1356,9 @@ class AdminDashboard {
                 }
             } else {
                 const errorData = await response.json();
-                console.error('Error obteniendo perfil del administrador:', errorData);
                 this.showMessage(`Error al obtener perfil: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('Error de conexión al obtener perfil del administrador:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -1427,13 +1368,11 @@ class AdminDashboard {
 
         const modal = document.getElementById('profile-modal');
         if (!modal) {
-            console.error('No se encontró el modal de perfil');
             return;
         }
 
         const modalContent = modal.querySelector('.modal-content');
         if (!modalContent) {
-            console.error('No se encontró el contenido del modal');
             return;
         }
 
@@ -1476,7 +1415,6 @@ class AdminDashboard {
             // 4. Recargar citas
 
         } catch (error) {
-            console.error('Error asignando doctor:', error);
             this.showMessage('Error al asignar doctor', 'error');
         }
     }
@@ -1495,7 +1433,6 @@ class AdminDashboard {
             // 4. Recargar citas
 
         } catch (error) {
-            console.error('Error asignando paciente:', error);
             this.showMessage('Error al asignar paciente', 'error');
         }
     }
@@ -1525,7 +1462,6 @@ class AdminDashboard {
             }
 
         } catch (error) {
-            console.error('Error cancelando cita:', error);
             this.showMessage('Error al cancelar cita', 'error');
         }
     }

@@ -24,49 +24,47 @@ class PatientDashboard {
             if (response.ok) {
                 const data = await response.json();
                 this.displayProfile(data.data);
-                
-                            // Extraer el ID del usuario del perfil
-            
-            // El ID puede estar en diferentes campos según la API
-            if (data.data._id) {
-                this.currentUserId = data.data._id;
-            } else if (data.data.id) {
-                this.currentUserId = data.data.id;
-            } else {
-                console.error('No se encontró ID en el perfil:', data.data);
-                this.showMessage('Error: Perfil incompleto', 'error');
-            }
+
+                // Extraer el ID del usuario del perfil
+
+                // El ID puede estar en diferentes campos según la API
+                if (data.data._id) {
+                    this.currentUserId = data.data._id;
+                } else if (data.data.id) {
+                    this.currentUserId = data.data.id;
+                } else {
+                    this.showMessage('Error: Perfil incompleto', 'error');
+                }
             } else {
                 this.showMessage('Error al cargar el perfil', 'error');
             }
         } catch (error) {
-            console.error('Error cargando perfil:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
 
     async loadAppointments(page = 1, limit = 5, filter = 'all') {
-        try {            
+        try {
             // Construir URL con filtros
             let url = `${this.baseURL}/appointments/my-appointments?page=${page}&limit=${limit}`;
             if (filter && filter !== 'all') {
                 url += `&status=${filter}`;
             }
-                        
+
             const response = await fetch(url, {
                 credentials: 'include'
             });
 
             if (response.ok) {
                 const data = await response.json();
-                
+
                 if (data.data && data.data.length > 0) {
                     // Ordenar citas por fecha de la cita (más cercana cronológicamente primero)
                     const sortedAppointments = data.data.sort((a, b) => {
                         // Usar la fecha de la cita, no la fecha de creación
                         const dateA = new Date(a.date);
                         const dateB = new Date(b.date);
-                        
+
                         // Ordenar de más cercana a más lejana cronológicamente
                         return dateA - dateB;
                     });
@@ -78,11 +76,9 @@ class PatientDashboard {
                 this.isViewingAppointments = true; // Marcar que estamos viendo citas
             } else {
                 const errorData = await response.json();
-                console.error('❌ Error en response:', errorData);
                 this.showMessage(`Error al cargar las citas: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            console.error('💥 Error cargando citas:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -90,17 +86,16 @@ class PatientDashboard {
     displayProfile(profile) {
         const profileContainer = document.getElementById('profile-data');
         if (profileContainer) {
-            
+
             // Formatear fecha de nacimiento de manera segura
             let birthDateDisplay = 'No especificada';
             if (profile.dateOfBirth) {
                 try {
                     const birthDate = new Date(profile.dateOfBirth);
                     if (!isNaN(birthDate.getTime())) {
-                        birthDateDisplay = birthDate.toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                        birthDateDisplay = birthDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
                     }
                 } catch (error) {
-                    console.error('Error formateando fecha de nacimiento:', error);
                 }
             }
 
@@ -174,7 +169,7 @@ class PatientDashboard {
     }
 
     // ===== BÚSQUEDA DE DOCTORES =====
-    
+
     async searchDoctors() {
         const searchTerm = document.getElementById('searchInput').value.trim();
         if (!searchTerm) {
@@ -191,7 +186,7 @@ class PatientDashboard {
                 const data = await response.json();
                 // Filtrar solo doctores activos
                 const doctors = data.data.filter(user => user.type === 'doctor' && user.user?.isActive !== false);
-                
+
                 if (doctors.length === 0) {
                     this.showMessage(`No se encontraron doctores con "${searchTerm}". Probá con otro término de búsqueda.`, 'info');
                     document.getElementById('search-results').innerHTML = `
@@ -204,7 +199,7 @@ class PatientDashboard {
                         const lastNameB = (b.user?.lastname || b.lastname || '').toLowerCase();
                         return lastNameA.localeCompare(lastNameB);
                     });
-                    
+
                     this.showMessage(`Se encontraron ${doctors.length} doctor(es) con "${searchTerm}"`, 'success');
                     this.displayDoctorSearchResults(doctors);
                 }
@@ -212,7 +207,6 @@ class PatientDashboard {
                 this.showMessage('Error en la búsqueda', 'error');
             }
         } catch (error) {
-            console.error('Error buscando doctores:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -229,7 +223,7 @@ class PatientDashboard {
 
             if (response.ok) {
                 const data = await response.json();
-                
+
                 // Filtrar solo doctores activos y ordenar alfabéticamente por apellido
                 const activeDoctors = data.data.filter(doctor => doctor.isActive !== false);
                 const sortedDoctors = activeDoctors.sort((a, b) => {
@@ -242,7 +236,6 @@ class PatientDashboard {
                 this.showMessage('Error al cargar doctores', 'error');
             }
         } catch (error) {
-            console.error('Error cargando doctores:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -258,7 +251,7 @@ class PatientDashboard {
             const doctorsHTML = doctors.map(doctor => {
                 // La API de búsqueda devuelve { user: {...}, type: 'doctor' }
                 const doctorData = doctor.user || doctor; // Fallback para compatibilidad
-                
+
                 return `
                     <div class="card doctor-card">
                         <div class="card-header">
@@ -281,7 +274,7 @@ class PatientDashboard {
 
             // Agregar controles de paginación si existen
             let paginationHTML = '';
-     
+
             if (pagination && pagination.totalPages > 1) {
                 paginationHTML = `
                     <div class="pagination-controls">
@@ -314,8 +307,6 @@ class PatientDashboard {
 
         // Guardar la vista anterior para poder regresar
         this.previousView = 'doctor-search';
-        console.log('💾 showDoctorDetail - Guardando vista anterior:', this.previousView);
-
         try {
             const response = await fetch(`${this.baseURL}/users/doctors/${this.currentDoctor}`, {
                 credentials: 'include'
@@ -329,7 +320,6 @@ class PatientDashboard {
                 this.showMessage('Error al cargar detalles del doctor', 'error');
             }
         } catch (error) {
-            console.error('Error cargando detalles del doctor:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -360,7 +350,6 @@ class PatientDashboard {
 
         // Guardar la vista anterior para poder regresar
         this.previousView = 'doctor-search';
-        console.log('💾 showSlots - Guardando vista anterior:', this.previousView);
 
         // Mostrar formulario para seleccionar fecha
         const contentContainer = document.getElementById('slots-content');
@@ -399,14 +388,13 @@ class PatientDashboard {
 
             if (slotsResponse.ok) {
                 const slotsData = await slotsResponse.json();
-                
+
                 // Los slots ya vienen filtrados del backend, no necesitamos filtrar más
                 this.displayAvailableSlots(slotsData.data, date);
             } else {
                 this.showMessage('Error al cargar slots disponibles', 'error');
             }
         } catch (error) {
-            console.error('Error cargando slots:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -449,14 +437,14 @@ class PatientDashboard {
     selectSlot(slotTime) {
         // Guardar el slot seleccionado y mostrar formulario de cita
         this.selectedSlot = slotTime;
-        
+
         // Extraer la hora del slot para preseleccionarla en el formulario
         const slotDate = new Date(slotTime);
         const hours = slotDate.getHours().toString().padStart(2, '0');
         const minutes = slotDate.getMinutes().toString().padStart(2, '0');
         this.selectedTime = `${hours}:${minutes}`;
-        
-        
+
+
         // Usar la fecha original del input, no la del slot (que puede tener problemas de zona horaria)
         const originalDateInput = document.getElementById('slotDate');
         if (originalDateInput && originalDateInput.value) {
@@ -468,7 +456,7 @@ class PatientDashboard {
             const day = slotDate.getDate().toString().padStart(2, '0');
             this.selectedDate = `${year}-${month}-${day}`;
         }
-        
+
         this.showBookAppointment();
     }
 
@@ -542,7 +530,6 @@ class PatientDashboard {
                 }
             }
         } catch (error) {
-            console.error('Error cargando nombre del doctor:', error);
         }
     }
 
@@ -558,7 +545,7 @@ class PatientDashboard {
         // Validar que la fecha no sea en el pasado
         const selectedDateTime = new Date(`${date}T${time}`);
         const now = new Date();
-        
+
         if (selectedDateTime <= now) {
             this.showMessage('La fecha y hora deben ser en el futuro', 'error');
             return;
@@ -578,18 +565,18 @@ class PatientDashboard {
             const profileResponse = await fetch(`${this.baseURL}/users/my-profile`, {
                 credentials: 'include'
             });
-            
+
             if (!profileResponse.ok) {
                 this.showMessage('Error al obtener perfil del paciente', 'error');
                 return;
             }
-            
+
             const profileData = await profileResponse.json();
-            
+
             // El ID del paciente está en req.user.userId del middleware
             // Vamos a obtenerlo de otra manera
             const patientId = this.getCurrentUserId();
-            
+
             if (!patientId) {
                 this.showMessage('Error: No se pudo obtener el ID del paciente', 'error');
                 return;
@@ -612,7 +599,7 @@ class PatientDashboard {
             if (response.ok) {
                 const successData = await response.json();
                 this.showMessage('Cita creada exitosamente!', 'success');
-                
+
                 // Esperar un poco antes de redirigir para que se vea el mensaje
                 setTimeout(() => {
                     this.backToSearch();
@@ -623,7 +610,6 @@ class PatientDashboard {
                 this.showMessage(`${errorData.error || 'Error al crear la cita'}`, 'error');
             }
         } catch (error) {
-            console.error('Error creando cita:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -644,7 +630,6 @@ class PatientDashboard {
                 this.showMessage('Error al cargar detalles de la cita', 'error');
             }
         } catch (error) {
-            console.error('Error cargando detalles de la cita:', error);
             this.showMessage('Error de conexión', 'error');
         }
     }
@@ -713,9 +698,6 @@ class PatientDashboard {
     // ===== NAVEGACIÓN =====
 
     showView(viewId) {
-        console.log('🔍 showView llamada con:', viewId);
-        console.log('🔍 previousView actual:', this.previousView);
-        
         // Ocultar todas las vistas
         document.getElementById('doctor-search').style.display = 'none';
         document.getElementById('my-appointments').style.display = 'none';
@@ -742,8 +724,7 @@ class PatientDashboard {
         if (viewId === 'doctor-search' && !this.previousView) {
             this.clearDoctorViews();
         }
-        
-        console.log('✅ Vista mostrada:', viewId);
+
     }
 
     updateSidebarActive(viewId) {
@@ -775,11 +756,11 @@ class PatientDashboard {
     validateDate() {
         const dateInput = document.getElementById('slotDate');
         const searchBtn = document.getElementById('searchSlotsBtn');
-        
+
         if (dateInput && dateInput.value) {
             const selectedDate = new Date(dateInput.value + 'T00:00:00'); // Evitar problemas de zona horaria
             const dayOfWeek = selectedDate.getDay();
-            
+
             if (dayOfWeek === 0 || dayOfWeek === 6) {
                 this.showMessage('No se permiten citas en fines de semana. Seleccioná un día de Lunes a Viernes.', 'error');
                 dateInput.value = ''; // Limpiar fecha inválida
@@ -795,16 +776,11 @@ class PatientDashboard {
     }
 
     backToSearch() {
-        console.log('🔍 backToSearch llamada');
-        console.log('🔍 previousView:', this.previousView);
-        
         // Si hay una vista anterior, regresar a ella, sino ir a doctor-search
         if (this.previousView) {
-            console.log('🔄 Regresando a vista anterior:', this.previousView);
             this.showView(this.previousView);
             this.previousView = null; // Limpiar la vista anterior
         } else {
-            console.log('🔄 No hay vista anterior, yendo a doctor-search');
             this.showView('doctor-search');
         }
         // No limpiar el estado aquí porque clearDoctorViews ya lo hace
@@ -825,11 +801,11 @@ class PatientDashboard {
         const searchResults = document.getElementById('search-results');
         const slotsContent = document.getElementById('slots-content');
         const slotsList = document.getElementById('slots-list');
-        
+
         if (searchResults) searchResults.innerHTML = '';
         if (slotsContent) slotsContent.innerHTML = '';
         if (slotsList) slotsList.innerHTML = '';
-        
+
         // Limpiar estado
         this.currentDoctor = null;
         this.selectedSlot = null;
@@ -837,16 +813,16 @@ class PatientDashboard {
         this.selectedDate = null;
     }
 
-        // ===== FILTROS DE CITAS =====
+    // ===== FILTROS DE CITAS =====
 
     filterAppointments(filter) {
-        
+
         // Guardar el filtro actual
         this.currentAppointmentsFilter = filter;
-        
+
         // Actualizar botones de tabs
         this.updateTabButtons(filter);
-        
+
         // Cargar citas con el filtro seleccionado
         this.loadAppointments(1, 5, filter);
     }
@@ -855,32 +831,32 @@ class PatientDashboard {
         // Remover clase active de todos los tabs
         const allTabs = document.querySelectorAll('.tab-btn');
         allTabs.forEach(tab => tab.classList.remove('active'));
-        
+
         // Agregar clase active al tab seleccionado
         const activeTab = document.querySelector(`[data-filter="${activeFilter}"]`);
         if (activeTab) {
             activeTab.classList.add('active');
         }
     }
-    
+
     reorderVisibleAppointments() {
         const appointmentsContainer = document.getElementById('appointments-list');
         if (!appointmentsContainer) return;
-        
+
         const visibleCards = Array.from(document.querySelectorAll('.appointment-card[style="display: block"], .appointment-card:not([style])'));
-        
+
         if (visibleCards.length > 1) {
             // Ordenar por fecha (más reciente primero)
             visibleCards.sort((a, b) => {
                 const dateA = a.querySelector('.appointment-date')?.textContent;
                 const dateB = b.querySelector('.appointment-date')?.textContent;
-                
+
                 if (dateA && dateB) {
                     return new Date(dateB) - new Date(dateA);
                 }
                 return 0;
             });
-            
+
             // Reordenar en el DOM
             visibleCards.forEach(card => {
                 appointmentsContainer.appendChild(card);
@@ -891,13 +867,13 @@ class PatientDashboard {
     clearFilters() {
         // Resetear filtros
         document.getElementById('statusFilter').value = '';
-        
+
         // Mostrar todas las citas
         const appointmentCards = document.querySelectorAll('.appointment-card');
         appointmentCards.forEach(card => {
             card.style.display = 'block';
         });
-        
+
         // Remover mensaje de no resultados
         const noResultsMsg = document.querySelector('.no-results-message');
         if (noResultsMsg) {
@@ -908,20 +884,20 @@ class PatientDashboard {
     // Función para crear controles de paginación básica (consistente con otros dashboards)
     createPaginationControls(pagination, type) {
         const { currentPage, totalPages, total, limit } = pagination;
-        
+
         let paginationHTML = '<div class="pagination-controls">';
         paginationHTML += `<div class="pagination-info">Página ${currentPage} de ${totalPages}${total ? ` (${total} citas)` : ''}</div>`;
         paginationHTML += '<div class="pagination-buttons">';
-        
+
         // Solo botones Anterior/Siguiente (paginación básica)
         if (currentPage > 1) {
             paginationHTML += `<button onclick="patientDashboard.changePage('${type}', ${currentPage - 1}, ${limit})" class="btn btn-secondary">← Anterior</button>`;
         }
-        
+
         if (currentPage < totalPages) {
             paginationHTML += `<button onclick="patientDashboard.changePage('${type}', ${currentPage + 1}, ${limit})" class="btn btn-primary">Siguiente →</button>`;
         }
-        
+
         paginationHTML += '</div></div>';
         return paginationHTML;
     }

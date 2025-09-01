@@ -22,7 +22,6 @@ import mongoose from 'mongoose';
  * @example
  * // Find active patients
  * const activePatients = await PatientModel.find({ isActive: true });
- * console.log(`Found ${activePatients.length} active patients`);
  */
 const patientsCollection = 'patients';
 

@@ -91,9 +91,6 @@ class AuthRepository {
      * @returns {Promise<Object|null>} - User object if email exists, null otherwise
      * @example
      * const existingUser = await checkEmailExists('john.doe@hospital.com');
-     * if (existingUser) {
-     *   console.log('Email already registered:', existingUser.role);
-     * }
      */
     async checkEmailExists(email) {
         const admin = await adminModel.findOne({ email });

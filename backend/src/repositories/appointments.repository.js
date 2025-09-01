@@ -73,10 +73,6 @@ export default class AppointmentsRepository {
      * @returns {Promise<Object|null>} - Appointment object with populated patient and doctor data, or null if not found
      * @example
      * const appointment = await findAppointmentById('507f1f77bcf86cd799439011');
-     * if (appointment) {
-     *   console.log('Patient:', appointment.patient.name);
-     *   console.log('Doctor:', appointment.doctor.name);
-     * }
      */
     findAppointmentById = async (appointmentId) => {
         const appById = await appointmentsModel.findById(appointmentId)
@@ -332,7 +328,6 @@ export default class AppointmentsRepository {
      * @returns {Promise<Object>} - MongoDB update result with count of modified documents
      * @example
      * const result = await cancelAllDoctorAppointmentsInWeek('507f1f77bcf86cd799439012', '2024-01-15', '2024-01-21', 'Doctor on vacation');
-     * console.log(`Cancelled ${result.modifiedCount} appointments`);
      */
     cancelAllDoctorAppointmentsInWeek = async (doctorId, startDate, endDate, reason = 'Cancelación masiva por el doctor') => {
         const result = await appointmentsModel.updateMany(

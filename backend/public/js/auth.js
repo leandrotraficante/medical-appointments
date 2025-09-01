@@ -123,7 +123,6 @@ async function handleUserRegister(e) {
     const birthDate = document.getElementById('registerBirthDate');
 
     if (!email || !password || !name || !lastname || !role || !personalId || !birthDate) {
-        console.error('Elementos del formulario no encontrados');
         return;
     }
 
@@ -190,7 +189,7 @@ function showMessage(container, message, type) {
 
 // ===== LOGOUT FUNCTION =====
 
-// Función global para logout (usada por main.js)
+// Función global para logout
 window.logout = async function () {
     try {
         const response = await fetch('/api/auth/logout', {
@@ -205,12 +204,10 @@ window.logout = async function () {
             // Redirigir al landing page
             window.location.href = '/';
         } else {
-            console.error('Logout failed');
             // Redirigir de todas formas
             window.location.href = '/';
         }
     } catch (error) {
-        console.error('Logout error:', error);
         // Redirigir de todas formas
         window.location.href = '/';
     }
