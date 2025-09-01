@@ -12,6 +12,9 @@ import configs from './config/configs.js';
 const app = express();
 const PORT = configs.PORT || 3000;
 
+// Configure trust proxy for Render (required for rate limiting)
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
