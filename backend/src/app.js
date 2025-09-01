@@ -44,6 +44,11 @@ const authLimiter = rateLimit({
 app.use(globalLimiter);
 app.use('/api/auth', authLimiter);
 
+// Health check endpoint for Render
+app.get('/healthz', (req, res) => {
+    res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentsRoutes);
 app.use('/api/users', usersRoutes);
@@ -51,6 +56,12 @@ app.use('/api/admin', adminRoutes);
 
 mongoose.connect(configs.mongoUrl, {})
     .then(() => {
-        app.listen(PORT, () => { });
+        console.log('MongoDB connected successfully');
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server running on port ${PORT}`);
+        });
     })
-    .catch(err => { });
+    .catch(err => {
+        console.error('MongoDB connection failed:', err);
+        process.exit(1);
+    });
