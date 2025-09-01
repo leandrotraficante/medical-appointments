@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use(express.static('public'));
 
 const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 25 * 60 * 1000,
     max: 100,
     message: {
         error: 'Too many requests',
@@ -34,8 +34,8 @@ const globalLimiter = rateLimit({
 });
 
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
+    windowMs: 25 * 60 * 1000,
+    max: 15,
     message: {
         error: 'Too many authentication attempts',
         message: 'Please try again in 15 minutes'

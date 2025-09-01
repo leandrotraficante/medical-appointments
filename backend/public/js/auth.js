@@ -122,7 +122,9 @@ async function handleUserRegister(e) {
     const personalId = document.getElementById('registerPersonalId');
     const birthDate = document.getElementById('registerBirthDate');
 
-    if (!email || !password || !name || !lastname || !role || !personalId || !birthDate) {
+    const phone = document.getElementById('registerPhone');
+    
+    if (!email || !password || !name || !lastname || !role || !personalId || !birthDate || !phone) {
         return;
     }
 
@@ -133,7 +135,8 @@ async function handleUserRegister(e) {
         lastname: lastname.value,
         role: role.value,
         personalId: personalId.value,
-        dateOfBirth: birthDate.value
+        dateOfBirth: birthDate.value,
+        phone: phone.value
     };
 
     const messageContainer = document.getElementById('registerMessage');
