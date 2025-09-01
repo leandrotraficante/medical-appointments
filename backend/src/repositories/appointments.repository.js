@@ -42,22 +42,44 @@ export default class AppointmentsRepository {
      * const doctorAppointments = await findAllAppointments({ doctor: '507f1f77bcf86cd799439012' });
      */
     findAllAppointments = async (filters = {}, page = null, limit = null) => {
+        // Procesar filtros de fecha si están presentes
+        const processedFilters = { ...filters };
+        
+        // Si hay startDate y endDate, crear filtro de rango de fechas
+        if (filters.startDate && filters.endDate) {
+            const startDate = new Date(filters.startDate);
+            const endDate = new Date(filters.endDate);
+            
+            // Ajustar endDate para incluir todo el día
+            endDate.setHours(23, 59, 59, 999);
+            
+            // Crear filtro de rango de fechas
+            processedFilters.date = {
+                $gte: startDate,
+                $lte: endDate
+            };
+            
+            // Remover startDate y endDate de los filtros (no son campos de la BD)
+            delete processedFilters.startDate;
+            delete processedFilters.endDate;
+        }
+        
         if (page && limit) {
             // Con paginación
             const skip = (page - 1) * limit;
             const [appointments, total] = await Promise.all([
-                appointmentsModel.find(filters)
+                appointmentsModel.find(processedFilters)
                     .populate('patient', 'name lastname personalId isActive')
                     .populate('doctor', 'name lastname license specialties email isActive')
                     .sort({ date: 1 })
                     .skip(skip)
                     .limit(limit),
-                appointmentsModel.countDocuments(filters)
+                appointmentsModel.countDocuments(processedFilters)
             ]);
             return { appointments, total, pagination: true };
         } else {
             // Sin paginación (comportamiento original)
-            const allApp = await appointmentsModel.find(filters)
+            const allApp = await appointmentsModel.find(processedFilters)
                 .populate('patient', 'name lastname personalId isActive')
                 .populate('doctor', 'name lastname license specialties email isActive')
                 .sort({ date: 1 });
