@@ -8,6 +8,7 @@ import usersRoutes from './routes/users.route.js';
 import adminRoutes from './routes/admin.route.js';
 import configs from './config/configs.js';
 
+// Production-ready app - dotenv removed, using Render environment variables
 const app = express();
 const PORT = configs.PORT || 3000;
 
