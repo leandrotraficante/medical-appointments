@@ -5,6 +5,7 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 ## 📋 Tabla de Contenidos
 
 - [🏗️ Descripción del Sistema](#️-descripción-del-sistema)
+- [🚀 Demo en Vivo](#-demo-en-vivo)
 - [🔄 Arquitectura](#-arquitectura)
 - [📁 Estructura del Proyecto](#-estructura-del-proyecto)
 - [🎮 Controllers](#-controllers)
@@ -33,6 +34,53 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 - **Gestión de citas** con estados y validaciones
 - **Perfiles personales** editables
 - **Endpoints públicos** para búsqueda sin autenticación
+
+---
+
+## 🚀 Demo en Vivo
+
+### 🌐 Aplicación Desplegada
+**URL de Producción:** [Enlace a Railway cuando esté desplegado]
+
+### 👥 Usuarios de Prueba
+
+**🔐 Admin (Gestión Completa):**
+- **Email:** `admin@portfolio.com`
+- **Password:** `Admin123!`
+- **Funcionalidades:** 
+  - Gestión completa de usuarios (activar/desactivar)
+  - Gestión de citas médicas
+  - Panel de administración completo
+  - Estadísticas del sistema
+
+**👨‍⚕️ Doctor (Gestión Médica):**
+- **Email:** `doctor@portfolio.com`
+- **Password:** `Doctor123!`
+- **Funcionalidades:**
+  - Ver citas asignadas
+  - Actualizar estado de citas
+  - Gestionar perfil médico
+  - Ver historial de pacientes
+
+**👤 Paciente (Gestión Personal):**
+- **Email:** `paciente@portfolio.com`
+- **Password:** `Paciente123!`
+- **Funcionalidades:**
+  - Reservar citas médicas
+  - Ver historial de citas
+  - Gestionar perfil personal
+  - Buscar doctores disponibles
+
+### 📱 Características del Demo
+- **Frontend Responsivo** con HTML, CSS y JavaScript vanilla
+- **Autenticación JWT** con cookies seguras
+- **Gestión de roles** diferenciada por usuario
+- **Validaciones en tiempo real** en formularios
+- **Búsqueda inteligente** de doctores y especialidades
+- **Sistema de citas** completo con estados
+
+### ⚠️ Nota Importante
+*Estos usuarios están configurados para demostración del portfolio. Los datos reales se configuran en producción.*
 
 ---
 
@@ -664,80 +712,3 @@ POST /api/auth/register
   "phone": "+54 9 11 1122-3344"
 }
 ```
-
-#### 4. Login y Obtener Token
-```bash
-POST /api/auth/login
-{
-  "email": "admin@hospital.com",
-  "password": "admin123"
-}
-```
-
-#### 5. Usar Token para Operaciones
-```bash
-GET /api/admin/admins
-Authorization: Bearer <TOKEN_OBTENIDO>
-```
-
-### Testing de Endpoints Públicos
-```bash
-# Listar doctores activos
-GET /api/public/doctors
-
-# Buscar por especialidad
-GET /api/public/doctors/search?specialty=Cardiology
-
-# Ver especialidades disponibles
-GET /api/public/specialties
-```
-
----
-
-## 📚 Documentación
-
-### JSDoc
-Todo el código está documentado con JSDoc para:
-- **Funciones y métodos** con parámetros y tipos
-- **Clases y modelos** con descripción y ejemplos
-- **Validaciones** y reglas de negocio
-- **Ejemplos de uso** para cada función
-
-### Generar Documentación
-```bash
-# Instalar Documentation.js
-npm install --save-dev documentation
-
-# Generar HTML
-npx documentation build src/**/*.js -f html -o docs
-
-# Generar Markdown
-npx documentation build src/**/*.js -f md -o docs
-```
-
----
-
-## 🤝 Contribución
-
-### Estándares de Código
-- **JSDoc** obligatorio para todas las funciones públicas
-- **Single quotes** para strings
-- **Arrow functions** para métodos de clase
-- **Async/await** para operaciones asíncronas
-- **Error handling** consistente en todas las capas
-
-### Estructura de Commits
-```
-feat: nueva funcionalidad
-fix: corrección de bug
-docs: actualización de documentación
-refactor: refactorización de código
-test: agregar o modificar tests
-```
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
