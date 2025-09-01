@@ -69,7 +69,7 @@ export default class AppointmentsRepository {
             const skip = (page - 1) * limit;
             const [appointments, total] = await Promise.all([
                 appointmentsModel.find(processedFilters)
-                    .populate('patient', 'name lastname personalId isActive')
+                    .populate('patient', 'name lastname personalId phone isActive')
                     .populate('doctor', 'name lastname license specialties email isActive')
                     .sort({ date: 1 })
                     .skip(skip)
@@ -80,7 +80,7 @@ export default class AppointmentsRepository {
         } else {
             // Sin paginación (comportamiento original)
             const allApp = await appointmentsModel.find(processedFilters)
-                .populate('patient', 'name lastname personalId isActive')
+                .populate('patient', 'name lastname personalId phone isActive')
                 .populate('doctor', 'name lastname license specialties email isActive')
                 .sort({ date: 1 });
             return allApp;
@@ -98,7 +98,7 @@ export default class AppointmentsRepository {
      */
     findAppointmentById = async (appointmentId) => {
         const appById = await appointmentsModel.findById(appointmentId)
-            .populate('patient', 'name lastname personalId isActive')
+            .populate('patient', 'name lastname personalId phone isActive')
             .populate('doctor', 'name lastname license specialties email isActive');
         return appById;
     }
@@ -115,7 +115,7 @@ export default class AppointmentsRepository {
     findAppointmentsByDoctor = async (doctorId, filters = {}) => {
         const query = { doctor: doctorId, ...filters };
         const appointments = await appointmentsModel.find(query)
-            .populate('patient', 'name lastname personalId isActive')
+            .populate('patient', 'name lastname personalId phone isActive')
             .populate('doctor', 'name lastname license specialties email isActive')
             .sort({ date: 1 });
         return appointments;
@@ -165,7 +165,7 @@ export default class AppointmentsRepository {
         };
 
         const appointments = await appointmentsModel.find(query)
-            .populate('patient', 'name lastname personalId isActive')
+            .populate('patient', 'name lastname personalId phone isActive')
             .populate('doctor', 'name lastname license specialties email isActive')
             .sort({ date: 1 });
 
@@ -184,7 +184,7 @@ export default class AppointmentsRepository {
     findAppointmentsByStatus = async (status, filters = {}) => {
         const query = { status, ...filters };
         const appointments = await appointmentsModel.find(query)
-            .populate('patient', 'name lastname personalId isActive')
+            .populate('patient', 'name lastname personalId phone isActive')
             .populate('doctor', 'name lastname license specialties email isActive')
             .sort({ date: 1 });
         return appointments;
@@ -285,7 +285,7 @@ export default class AppointmentsRepository {
             appointmentId,
             { status: newStatus },
             { new: true }
-        ).populate('patient', 'name lastname personalId isActive')
+        ).populate('patient', 'name lastname personalId phone isActive')
             .populate('doctor', 'name lastname license specialties email isActive');
         return updatedApp;
     }
@@ -319,7 +319,7 @@ export default class AppointmentsRepository {
             appointmentId,
             { date: newDateTime },
             { new: true }
-        ).populate('patient', 'name lastname personalId isActive')
+        ).populate('patient', 'name lastname personalId phone isActive')
             .populate('doctor', 'name lastname license specialties email isActive');
         return updatedApp;
     }
