@@ -741,15 +741,3 @@ test: agregar o modificar tests
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
----
-
-## 📞 Soporte
-
-Para soporte técnico o preguntas:
-- **Email**: soporte@medicalappointments.com
-- **Issues**: [GitHub Issues](https://github.com/username/medical-appointments/issues)
-- **Documentación**: [Wiki del Proyecto](https://github.com/username/medical-appointments/wiki)
-
----
-
-**¡Gracias por usar Medical Appointments System!** 🏥✨
