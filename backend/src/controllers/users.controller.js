@@ -423,7 +423,6 @@ const getMyProfile = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error getting profile:', error);
         
         if (error.message === 'User profile not found') {
             return res.status(404).json({ error: 'User profile not found' });

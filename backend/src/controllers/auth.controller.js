@@ -60,7 +60,6 @@ const register = async (req, res) => {
         });
     } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-            console.error('Error in register:', error);
         }
 
         if (error.name === 'ValidationError') {
