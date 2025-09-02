@@ -201,17 +201,22 @@ export default class AppointmentsRepository {
      * // Returns: [{ time: "2024-01-15T09:00:00.000Z", formatted: "09:00" }, ...]
      */
     findAvailableSlots = async (doctorId, date) => {
-        // Obtener la fecha de inicio y fin del día
-        // Asegurar que la fecha se interprete en la zona horaria local
-        const dateObj = new Date(date + 'T00:00:00');
-        const startOfDay = new Date(dateObj);
-        startOfDay.setHours(0, 0, 0, 0);
+        // Interpretar la fecha recibida (YYYY-MM-DD) como hora local de Buenos Aires (UTC-3)
+        // y trabajar en UTC para consultas/almacenamiento
+        const [yStr, mStr, dStr] = date.split('-');
+        const year = parseInt(yStr, 10);
+        const month = parseInt(mStr, 10); // 1-12
+        const day = parseInt(dStr, 10);
 
-        const endOfDay = new Date(dateObj);
-        endOfDay.setHours(23, 59, 59, 999);
+        // Inicio del día BA en UTC: 00:00 BA = 03:00 UTC
+        const startOfDayUTC = new Date(Date.UTC(year, month - 1, day, 3, 0, 0, 0));
+        // Siguiente día a las 03:00 UTC (inicio del siguiente día BA)
+        const nextDayStartUTC = new Date(Date.UTC(year, month - 1, day + 1, 3, 0, 0, 0));
 
         // Verificar que no sea fin de semana (0 = Domingo, 6 = Sábado)
-        const dayOfWeek = startOfDay.getDay();
+        // Calcular el día de la semana en BA (usando un objeto BA local virtual)
+        const baStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0)); // 00:00 BA simulado
+        const dayOfWeek = baStart.getUTCDay(); // usar UTC day del BA-simulado
         if (dayOfWeek === 0 || dayOfWeek === 6) {
             return []; // No hay slots disponibles en fines de semana
         }
@@ -220,7 +225,7 @@ export default class AppointmentsRepository {
         // Excluir citas canceladas, pero incluir pending y confirmed como ocupadas
         const existingAppointments = await appointmentsModel.find({
             doctor: doctorId,
-            date: { $gte: startOfDay, $lt: endOfDay },
+            date: { $gte: startOfDayUTC, $lt: nextDayStartUTC },
             status: { $nin: ['cancelled'] }
         }).sort({ date: 1 });
 
@@ -233,37 +238,19 @@ export default class AppointmentsRepository {
 
         for (let hour = startHour; hour < endHour; hour++) {
             for (let minute = 0; minute < 60; minute += 30) {
-                // Crear la fecha usando la hora local para evitar problemas de zona horaria
-                const slotTime = new Date(date + `T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`);
+                // Construir el slot como hora BA convertida a UTC (sumar 3 horas)
+                const slotTime = new Date(Date.UTC(year, month - 1, day, hour + 3, minute, 0));
 
                 // Verificar si el slot está disponible
                 const isOccupied = existingAppointments.some(app => {
-                    const appTime = new Date(app.date);
-
-                    // Comparar solo la hora y minuto, ignorando segundos y milisegundos
-                    const slotHour = slotTime.getHours();
-                    const slotMinute = slotTime.getMinutes();
-                    const appHour = appTime.getHours();
-                    const appMinute = appTime.getMinutes();
-
-                    // Un slot está ocupado si la cita está en la misma hora y minuto
-                    const isOccupiedResult = (slotHour === appHour && slotMinute === appMinute);
-
-                    // Debug log para cada slot
-                    if (isOccupiedResult) {
-
-                    }
-
-                    return isOccupiedResult;
+                    const appTime = new Date(app.date).getTime();
+                    return appTime === slotTime.getTime();
                 });
 
                 if (!isOccupied) {
                     availableSlots.push({
                         time: slotTime,
-                        formatted: slotTime.toLocaleTimeString('es-AR', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })
+                        formatted: slotTime.toISOString()
                     });
                 }
             }

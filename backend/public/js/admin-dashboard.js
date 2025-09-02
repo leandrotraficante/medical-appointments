@@ -758,7 +758,7 @@ class AdminDashboard {
                     <div class="appointment-info">
                         <p><strong>Paciente:</strong> ${appointment.patient?.name || 'N/A'} ${appointment.patient?.lastname || ''}</p>
                         <p><strong>Fecha:</strong> ${this.formatDateTime(appointment.date, false)}</p>
-                        <p><strong>Hora:</strong> ${new Date(appointment.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p><strong>Hora:</strong> ${new Date(appointment.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' })}</p>
                         <p><strong>Estado:</strong> ${this.getStatusText(appointment.status)}</p>
                         <p><strong>Última Modificación:</strong> ${lastModified}</p>
                         ${doctorMessage ? `<p class="doctor-status ${doctorStatus}">${doctorMessage}</p>` : ''}
@@ -806,14 +806,16 @@ class AdminDashboard {
             const dateStr = dateObj.toLocaleDateString('es-AR', {
                 day: '2-digit',
                 month: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+                timeZone: 'America/Argentina/Buenos_Aires'
             });
 
             if (!includeTime) return dateStr;
 
             const timeStr = dateObj.toLocaleTimeString('es-AR', {
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                timeZone: 'America/Argentina/Buenos_Aires'
             });
 
             return `${dateStr} ${timeStr}`;
@@ -1051,8 +1053,8 @@ class AdminDashboard {
             <p><strong>DNI:</strong> ${patient.personalId || 'No especificado'}</p>
                         <p><strong>Teléfono:</strong> ${patient.phone || 'No especificado'}</p>
                         <p><strong>Estado:</strong> ${patient.isActive ? 'Activo' : 'Inactivo'}</p>
-            <p><strong>Fecha de Nacimiento:</strong> ${patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'No especificada'}</p>
-                        <p><strong>Fecha de Registro:</strong> ${patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No especificada'}</p>
+            <p><strong>Fecha de Nacimiento:</strong> ${patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires' }) : 'No especificada'}</p>
+                        <p><strong>Fecha de Registro:</strong> ${patient.createdAt ? new Date(patient.createdAt).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }) : 'No especificada'}</p>
                         <div class="profile-actions">
                             ${patient.isActive ?
                 `<button onclick="adminDashboard.deactivatePatient('${patient._id}')" class="btn btn-warning">Desactivar Paciente</button>` :
@@ -1084,8 +1086,8 @@ class AdminDashboard {
                         <p><strong>Especialidades:</strong> ${doctor.specialties ? doctor.specialties.join(', ') : 'No especificadas'}</p>
             <p><strong>Matrícula:</strong> ${doctor.license || 'No especificada'}</p>
                         <p><strong>Estado:</strong> ${doctor.isActive ? 'Activo' : 'Inactivo'}</p>
-            <p><strong>Fecha de Nacimiento:</strong> ${doctor.dateOfBirth ? new Date(doctor.dateOfBirth).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'No especificada'}</p>
-                        <p><strong>Fecha de Registro:</strong> ${doctor.createdAt ? new Date(doctor.createdAt).toLocaleDateString() : 'No especificada'}</p>
+            <p><strong>Fecha de Nacimiento:</strong> ${doctor.dateOfBirth ? new Date(doctor.dateOfBirth).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires' }) : 'No especificada'}</p>
+                        <p><strong>Fecha de Registro:</strong> ${doctor.createdAt ? new Date(doctor.createdAt).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }) : 'No especificada'}</p>
                         <div class="profile-actions">
                             ${doctor.isActive ?
                 `<button onclick="adminDashboard.deactivateDoctor('${doctor._id}')" class="btn btn-warning">Desactivar Doctor</button>` :
@@ -1120,8 +1122,8 @@ class AdminDashboard {
                     <p><strong>Nombre:</strong> ${admin.name} ${admin.lastname}</p>
                     <p><strong>Email:</strong> ${admin.email}</p>
                     <p><strong>Estado:</strong> ${admin.isActive ? 'Activo' : 'Inactivo'}</p>
-                    <p><strong>Fecha de Nacimiento:</strong> ${admin.dateOfBirth ? new Date(admin.dateOfBirth).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'No especificada'}</p>
-                    <p><strong>Fecha de Registro:</strong> ${admin.createdAt ? new Date(admin.createdAt).toLocaleDateString() : 'No especificada'}</p>
+                    <p><strong>Fecha de Nacimiento:</strong> ${admin.dateOfBirth ? new Date(admin.dateOfBirth).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires' }) : 'No especificada'}</p>
+                    <p><strong>Fecha de Registro:</strong> ${admin.createdAt ? new Date(admin.createdAt).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }) : 'No especificada'}</p>
                     </div>
                 </div>
             `;
@@ -1386,8 +1388,8 @@ class AdminDashboard {
                         <p><strong>Nombre:</strong> ${admin.name} ${admin.lastname}</p>
                         <p><strong>Email:</strong> ${admin.email}</p>
                         <p><strong>Estado:</strong> ${admin.isActive ? 'Activo' : 'Inactivo'}</p>
-                    <p><strong>Fecha de Nacimiento:</strong> ${admin.dateOfBirth ? new Date(admin.dateOfBirth).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'No especificada'}</p>
-                        <p><strong>Fecha de Registro:</strong> ${admin.createdAt ? new Date(admin.createdAt).toLocaleDateString() : 'No especificada'}</p>
+                    <p><strong>Fecha de Nacimiento:</strong> ${admin.dateOfBirth ? new Date(admin.dateOfBirth).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires' }) : 'No especificada'}</p>
+                        <p><strong>Fecha de Registro:</strong> ${admin.createdAt ? new Date(admin.createdAt).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }) : 'No especificada'}</p>
                     </div>
                 </div>
             `;

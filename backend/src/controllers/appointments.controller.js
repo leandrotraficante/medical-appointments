@@ -26,10 +26,25 @@ const createAppointment = async (req, res) => {
             return res.status(400).json({ error: 'Patient, doctor and date are required' });
         }
 
-        if (isNaN(new Date(date).getTime())) {
+        // Parsear fecha como hora de Buenos Aires (si viene como 'YYYY-MM-DDTHH:mm:ss')
+        const parsedDate = (() => {
+            // Aceptar ISO completo; si termina con 'Z' se usa tal cual
+            if (typeof date === 'string' && /Z$/.test(date)) return new Date(date);
+            if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(date)) {
+                const [ymd, hms] = date.split('T');
+                const [y, m, d] = ymd.split('-').map(n => parseInt(n, 10));
+                const [hh, mm, ss = '00'] = hms.split(':');
+                // Convertir BA -> UTC sumando 3 horas
+                return new Date(Date.UTC(y, m - 1, d, parseInt(hh, 10) + 3, parseInt(mm, 10), parseInt(ss, 10)));
+            }
+            const dt = new Date(date);
+            return isNaN(dt.getTime()) ? null : dt;
+        })();
+
+        if (!parsedDate) {
             return res.status(400).json({ error: 'Invalid date format' });
         }
-        const appointmentData = { patient, doctor, date };
+        const appointmentData = { patient, doctor, date: parsedDate };
         const newAppointment = await appointmentsService.createAppointmentService(appointmentData);
         res.status(201).json({ success: true, data: newAppointment });
     } catch (error) {
@@ -442,16 +457,29 @@ const updateAppointmentDate = async (req, res) => {
         return res.status(400).json({ error: 'Date is required' });
     }
     
-    if (isNaN(new Date(newDate).getTime())) {
+    // Parsear fecha como hora de Buenos Aires si viene sin Z
+    const parsedNewDate = (() => {
+        if (typeof newDate === 'string' && /Z$/.test(newDate)) return new Date(newDate);
+        if (typeof newDate === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(newDate)) {
+            const [ymd, hms] = newDate.split('T');
+            const [y, m, d] = ymd.split('-').map(n => parseInt(n, 10));
+            const [hh, mm, ss = '00'] = hms.split(':');
+            return new Date(Date.UTC(y, m - 1, d, parseInt(hh, 10) + 3, parseInt(mm, 10), parseInt(ss, 10)));
+        }
+        const dt = new Date(newDate);
+        return isNaN(dt.getTime()) ? null : dt;
+    })();
+
+    if (!parsedNewDate) {
         return res.status(400).json({ error: 'Invalid date format' });
     }
-    
-    if (new Date(newDate) <= new Date()) {
+
+    if (parsedNewDate <= new Date()) {
         return res.status(400).json({ error: 'New appointment date must be in the future' });
     }
     
     try {
-        const updatedAppointment = await appointmentsService.updateAppointmentDateTime(appointmentId, newDate);
+        const updatedAppointment = await appointmentsService.updateAppointmentDateTime(appointmentId, parsedNewDate);
         res.status(200).json({ success: true, data: updatedAppointment });
     } catch (error) {
         if (error?.message === 'Appointment not found') {

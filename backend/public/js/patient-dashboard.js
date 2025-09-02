@@ -93,7 +93,7 @@ class PatientDashboard {
                 try {
                     const birthDate = new Date(profile.dateOfBirth);
                     if (!isNaN(birthDate.getTime())) {
-                        birthDateDisplay = birthDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                        birthDateDisplay = birthDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Argentina/Buenos_Aires' });
                     }
                 } catch (error) {
                 }
@@ -166,7 +166,7 @@ class PatientDashboard {
                         <span class="status-badge ${appointment.status}">${appointment.status}</span>
                     </div>
                     <div class="appointment-info">
-                        <p><strong>Fecha:</strong> ${new Date(appointment.date).toLocaleString()}</p>
+                        <p><strong>Fecha:</strong> ${new Date(appointment.date).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}</p>
                             <p><strong>Especialidades:</strong> ${doctorSpecialties}</p>
                     </div>
                     <div class="appointment-actions">
@@ -377,7 +377,7 @@ class PatientDashboard {
             contentContainer.innerHTML = `
                 <div class="slots-form">
                     <h3>Seleccionar Fecha</h3>
-                    <input type="date" id="slotDate" min="${new Date().toISOString().split('T')[0]}" onchange="patientDashboard.validateDate()">
+                    <input type="date" id="slotDate" min="${(() => { const now = new Date(); const y = now.getFullYear(); const m = (now.getMonth()+1).toString().padStart(2,'0'); const d = now.getDate().toString().padStart(2,'0'); return `${y}-${m}-${d}`; })()}" onchange="patientDashboard.validateDate()">
                                             <button id="searchSlotsBtn" onclick="patientDashboard.loadAvailableSlots()" disabled class="btn btn-primary">Ver Disponibilidad</button>
                     <small>⚠️ Solo se permiten citas de Lunes a Viernes</small>
                     <div class="back-buttons">
@@ -427,19 +427,28 @@ class PatientDashboard {
                 return;
             }
 
-            const slotsHTML = slots.map(slot => `
+            const slotsHTML = slots.map(slot => {
+                const localSlotDate = new Date(slot.time);
+                const localFormatted = localSlotDate.toLocaleTimeString('es-AR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'America/Argentina/Buenos_Aires'
+                });
+                return `
                 <div class="slot-item">
-                    <p><strong>Horario:</strong> ${slot.formatted}</p>
+                    <p><strong>Horario:</strong> ${localFormatted}</p>
                     <button onclick="patientDashboard.selectSlot('${slot.time}')">Seleccionar</button>
                 </div>
-            `).join('');
+                `;
+            }).join('');
 
             // Formatear la fecha de manera segura para evitar problemas de zona horaria
-            const displayDate = new Date(date + 'T00:00:00'); // Forzar hora local
+            const displayDate = new Date(date + 'T00:00:00');
             const formattedDate = displayDate.toLocaleDateString('es-AR', {
                 day: '2-digit',
                 month: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+                timeZone: 'America/Argentina/Buenos_Aires'
             });
 
             slotsList.innerHTML = `
@@ -505,7 +514,8 @@ class PatientDashboard {
                 weekday: 'long',
                 day: '2-digit',
                 month: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+                timeZone: 'America/Argentina/Buenos_Aires'
             });
 
             contentContainer.innerHTML = `
@@ -528,7 +538,7 @@ class PatientDashboard {
                     
                     <div class="form-group">
                         <label>Fecha:</label>
-                        <input type="date" id="appointmentDate" min="${new Date().toISOString().split('T')[0]}" value="${this.selectedDate}" readonly>
+                        <input type="date" id="appointmentDate" min="${(() => { const now = new Date(); const y = now.getFullYear(); const m = (now.getMonth()+1).toString().padStart(2,'0'); const d = now.getDate().toString().padStart(2,'0'); return `${y}-${m}-${d}`; })()}" value="${this.selectedDate}" readonly>
                         <small>⚠️ La fecha no se puede modificar una vez seleccionada</small>
                     </div>
                     
@@ -693,11 +703,13 @@ class PatientDashboard {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
+                day: 'numeric',
+                timeZone: 'America/Argentina/Buenos_Aires'
             });
             const formattedTime = appointmentDate.toLocaleTimeString('es-AR', {
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                timeZone: 'America/Argentina/Buenos_Aires'
             });
 
             contentContainer.innerHTML = `

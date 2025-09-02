@@ -104,7 +104,8 @@ class DoctorDashboard {
 
     async loadTodayAppointments(page = 1, limit = 5) {
         try {
-            const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+            const now = new Date();
+            const today = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}`; // Formato YYYY-MM-DD local
             const response = await fetch(`${this.baseURL}/appointments/my-appointments?startDate=${today}&endDate=${today}&page=${page}&limit=${limit}`, {
                 credentials: 'include'
             });
@@ -190,7 +191,8 @@ class DoctorDashboard {
                                 month: '2-digit',
                                 day: '2-digit',
                                 hour: '2-digit',
-                                minute: '2-digit'
+                                minute: '2-digit',
+                                timeZone: 'America/Argentina/Buenos_Aires'
                             })}</p>
                         <p><strong>🆔 DNI:</strong> ${appointment.patient.personalId || 'No especificado'}</p>
                             <p><strong>📞 Teléfono:</strong> ${appointment.patient.phone || 'No especificado'}</p>
@@ -251,7 +253,8 @@ class DoctorDashboard {
                         <div class="appointment-info">
                             <p><strong>📅 Hora:</strong> ${new Date(appointment.date).toLocaleTimeString('es-AR', {
                                 hour: '2-digit',
-                                minute: '2-digit'
+                                minute: '2-digit',
+                                timeZone: 'America/Argentina/Buenos_Aires'
                             })}</p>
                             <p><strong>🆔 DNI:</strong> ${appointment.patient.personalId || 'No especificado'}</p>
                             <p><strong>📞 Teléfono:</strong> ${appointment.patient.phone || 'No especificado'}</p>
@@ -341,11 +344,13 @@ class DoctorDashboard {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
+                day: 'numeric',
+                timeZone: 'America/Argentina/Buenos_Aires'
             });
             const formattedTime = appointmentDate.toLocaleTimeString('es-AR', {
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                timeZone: 'America/Argentina/Buenos_Aires'
             });
 
             contentContainer.innerHTML = `
