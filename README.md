@@ -41,13 +41,13 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 ## 🚀 Demo en Vivo
 
 ### 🌐 Aplicación Desplegada
-**URL de Producción:** [Enlace a Railway cuando esté desplegado]
+**URL de Producción:** https://medical-appointments-production.up.railway.app/
 
 ### 👥 Usuarios de Prueba
 
 **🔐 Admin (Gestión Completa):**
-- **Email:** `admin@portfolio.com`
-- **Password:** `Admin123!`
+- **Email:** `admin@hospital.com`
+- **Password:** `admin123!`
 - **Funcionalidades:** 
   - Gestión completa de usuarios (activar/desactivar)
   - Gestión de citas médicas
@@ -55,8 +55,8 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
   - Estadísticas del sistema
 
 **👨‍⚕️ Doctor (Gestión Médica):**
-- **Email:** `doctor@portfolio.com`
-- **Password:** `Doctor123!`
+- **Email:** `dr.gonzalez@hospital.com`
+- **Password:** `doctor123!`
 - **Funcionalidades:**
   - Ver citas asignadas
   - Actualizar estado de citas
@@ -64,8 +64,8 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
   - Ver historial de pacientes
 
 **👤 Paciente (Gestión Personal):**
-- **Email:** `paciente@portfolio.com`
-- **Password:** `Paciente123!`
+- **Email:** `patient@hospital.com`
+- **Password:** `patient123!`
   - Reservar citas médicas
   - Ver historial de citas
   - Gestionar perfil personal
