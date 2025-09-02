@@ -79,7 +79,7 @@ class PatientDashboard {
                 this.showMessage(`Error al cargar las citas: ${errorData.error || 'Error desconocido'}`, 'error');
             }
         } catch (error) {
-            this.showMessage('Error de conexión', 'error');
+            this.showMessage('Error de conexión. Verificá que el servidor esté corriendo.', 'error');
         }
     }
 
@@ -111,52 +111,72 @@ class PatientDashboard {
         }
     }
 
-    displayAppointments(appointments, pagination = null) {
+        displayAppointments(appointments, pagination = null, filter = 'all') {
         const appointmentsContainer = document.getElementById('appointments-list');
         if (appointmentsContainer) {
             if (appointments.length === 0) {
+                let emptyMessage = 'No tenés citas programadas';
+                if (filter !== 'all') {
+                    const filterLabels = {
+                        'pending': 'pendientes',
+                        'confirmed': 'confirmadas', 
+                        'completed': 'completadas',
+                        'cancelled': 'canceladas'
+                    };
+                    emptyMessage = `No tenés citas ${filterLabels[filter] || filter}`;
+                }
+                
                 appointmentsContainer.innerHTML = `
                     <div class="empty-state">
-                        <h3>No tenés citas programadas</h3>
-                        <p>¿Querés agendar tu primera cita médica?</p>
+                        <h3>${emptyMessage}</h3>
+                        <p>${filter === 'all' ? '¿Querés agendar tu primera cita médica?' : 'Cambiá el filtro para ver otros tipos de citas.'}</p>
                         <div class="empty-state-actions">
-                            <button onclick="patientDashboard.showView('doctor-search')" class="btn btn-primary">
-                                Buscar Doctores
-                            </button>
-                            <button onclick="patientDashboard.showView('patient-info')" class="btn btn-secondary">
-                                Ver Mi Perfil
-                            </button>
+                            ${filter === 'all' ? `
+                                <button onclick="patientDashboard.showView('doctor-search')" class="btn btn-primary">
+                                    Buscar Doctores
+                                </button>
+                                <button onclick="patientDashboard.showView('patient-info')" class="btn btn-secondary">
+                                    Ver Mi Perfil
+                                </button>
+                            ` : `
+                                <button onclick="patientDashboard.filterAppointments('all')" class="btn btn-primary">
+                                    Ver Todas las Citas
+                                </button>
+                            `}
                         </div>
                     </div>
                 `;
                 return;
             }
 
-            // Agregar controles de filtro
-            const filterControls = `
-                <div class="appointments-filters">
-                    
-                    </div>
-                </div>
-            `;
+            const appointmentsHTML = appointments.map(appointment => {
+                // Verificar que el doctor esté disponible
+                const doctorName = appointment.doctor ? 
+                    `${appointment.doctor.name || 'Sin nombre'} ${appointment.doctor.lastname || 'Sin apellido'}` : 
+                    'Doctor no disponible';
+                
+                const doctorSpecialties = appointment.doctor && appointment.doctor.specialties ? 
+                    appointment.doctor.specialties.join(', ') : 
+                    'No especificadas';
 
-            const appointmentsHTML = appointments.map(appointment => `
-                <div class="appointment-card" onclick="patientDashboard.showAppointmentDetail('${appointment._id}')">
-                    <div class="appointment-header">
-                        <h4>${appointment.doctor.name} ${appointment.doctor.lastname}</h4>
-                        <span class="status-badge ${appointment.status}">${appointment.status}</span>
+                return `
+                    <div class="appointment-card" onclick="patientDashboard.showAppointmentDetail('${appointment._id}')">
+                        <div class="appointment-header">
+                            <h4>${doctorName}</h4>
+                            <span class="status-badge ${appointment.status}">${appointment.status}</span>
+                        </div>
+                        <div class="appointment-info">
+                            <p><strong>Fecha:</strong> ${new Date(appointment.date).toLocaleString()}</p>
+                            <p><strong>Especialidades:</strong> ${doctorSpecialties}</p>
+                        </div>
+                        <div class="appointment-actions">
+                            <button onclick="event.stopPropagation(); patientDashboard.showAppointmentDetail('${appointment._id}')" class="detail-btn">
+                                Ver Detalles
+                            </button>
+                        </div>
                     </div>
-                    <div class="appointment-info">
-                        <p><strong>Fecha:</strong> ${new Date(appointment.date).toLocaleString()}</p>
-                        <p><strong>Especialidades:</strong> ${appointment.doctor.specialties ? appointment.doctor.specialties.join(', ') : 'No especificadas'}</p>
-                    </div>
-                    <div class="appointment-actions">
-                        <button onclick="event.stopPropagation(); patientDashboard.showAppointmentDetail('${appointment._id}')" class="detail-btn">
-                            Ver Detalles
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             // Agregar controles de paginación básica si hay múltiples páginas
             let paginationHTML = '';
@@ -164,7 +184,7 @@ class PatientDashboard {
                 paginationHTML = this.createPaginationControls(pagination, 'appointments');
             }
 
-            appointmentsContainer.innerHTML = filterControls + appointmentsHTML + paginationHTML;
+            appointmentsContainer.innerHTML = appointmentsHTML + paginationHTML;
         }
     }
 
@@ -470,44 +490,62 @@ class PatientDashboard {
             return;
         }
 
+        if (!this.selectedSlot || !this.selectedDate || !this.selectedTime) {
+            this.showMessage('No hay slot seleccionado', 'error');
+            return;
+        }
+
         const contentContainer = document.getElementById('book-appointment-content');
         if (contentContainer) {
+            // Formatear la fecha y hora seleccionada para mostrar
+            const selectedDateObj = new Date(this.selectedDate + 'T00:00:00');
+            const formattedDate = selectedDateObj.toLocaleDateString('es-AR', {
+                weekday: 'long',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
             contentContainer.innerHTML = `
                 <div class="book-appointment-form">
-                    <h3>Ver Disponibilidad</h3>
+                    <h3>Confirmar Cita</h3>
                     <p><strong>Doctor:</strong> <span id="selected-doctor-name">Cargando...</span></p>
-                    <p><strong>Fecha y Hora:</strong> <span id="selected-slot-time">${this.selectedSlot ? new Date(this.selectedSlot).toLocaleString() : 'No seleccionado'}</span></p>
+                    
+                    <div class="appointment-summary">
+                        <h4>📅 Resumen de la Cita</h4>
+                        <div class="summary-item">
+                            <strong>Fecha:</strong> ${formattedDate}
+                        </div>
+                        <div class="summary-item">
+                            <strong>Hora:</strong> ${this.selectedTime}
+                        </div>
+                        <div class="summary-item">
+                            <strong>Estado:</strong> <span class="status-badge pending">Pendiente de confirmación</span>
+                        </div>
+                    </div>
                     
                     <div class="form-group">
                         <label>Fecha:</label>
-                        <input type="date" id="appointmentDate" min="${new Date().toISOString().split('T')[0]}" ${this.selectedDate ? `value="${this.selectedDate}"` : ''}>
+                        <input type="date" id="appointmentDate" min="${new Date().toISOString().split('T')[0]}" value="${this.selectedDate}" readonly>
+                        <small>⚠️ La fecha no se puede modificar una vez seleccionada</small>
                     </div>
                     
                     <div class="form-group">
                         <label>Hora:</label>
-                        <select id="appointmentTime" required>
-                                <option value="">Seleccionar hora</option>
-                                <option value="09:00" ${this.selectedTime === '09:00' ? 'selected' : ''}>09:00</option>
-                                <option value="09:30" ${this.selectedTime === '09:30' ? 'selected' : ''}>09:30</option>
-                                <option value="10:00" ${this.selectedTime === '10:00' ? 'selected' : ''}>10:00</option>
-                                <option value="10:30" ${this.selectedTime === '10:30' ? 'selected' : ''}>10:30</option>
-                                <option value="11:00" ${this.selectedTime === '11:00' ? 'selected' : ''}>11:00</option>
-                                <option value="11:30" ${this.selectedTime === '11:30' ? 'selected' : ''}>11:30</option>
-                                <option value="12:00" ${this.selectedTime === '12:00' ? 'selected' : ''}>12:00</option>
-                                <option value="12:30" ${this.selectedTime === '12:30' ? 'selected' : ''}>12:30</option>
-                                <option value="13:00" ${this.selectedTime === '13:00' ? 'selected' : ''}>13:00</option>
-                                <option value="13:30" ${this.selectedTime === '13:30' ? 'selected' : ''}>13:30</option>
-                                <option value="14:00" ${this.selectedTime === '14:00' ? 'selected' : ''}>14:00</option>
-                                <option value="14:30" ${this.selectedTime === '14:30' ? 'selected' : ''}>14:30</option>
-                                <option value="15:00" ${this.selectedTime === '15:00' ? 'selected' : ''}>15:00</option>
-                                <option value="15:30" ${this.selectedTime === '15:30' ? 'selected' : ''}>15:30</option>
-                                <option value="16:00" ${this.selectedTime === '16:00' ? 'selected' : ''}>16:00</option>
-                                <option value="16:30" ${this.selectedTime === '16:30' ? 'selected' : ''}>16:30</option>
-                            </select>
-                            <small>Horarios disponibles: 9:00 AM - 5:00 PM (cada 30 minutos)</small>
-                        </div>
+                        <select id="appointmentTime" required disabled>
+                            <option value="${this.selectedTime}" selected>${this.selectedTime}</option>
+                        </select>
+                        <small>⚠️ La hora no se puede modificar una vez seleccionada</small>
+                    </div>
                     
-                    <button onclick="patientDashboard.createAppointment()" class="confirm-appointment-btn">Confirmar Cita</button>
+                    <div class="form-actions">
+                        <button onclick="patientDashboard.createAppointment()" class="confirm-appointment-btn">
+                            ✅ Confirmar Cita
+                        </button>
+                        <button onclick="patientDashboard.backToSearch()" class="btn btn-secondary">
+                            ❌ Cancelar
+                        </button>
+                    </div>
                 </div>
             `;
         }
@@ -658,10 +696,10 @@ class PatientDashboard {
                     
                     <div class="detail-section">
                         <h4>👨‍⚕️ Información del Doctor</h4>
-                        <p><strong>Nombre:</strong> ${appointment.doctor.name} ${appointment.doctor.lastname}</p>
-                        <p><strong>Especialidades:</strong> ${appointment.doctor.specialties ? appointment.doctor.specialties.join(', ') : 'No especificadas'}</p>
-                        <p><strong>Matrícula:</strong> ${appointment.doctor.license || 'No especificada'}</p>
-                        <p><strong>Email:</strong> ${appointment.doctor.email || 'No especificado'}</p>
+                        <p><strong>Nombre:</strong> ${appointment.doctor ? `${appointment.doctor.name || 'Sin nombre'} ${appointment.doctor.lastname || 'Sin apellido'}` : 'Doctor no disponible'}</p>
+                        <p><strong>Especialidades:</strong> ${appointment.doctor && appointment.doctor.specialties ? appointment.doctor.specialties.join(', ') : 'No especificadas'}</p>
+                        <p><strong>Matrícula:</strong> ${appointment.doctor && appointment.doctor.license ? appointment.doctor.license : 'No especificada'}</p>
+                        <p><strong>Email:</strong> ${appointment.doctor && appointment.doctor.email ? appointment.doctor.email : 'No especificado'}</p>
                     </div>
                     
                     <div class="detail-section">
@@ -674,8 +712,8 @@ class PatientDashboard {
                     
                     <div class="detail-section">
                         <h4>👤 Información del Paciente</h4>
-                        <p><strong>Nombre:</strong> ${appointment.patient.name} ${appointment.patient.lastname}</p>
-                        <p><strong>DNI:</strong> ${appointment.patient.personalId || 'No especificado'}</p>
+                        <p><strong>Nombre:</strong> ${appointment.patient ? `${appointment.patient.name || 'Sin nombre'} ${appointment.patient.lastname || 'Sin apellido'}` : 'Paciente no disponible'}</p>
+                        <p><strong>DNI:</strong> ${appointment.patient && appointment.patient.personalId ? appointment.patient.personalId : 'No especificado'}</p>
                     </div>
                     
                     ${appointment.notes ? `
@@ -906,8 +944,9 @@ class PatientDashboard {
     changePage(type, page, limit) {
         switch (type) {
             case 'appointments':
-                // Usar el filtro actual guardado
-                this.loadAppointments(page, limit, this.currentAppointmentsFilter);
+                // Usar el filtro actual guardado y un límite por defecto si no se especifica
+                const appointmentsLimit = limit || 5;
+                this.loadAppointments(page, appointmentsLimit, this.currentAppointmentsFilter);
                 break;
             case 'doctors':
                 this.loadDoctorsPage(page);

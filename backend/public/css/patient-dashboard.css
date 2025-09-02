@@ -355,23 +355,29 @@ button:disabled {
 }
 
 .btn-primary {
-    background: #2196f3;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
     color: white;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
 }
 
 .btn-primary:hover {
-    background: #1976d2;
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
     color: white;
+    border: none;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
 }
 
 .btn-secondary:hover {
-    background: #5a6268;
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #545b62 0%, #3d4449 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
 }
 
 .btn-success {
@@ -498,17 +504,7 @@ button:disabled {
     box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-}
 
-.btn-secondary {
-    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
-}
-
-.btn-secondary:hover {
-    background: linear-gradient(135deg, #545b62 0%, #3d4449 100%);
-}
 
 .clear-filters-btn {
     background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
@@ -879,32 +875,38 @@ button:disabled {
 }
 
 .tab-btn {
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.2rem;
     border: 2px solid #e0e0e0;
-    background: white;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     color: #666;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.875rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .tab-btn:hover {
-    border-color: #2196f3;
-    color: #2196f3;
-    background: rgba(33, 150, 243, 0.05);
+    border-color: #007bff;
+    color: #007bff;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
 }
 
 .tab-btn.active {
-    background: #2196f3;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
     color: white;
-    border-color: #2196f3;
+    border-color: #007bff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 }
 
 .tab-btn.active:hover {
-    background: #1976d2;
-    border-color: #1976d2;
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    border-color: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
 }
 
 /* ===== RESPONSIVE TABS ===== */
@@ -931,4 +933,65 @@ button:disabled {
         max-width: 200px;
         padding: 0.6rem 1rem;
     }
+}
+
+/* ===== APPOINTMENT SUMMARY ===== */
+.appointment-summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #28a745;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-summary h4 {
+    color: #28a745;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-item strong {
+    color: #495057;
+    font-weight: 600;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.confirm-appointment-btn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.confirm-appointment-btn:hover {
+    background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
 }

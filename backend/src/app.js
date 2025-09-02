@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
@@ -8,7 +9,8 @@ import usersRoutes from './routes/users.route.js';
 import adminRoutes from './routes/admin.route.js';
 import configs from './config/configs.js';
 
-// Production-ready app - dotenv removed, using Render environment variables
+// Load environment variables from .env file
+dotenv.config();
 const app = express();
 const PORT = configs.PORT || 3000;
 

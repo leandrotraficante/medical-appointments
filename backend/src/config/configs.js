@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 /**
  * Main configuration object containing environment variables
  * @type {Object}
