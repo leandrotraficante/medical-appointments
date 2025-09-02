@@ -1,6 +1,6 @@
 # 🏥 Medical Appointments System
 
-Sistema completo de citas médicas con arquitectura en capas, autenticación JWT y gestión de usuarios por roles.
+Sistema completo de citas médicas con arquitectura en capas, autenticación JWT y gestión de usuarios por roles. **Enfoque principal en backend** con frontend básico para demostración.
 
 ## 📋 Tabla de Contenidos
 
@@ -19,7 +19,7 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 - [📋 Guía de Endpoints](#-guía-de-endpoints)
 - [🔐 Autenticación](#-autenticación)
 - [🧪 Testing](#-testing)
-- [📚 Documentación](#-documentación)
+- [🌍 Zona Horaria](#-zona-horaria)
 
 ---
 
@@ -33,7 +33,8 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 - **Búsqueda inteligente** de doctores y especialidades
 - **Gestión de citas** con estados y validaciones
 - **Perfiles personales** editables
-- **Endpoints públicos** para búsqueda sin autenticación
+- **Frontend básico** para demostración (HTML/CSS/JS vanilla)
+- **Zona horaria unificada** a Buenos Aires, Argentina
 
 ---
 
@@ -65,19 +66,19 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 **👤 Paciente (Gestión Personal):**
 - **Email:** `paciente@portfolio.com`
 - **Password:** `Paciente123!`
-- **Funcionalidades:**
   - Reservar citas médicas
   - Ver historial de citas
   - Gestionar perfil personal
   - Buscar doctores disponibles
 
 ### 📱 Características del Demo
-- **Frontend Responsivo** con HTML, CSS y JavaScript vanilla
+- **Frontend Básico** con HTML, CSS y JavaScript vanilla
 - **Autenticación JWT** con cookies seguras
 - **Gestión de roles** diferenciada por usuario
 - **Validaciones en tiempo real** en formularios
 - **Búsqueda inteligente** de doctores y especialidades
 - **Sistema de citas** completo con estados
+- **Zona horaria** Buenos Aires en toda la aplicación
 
 ### ⚠️ Nota Importante
 *Estos usuarios están configurados para demostración del portfolio. Los datos reales se configuran en producción.*
@@ -116,22 +117,16 @@ backend/
 │   │   ├── admin.controller.js
 │   │   ├── appointments.controller.js
 │   │   ├── auth.controller.js
-│   │   ├── profile.controller.js
-│   │   ├── public.controller.js
 │   │   └── users.controller.js
 │   ├── services/             # Lógica de negocio
 │   │   ├── admin.service.js
 │   │   ├── appointments.service.js
 │   │   ├── auth.service.js
-│   │   ├── profile.service.js
-│   │   ├── public.service.js
 │   │   └── user.service.js
 │   ├── repositories/         # Acceso a datos
 │   │   ├── admin.repository.js
 │   │   ├── appointments.repository.js
 │   │   ├── auth.repository.js
-│   │   ├── profile.repository.js
-│   │   ├── public.repository.js
 │   │   └── user.repository.js
 │   ├── models/               # Esquemas MongoDB
 │   │   ├── admin.model.js
@@ -142,8 +137,6 @@ backend/
 │   │   ├── admin.route.js
 │   │   ├── appointments.route.js
 │   │   ├── auth.route.js
-│   │   ├── profile.route.js
-│   │   ├── public.route.js
 │   │   └── users.route.js
 │   ├── middleware/           # Middleware personalizado
 │   │   └── auth.middleware.js
@@ -154,6 +147,22 @@ backend/
 │   ├── config/               # Configuraciones
 │   │   └── configs.js
 │   └── app.js               # Punto de entrada
+├── public/                   # Frontend básico (HTML/CSS/JS)
+│   ├── css/                 # Estilos
+│   │   ├── admin-dashboard.css
+│   │   ├── doctor-dashboard.css
+│   │   ├── index.css
+│   │   ├── pagination.css
+│   │   └── patient-dashboard.css
+│   ├── js/                  # JavaScript del frontend
+│   │   ├── admin-dashboard.js
+│   │   ├── auth.js
+│   │   ├── doctor-dashboard.js
+│   │   └── patient-dashboard.js
+│   ├── admin-dashboard.html
+│   ├── doctor-dashboard.html
+│   ├── index.html
+│   └── patient-dashboard.html
 ├── package.json
 └── README.md
 ```
@@ -204,24 +213,6 @@ Maneja autenticación y registro de usuarios.
 | `login` | Autentica usuario | `POST /api/auth/login` |
 | `logout` | Cierra sesión | `GET /api/auth/logout` |
 
-### Profile Controller
-Gestiona perfiles personales de usuarios.
-
-| Método | Descripción | Endpoint |
-|--------|-------------|----------|
-| `getMyProfile` | Obtiene perfil del usuario logueado | `GET /api/profile` |
-| `updateMyProfile` | Actualiza perfil del usuario | `PUT /api/profile` |
-
-### Public Controller
-Endpoints públicos para búsqueda de doctores.
-
-| Método | Descripción | Endpoint |
-|--------|-------------|----------|
-| `getActiveDoctors` | Lista doctores activos (público) | `GET /api/public/doctors` |
-| `getAllSpecialties` | Lista todas las especialidades | `GET /api/public/specialties` |
-| `searchDoctorsBySpecialty` | Busca doctores por especialidad | `GET /api/public/doctors/search` |
-| `getDoctorSchedule` | Obtiene información de doctor | `GET /api/public/doctors/:id/schedule` |
-
 ### Users Controller
 Gestión y búsqueda de usuarios del sistema.
 
@@ -271,20 +262,6 @@ Lógica de autenticación y registro.
 
 - **`register(userData, role)`** - Registra nuevo usuario
 - **`login(email, password)`** - Autentica usuario
-
-### Profile Service
-Lógica para gestión de perfiles.
-
-- **`getMyProfile(userId, role)`** - Obtiene perfil de usuario
-- **`updateMyProfile(userId, role, updateData)`** - Actualiza perfil
-
-### Public Service
-Lógica para endpoints públicos.
-
-- **`getActiveDoctors()`** - Lista doctores activos
-- **`getAllSpecialties()`** - Lista todas las especialidades
-- **`searchDoctorsBySpecialty(specialty)`** - Busca doctores por especialidad
-- **`getDoctorSchedule(doctorId)`** - Obtiene información de doctor
 
 ### User Service
 Lógica para gestión de usuarios.
@@ -340,20 +317,6 @@ Acceso a datos para autenticación.
 - **`createDoctor(doctorData)`** - Crea nuevo doctor
 - **`createPatient(patientData)`** - Crea nuevo paciente
 - **`checkEmailExists(email)`** - Verifica si email ya existe
-
-### Profile Repository
-Acceso a datos para perfiles.
-
-- **`findUserByIdAndRole(userId, role)`** - Busca usuario por ID y rol
-- **`updateUserProfile(userId, role, updateData)`** - Actualiza perfil de usuario
-
-### Public Repository
-Acceso a datos para endpoints públicos.
-
-- **`getActiveDoctors()`** - Lista doctores activos
-- **`getAllSpecialties()`** - Lista todas las especialidades
-- **`searchDoctorsBySpecialty(specialty)`** - Busca doctores por especialidad
-- **`getDoctorSchedule(doctorId)`** - Obtiene información de doctor
 
 ### User Repository
 Acceso a datos para gestión de usuarios.
@@ -483,16 +446,6 @@ Acceso a datos para gestión de usuarios.
 - **`POST /login`** - Autentica usuario
 - **`GET /logout`** - Cierra sesión
 
-### Profile Routes (`/api/profile`)
-- **`GET /`** - Obtiene perfil del usuario logueado
-- **`PUT /`** - Actualiza perfil del usuario
-
-### Public Routes (`/api/public`)
-- **`GET /doctors`** - Lista doctores activos (público)
-- **`GET /specialties`** - Lista todas las especialidades
-- **`GET /doctors/search`** - Busca doctores por especialidad
-- **`GET /doctors/:id/schedule`** - Obtiene información de doctor
-
 ### Users Routes (`/api/users`)
 - **`GET /doctors`** - Lista todos los doctores
 - **`GET /patients`** - Lista todos los pacientes
@@ -502,10 +455,6 @@ Acceso a datos para gestión de usuarios.
 - **`GET /inactive-patients`** - Lista pacientes inactivos
 - **`GET /search`** - Búsqueda unificada inteligente
 - **`GET /doctors/license/:license`** - Busca doctor por licencia
-
-
-
-
 - **`GET /doctors-by-name`** - Busca doctores por nombre
 - **`GET /patients-by-name`** - Busca pacientes por nombre
 
@@ -577,29 +526,18 @@ cp .env.example .env
 
 # Iniciar servidor
 npm start
-
-# Modo desarrollo
-npm run dev
 ```
 
 ### Scripts Disponibles
 ```json
 {
-  "start": "node src/app.js",
-  "dev": "nodemon src/app.js",
-  "test": "jest"
+  "start": "node src/app.js"
 }
 ```
 
 ---
 
 ## 📋 Guía de Endpoints
-
-### Endpoints Públicos (Sin Autenticación)
-- **`GET /api/public/doctors`** - Lista doctores activos
-- **`GET /api/public/specialties`** - Lista especialidades
-- **`GET /api/public/doctors/search?specialty=Cardiology`** - Busca doctores por especialidad
-- **`GET /api/public/doctors/:id/schedule`** - Información de doctor
 
 ### Endpoints de Autenticación
 - **`POST /api/auth/register`** - Registro de usuarios
@@ -614,10 +552,6 @@ npm run dev
 #### Admin + Doctor
 - **`PUT /api/appointments/:id/status`** - Actualizar estado de citas
 - **`PUT /api/appointments/:id/date`** - Reprogramar citas
-
-#### Admin + Doctor + Patient
-- **`GET /api/profile`** - Ver perfil personal
-- **`PUT /api/profile`** - Actualizar perfil personal
 
 #### Patient + Admin
 - **`POST /api/appointments`** - Crear citas
@@ -712,3 +646,44 @@ POST /api/auth/register
   "phone": "+54 9 11 1122-3344"
 }
 ```
+
+---
+
+## 🌍 Zona Horaria
+
+### Configuración
+El sistema está configurado para funcionar exclusivamente en **Buenos Aires, Argentina (UTC-3)**.
+
+### Implementación
+- **Backend**: Interpreta todas las fechas como hora local de Buenos Aires y las convierte a UTC para almacenamiento
+- **Frontend**: Muestra todas las fechas y horas con `timeZone: 'America/Argentina/Buenos_Aires'`
+- **Slots disponibles**: Se generan considerando horario de Buenos Aires
+- **Validaciones**: Todas las validaciones de fecha se realizan en zona horaria local
+
+### Ventajas
+- ✅ **Sin desfases horarios** entre servidor y usuarios
+- ✅ **Consistencia total** en toda la aplicación
+- ✅ **Sin dependencias externas** - implementación manual robusta
+- ✅ **Funciona independientemente** de la zona horaria del servidor
+
+---
+
+## 📚 Frontend Básico
+
+### Características
+- **HTML/CSS/JS vanilla** - Sin frameworks
+- **Dashboards específicos** por rol (Admin, Doctor, Patient)
+- **Autenticación JWT** con cookies
+- **Responsive design** básico
+- **Validaciones en tiempo real**
+
+### Archivos Principales
+- `index.html` - Página de login
+- `admin-dashboard.html` - Panel de administración
+- `doctor-dashboard.html` - Panel del doctor
+- `patient-dashboard.html` - Panel del paciente
+- `auth.js` - Manejo de autenticación
+- `*.dashboard.js` - Lógica específica de cada dashboard
+
+### Nota
+El frontend es **básico y funcional** para demostración. El enfoque principal del proyecto está en el **backend robusto** con arquitectura en capas.
