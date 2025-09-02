@@ -479,13 +479,6 @@ class PatientDashboard {
             this.selectedDate = `${year}-${month}-${day}`;
         }
 
-        console.log('Slot seleccionado:', {
-            slotTime: slotTime,
-            selectedTime: this.selectedTime,
-            selectedDate: this.selectedDate,
-            slotDateLocal: slotDate.toLocaleString('es-AR')
-        });
-
         this.showBookAppointment();
     }
 
@@ -548,10 +541,10 @@ class PatientDashboard {
                         </div>
                     
                     <div class="form-actions">
-                        <button onclick="patientDashboard.createAppointment()" class="confirm-appointment-btn">
+                        <button onclick="patientDashboard.createAppointment()" class="appointment-action-btn confirm-btn">
                             ✅ Confirmar Cita
                         </button>
-                        <button onclick="patientDashboard.backToSearch()" class="btn btn-secondary cancel-appointment-btn">
+                        <button onclick="patientDashboard.backToSearch()" class="appointment-action-btn cancel-btn">
                             ❌ Cancelar
                         </button>
                     </div>
@@ -617,12 +610,6 @@ class PatientDashboard {
         
         // Crear ISO string en zona horaria local (sin conversión UTC)
         const dateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
-
-        console.log('Creando cita con fecha:', {
-            fechaOriginal: `${date}T${time}`,
-            fechaProcesada: selectedDateTime.toLocaleString('es-AR'),
-            fechaEnviada: dateTime
-        });
 
         try {
             // Obtener el ID del paciente desde el perfil
