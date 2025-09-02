@@ -60,15 +60,12 @@ Sistema completo de citas médicas con arquitectura en capas, autenticación JWT
 - **Funcionalidades:**
   - Ver citas asignadas
   - Actualizar estado de citas
-  - Gestionar perfil médico
-  - Ver historial de pacientes
 
 **👤 Paciente (Gestión Personal):**
 - **Email:** `patient@hospital.com`
 - **Password:** `patient123!`
   - Reservar citas médicas
   - Ver historial de citas
-  - Gestionar perfil personal
   - Buscar doctores disponibles
 
 ### 📱 Características del Demo
