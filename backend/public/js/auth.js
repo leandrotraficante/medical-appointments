@@ -128,6 +128,14 @@ async function handleUserRegister(e) {
         return;
     }
 
+    // Ajustar la fecha de nacimiento para evitar problemas de zona horaria
+    let adjustedDateOfBirth = birthDate.value;
+    if (birthDate.value) {
+        // Crear fecha en zona horaria local para evitar el desfase de un día
+        const date = new Date(birthDate.value + 'T12:00:00');
+        adjustedDateOfBirth = date.toISOString().split('T')[0];
+    }
+
     const formData = {
         email: email.value,
         password: password.value,
@@ -135,7 +143,7 @@ async function handleUserRegister(e) {
         lastname: lastname.value,
         role: role.value,
         personalId: personalId.value,
-        dateOfBirth: birthDate.value,
+        dateOfBirth: adjustedDateOfBirth,
         phone: phone.value
     };
 

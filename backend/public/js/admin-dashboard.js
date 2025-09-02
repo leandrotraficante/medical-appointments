@@ -155,6 +155,14 @@ class AdminDashboard {
         event.preventDefault();
 
         const formData = new FormData(event.target);
+        // Ajustar la fecha de nacimiento para evitar problemas de zona horaria
+        let adjustedDateOfBirth = formData.get('dateOfBirth');
+        if (adjustedDateOfBirth) {
+            // Crear fecha en zona horaria local para evitar el desfase de un día
+            const date = new Date(adjustedDateOfBirth + 'T12:00:00');
+            adjustedDateOfBirth = date.toISOString().split('T')[0];
+        }
+
         const doctorData = {
             name: formData.get('name'),
             lastname: formData.get('lastname'),
@@ -163,7 +171,7 @@ class AdminDashboard {
             personalId: formData.get('personalId'),
             license: formData.get('license'),
             phone: formData.get('phone'),
-            dateOfBirth: formData.get('dateOfBirth'),
+            dateOfBirth: adjustedDateOfBirth,
             role: 'doctor'
         };
 
