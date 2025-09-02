@@ -132,12 +132,12 @@ class PatientDashboard {
                         <p>${filter === 'all' ? '¿Querés agendar tu primera cita médica?' : 'Cambiá el filtro para ver otros tipos de citas.'}</p>
                         <div class="empty-state-actions">
                             ${filter === 'all' ? `
-                                <button onclick="patientDashboard.showView('doctor-search')" class="btn btn-primary">
-                                    Buscar Doctores
-                                </button>
-                                <button onclick="patientDashboard.showView('patient-info')" class="btn btn-secondary">
-                                    Ver Mi Perfil
-                                </button>
+                            <button onclick="patientDashboard.showView('doctor-search')" class="btn btn-primary">
+                                Buscar Doctores
+                            </button>
+                            <button onclick="patientDashboard.showView('patient-info')" class="btn btn-secondary">
+                                Ver Mi Perfil
+                            </button>
                             ` : `
                                 <button onclick="patientDashboard.filterAppointments('all')" class="btn btn-primary">
                                     Ver Todas las Citas
@@ -160,21 +160,21 @@ class PatientDashboard {
                     'No especificadas';
 
                 return `
-                    <div class="appointment-card" onclick="patientDashboard.showAppointmentDetail('${appointment._id}')">
-                        <div class="appointment-header">
+                <div class="appointment-card" onclick="patientDashboard.showAppointmentDetail('${appointment._id}')">
+                    <div class="appointment-header">
                             <h4>${doctorName}</h4>
-                            <span class="status-badge ${appointment.status}">${appointment.status}</span>
-                        </div>
-                        <div class="appointment-info">
-                            <p><strong>Fecha:</strong> ${new Date(appointment.date).toLocaleString()}</p>
-                            <p><strong>Especialidades:</strong> ${doctorSpecialties}</p>
-                        </div>
-                        <div class="appointment-actions">
-                            <button onclick="event.stopPropagation(); patientDashboard.showAppointmentDetail('${appointment._id}')" class="detail-btn">
-                                Ver Detalles
-                            </button>
-                        </div>
+                        <span class="status-badge ${appointment.status}">${appointment.status}</span>
                     </div>
+                    <div class="appointment-info">
+                        <p><strong>Fecha:</strong> ${new Date(appointment.date).toLocaleString()}</p>
+                            <p><strong>Especialidades:</strong> ${doctorSpecialties}</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button onclick="event.stopPropagation(); patientDashboard.showAppointmentDetail('${appointment._id}')" class="detail-btn">
+                            Ver Detalles
+                        </button>
+                    </div>
+                </div>
                 `;
             }).join('');
 
@@ -459,11 +459,13 @@ class PatientDashboard {
         this.selectedSlot = slotTime;
 
         // Extraer la hora del slot para preseleccionarla en el formulario
+        // Usar toLocaleString para evitar problemas de zona horaria
         const slotDate = new Date(slotTime);
+        
+        // Obtener la hora en la zona horaria local
         const hours = slotDate.getHours().toString().padStart(2, '0');
         const minutes = slotDate.getMinutes().toString().padStart(2, '0');
         this.selectedTime = `${hours}:${minutes}`;
-
 
         // Usar la fecha original del input, no la del slot (que puede tener problemas de zona horaria)
         const originalDateInput = document.getElementById('slotDate');
@@ -476,6 +478,13 @@ class PatientDashboard {
             const day = slotDate.getDate().toString().padStart(2, '0');
             this.selectedDate = `${year}-${month}-${day}`;
         }
+
+        console.log('Slot seleccionado:', {
+            slotTime: slotTime,
+            selectedTime: this.selectedTime,
+            selectedDate: this.selectedDate,
+            slotDateLocal: slotDate.toLocaleString('es-AR')
+        });
 
         this.showBookAppointment();
     }
@@ -534,15 +543,15 @@ class PatientDashboard {
                         <label>Hora:</label>
                         <select id="appointmentTime" required disabled>
                             <option value="${this.selectedTime}" selected>${this.selectedTime}</option>
-                        </select>
+                            </select>
                         <small>⚠️ La hora no se puede modificar una vez seleccionada</small>
-                    </div>
+                        </div>
                     
                     <div class="form-actions">
                         <button onclick="patientDashboard.createAppointment()" class="confirm-appointment-btn">
                             ✅ Confirmar Cita
                         </button>
-                        <button onclick="patientDashboard.backToSearch()" class="btn btn-secondary">
+                        <button onclick="patientDashboard.backToSearch()" class="btn btn-secondary cancel-appointment-btn">
                             ❌ Cancelar
                         </button>
                     </div>
@@ -581,7 +590,8 @@ class PatientDashboard {
         }
 
         // Validar que la fecha no sea en el pasado
-        const selectedDateTime = new Date(`${date}T${time}`);
+        // Crear la fecha en zona horaria local para evitar problemas de UTC
+        const selectedDateTime = new Date(`${date}T${time}:00`);
         const now = new Date();
 
         if (selectedDateTime <= now) {
@@ -596,7 +606,23 @@ class PatientDashboard {
             return;
         }
 
-        const dateTime = selectedDateTime.toISOString();
+        // Crear la fecha en formato ISO pero manteniendo la zona horaria local
+        // Esto evita la conversión automática a UTC que causa la diferencia de 3 horas
+        const year = selectedDateTime.getFullYear();
+        const month = (selectedDateTime.getMonth() + 1).toString().padStart(2, '0');
+        const day = selectedDateTime.getDate().toString().padStart(2, '0');
+        const hours = selectedDateTime.getHours().toString().padStart(2, '0');
+        const minutes = selectedDateTime.getMinutes().toString().padStart(2, '0');
+        const seconds = selectedDateTime.getSeconds().toString().padStart(2, '0');
+        
+        // Crear ISO string en zona horaria local (sin conversión UTC)
+        const dateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+
+        console.log('Creando cita con fecha:', {
+            fechaOriginal: `${date}T${time}`,
+            fechaProcesada: selectedDateTime.toLocaleString('es-AR'),
+            fechaEnviada: dateTime
+        });
 
         try {
             // Obtener el ID del paciente desde el perfil

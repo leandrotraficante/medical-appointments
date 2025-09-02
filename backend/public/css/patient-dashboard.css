@@ -995,3 +995,16 @@ button:disabled {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
 }
+
+.cancel-appointment-btn {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.cancel-appointment-btn:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+}
