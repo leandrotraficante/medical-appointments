@@ -599,8 +599,8 @@ class PatientDashboard {
             return;
         }
 
-        // Crear la fecha en formato ISO pero manteniendo la zona horaria local
-        // Esto evita la conversión automática a UTC que causa la diferencia de 3 horas
+        // Crear la fecha en formato ISO manteniendo la zona horaria local
+        // No agregar "Z" (UTC) para evitar la conversión que causa la diferencia de 3 horas
         const year = selectedDateTime.getFullYear();
         const month = (selectedDateTime.getMonth() + 1).toString().padStart(2, '0');
         const day = selectedDateTime.getDate().toString().padStart(2, '0');
@@ -608,8 +608,8 @@ class PatientDashboard {
         const minutes = selectedDateTime.getMinutes().toString().padStart(2, '0');
         const seconds = selectedDateTime.getSeconds().toString().padStart(2, '0');
         
-        // Crear ISO string en zona horaria local (sin conversión UTC)
-        const dateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+        // Enviar string sin sufijo de zona (interpretado como hora local en backend)
+        const dateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 
         try {
             // Obtener el ID del paciente desde el perfil
